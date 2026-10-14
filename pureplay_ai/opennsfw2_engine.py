@@ -188,9 +188,14 @@ class PurePlayOpenNSFW2Engine:
             "video_path": video_path,
             "duration": round(duration, 2),
             "sampled_frames": len(scores),
+            "overall_score": round(peak_score, 4),
             "peak_nsfw_score": round(peak_score, 4),
             "avg_nsfw_score": round(avg_score, 4),
             "flagged_frames": flagged_count,
             "decision": "Flagged" if peak_score >= self.threshold else "Approved",
             "timeline": timeline
         }
+
+    def analyze_video_frames(self, video_path, sample_fps=2.0):
+        """Alias for analyze_video with frame-by-frame analysis."""
+        return self.analyze_video(video_path, sample_fps=sample_fps)
