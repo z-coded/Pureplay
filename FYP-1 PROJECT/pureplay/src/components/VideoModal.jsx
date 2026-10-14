@@ -11,19 +11,19 @@ export default function VideoModal({ isOpen, onClose, videoUrl, title }) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm"
+            className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
           />
           <motion.div 
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="relative z-10 w-full max-w-4xl overflow-hidden rounded-2xl border border-slate-800 bg-slate-900 shadow-2xl"
+            className="relative z-10 w-full max-w-4xl overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl"
           >
-            <div className="flex items-center justify-between border-b border-slate-800 bg-slate-900/50 px-4 py-3">
-              <h3 className="font-semibold text-slate-200 truncate pr-4">{title || 'Video Player'}</h3>
+            <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-4 py-3">
+              <h3 className="font-semibold text-slate-900 truncate pr-4">{title || 'Video Player'}</h3>
               <button 
                 onClick={onClose}
-                className="rounded-lg p-1 text-slate-400 hover:bg-slate-800 hover:text-white transition-colors shrink-0"
+                className="rounded-lg p-1 text-slate-400 hover:bg-slate-200 hover:text-slate-800 transition-colors shrink-0"
               >
                 <X className="h-5 w-5" />
               </button>

@@ -37,10 +37,10 @@ export default function ProfileSwitcher() {
     <div className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 rounded-xl bg-slate-900/80 border border-white/[0.08] px-3.5 py-1.5 text-xs text-slate-200 hover:bg-slate-800/80 hover:border-white/[0.15] transition-all"
+        className="flex items-center gap-2 rounded-xl bg-white border border-slate-200 px-3.5 py-1.5 text-xs text-slate-700 shadow-xs hover:bg-slate-50 hover:border-slate-300 transition-all"
       >
-        <div className={`h-2 w-2 rounded-full ${activeProfile?.type === 'child' ? 'bg-rose-400 shadow-[0_0_6px_#f43f5e]' : 'bg-cyan-400 shadow-[0_0_6px_#22d3ee]'}`} />
-        <span className="font-medium">{activeProfile?.name || 'Select Profile'}</span>
+        <div className={`h-2 w-2 rounded-full ${activeProfile?.type === 'child' ? 'bg-amber-500' : 'bg-emerald-500'}`} />
+        <span className="font-semibold">{activeProfile?.name || 'Select Profile'}</span>
         <ChevronDown className={`h-3.5 w-3.5 text-slate-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
@@ -52,27 +52,27 @@ export default function ProfileSwitcher() {
               initial={{ opacity: 0, y: 6, scale: 0.98 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 6, scale: 0.98 }}
-              className="absolute right-0 mt-2 z-50 w-64 rounded-2xl bg-slate-900/95 border border-white/[0.1] shadow-2xl backdrop-blur-2xl p-2"
+              className="absolute right-0 mt-2 z-50 w-64 rounded-2xl bg-white border border-slate-200 shadow-xl backdrop-blur-2xl p-2"
             >
               {!pendingProfile ? (
                 <div className="space-y-1">
-                  <p className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-500 font-mono">Switch Profile</p>
+                  <p className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400 font-mono">Switch Profile</p>
                   {profiles.map((profile) => (
                     <button
                       key={profile.id}
                       onClick={() => handleSwitch(profile)}
                       className={`w-full flex items-center justify-between px-3 py-2 rounded-xl transition-colors ${
-                        activeProfile?.id === profile.id ? 'bg-cyan-500/10 text-cyan-400' : 'text-slate-300 hover:bg-slate-800'
+                        activeProfile?.id === profile.id ? 'bg-indigo-50 text-indigo-700 font-semibold' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
                       }`}
                     >
                       <div className="flex items-center gap-3">
-                        <User size={16} className={profile.type === 'child' ? 'text-rose-400' : 'text-emerald-400'} />
+                        <User size={16} className={profile.type === 'child' ? 'text-amber-500' : 'text-emerald-600'} />
                         <div className="text-left">
-                          <p className="text-sm font-medium">{profile.name}</p>
-                          <p className="text-[10px] opacity-60 uppercase">{profile.type}</p>
+                          <p className="text-sm font-semibold">{profile.name}</p>
+                          <p className="text-[10px] opacity-70 uppercase font-mono">{profile.type}</p>
                         </div>
                       </div>
-                      {activeProfile?.id === profile.id && <Check size={14} />}
+                      {activeProfile?.id === profile.id && <Check size={14} className="text-indigo-600" />}
                       {profile.type === 'child' && profile.pin && <Lock size={12} className="opacity-40" />}
                     </button>
                   ))}
@@ -80,9 +80,9 @@ export default function ProfileSwitcher() {
               ) : (
                 <div className="p-4 space-y-4">
                   <div className="text-center">
-                    <Lock className="mx-auto h-8 w-8 text-cyan-400 mb-2" />
-                    <h3 className="text-sm font-bold text-white">Enter Profile PIN</h3>
-                    <p className="text-xs text-slate-400">Restricted access for {pendingProfile.name}</p>
+                    <Lock className="mx-auto h-8 w-8 text-indigo-600 mb-2" />
+                    <h3 className="text-sm font-bold text-slate-900">Enter Profile PIN</h3>
+                    <p className="text-xs text-slate-500">Restricted access for {pendingProfile.name}</p>
                   </div>
                   <input
                     type="password"
@@ -90,13 +90,13 @@ export default function ProfileSwitcher() {
                     autoFocus
                     value={pin}
                     onChange={(e) => setPin(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-center text-xl tracking-[1em] focus:border-cyan-500 focus:outline-none"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-center text-xl tracking-[1em] text-slate-900 focus:border-indigo-500 focus:bg-white focus:outline-none"
                     placeholder="****"
                   />
-                  {error && <p className="text-[10px] text-rose-500 text-center">{error}</p>}
+                  {error && <p className="text-[10px] text-rose-600 text-center font-medium">{error}</p>}
                   <div className="flex gap-2">
-                    <button onClick={() => setPendingProfile(null)} className="flex-1 px-3 py-2 rounded-lg bg-slate-800 text-xs text-slate-300 hover:bg-slate-700">Cancel</button>
-                    <button onClick={confirmPin} className="flex-1 px-3 py-2 rounded-lg bg-cyan-600 text-xs text-white hover:bg-cyan-500">Verify</button>
+                    <button onClick={() => setPendingProfile(null)} className="btn-secondary flex-1 text-xs py-1.5">Cancel</button>
+                    <button onClick={confirmPin} className="btn-primary flex-1 text-xs py-1.5">Verify</button>
                   </div>
                 </div>
               )}

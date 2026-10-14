@@ -26,28 +26,28 @@ function MainLayout() {
   const navClass = ({ isActive }) =>
     `flex items-center gap-2 rounded-xl px-3 py-1.5 text-xs font-semibold transition-all duration-200 ${
       isActive
-        ? 'bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 shadow-[0_0_12px_rgba(6,182,212,0.15)]'
-        : 'text-slate-400 hover:bg-slate-800/40 hover:text-white'
+        ? 'bg-indigo-50 text-indigo-700 border border-indigo-200 shadow-xs'
+        : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
     }`
 
   const adminNavClass = ({ isActive }) =>
     `flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider transition-all duration-200 ${
       isActive
-        ? 'bg-violet-500/20 text-violet-300 border border-violet-500/30'
-        : 'text-slate-400 hover:bg-slate-800/40 hover:text-slate-200'
+        ? 'bg-purple-100 text-purple-800 border border-purple-200'
+        : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900'
     }`
 
   const closeMobile = () => setMobileMenuOpen(false)
 
   return (
-    <div className="min-h-screen bg-[#070a11] flex flex-col justify-between">
+    <div className="min-h-screen bg-slate-50 flex flex-col justify-between text-slate-800">
       {/* Top Header */}
-      <header className="border-b border-white/[0.08] bg-slate-950/80 sticky top-0 z-40 backdrop-blur-2xl">
+      <header className="border-b border-slate-200/80 bg-white/80 sticky top-0 z-40 backdrop-blur-xl shadow-xs">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 sm:px-6 py-3">
           {/* Logo & Brand */}
           <div className="flex items-center gap-4">
             <Link to="/dashboard" className="flex items-center gap-2.5 group">
-              <div className="relative h-9 w-9 transition-transform group-hover:scale-105 drop-shadow-[0_0_10px_rgba(6,182,212,0.35)] flex items-center justify-center">
+              <div className="relative h-9 w-9 transition-transform group-hover:scale-105 flex items-center justify-center">
                 <img 
                   src="/logo.png" 
                   alt="PurePlay Logo" 
@@ -55,7 +55,7 @@ function MainLayout() {
                 />
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-lg font-black bg-gradient-to-r from-cyan-400 via-sky-400 to-indigo-400 bg-clip-text text-transparent">
+                <span className="text-lg font-black bg-gradient-to-r from-indigo-600 via-sky-600 to-blue-600 bg-clip-text text-transparent">
                   PurePlay
                 </span>
                 <span className="badge-cyan text-[10px] font-mono py-0 px-2">
@@ -66,7 +66,7 @@ function MainLayout() {
           </div>
 
           {/* Desktop Navigation Links */}
-          <nav className="hidden xl:flex items-center gap-1 bg-slate-950/50 border border-white/[0.06] p-1 rounded-2xl">
+          <nav className="hidden xl:flex items-center gap-1 bg-slate-100/80 border border-slate-200/80 p-1 rounded-2xl">
             <NavLink className={navClass} to="/dashboard">
               <LayoutDashboard className="h-3.5 w-3.5" />
               <span>Dashboard</span>
@@ -89,8 +89,8 @@ function MainLayout() {
             </NavLink>
 
             {role === 'admin' && (
-              <div className="flex items-center gap-1 ml-2 pl-2 border-l border-white/[0.08]">
-                <span className="badge-slate text-[10px] font-mono text-violet-400 border-violet-500/20 bg-violet-500/10">
+              <div className="flex items-center gap-1 ml-2 pl-2 border-l border-slate-200">
+                <span className="badge-slate text-[10px] font-mono text-purple-700 border-purple-200 bg-purple-50">
                   Admin
                 </span>
                 <NavLink className={adminNavClass} to="/admin" end>
@@ -112,9 +112,9 @@ function MainLayout() {
           {/* User Controls & Mobile Hamburger */}
           <div className="flex items-center gap-2.5">
             {/* Role Badge */}
-            <div className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-900/80 border border-white/[0.06]">
-              <span className={`h-1.5 w-1.5 rounded-full ${role === 'admin' ? 'bg-violet-400 shadow-[0_0_6px_#a78bfa]' : 'bg-cyan-400 shadow-[0_0_6px_#22d3ee]'}`} />
-              <span className="capitalize text-slate-300 text-xs">{role}</span>
+            <div className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-white border border-slate-200 text-slate-700 shadow-xs">
+              <span className={`h-1.5 w-1.5 rounded-full ${role === 'admin' ? 'bg-purple-500' : 'bg-emerald-500'}`} />
+              <span className="capitalize text-slate-700 text-xs">{role}</span>
             </div>
 
             <div className="hidden sm:block">
@@ -125,7 +125,7 @@ function MainLayout() {
               type="button"
               onClick={logOut}
               title="Log out"
-              className="hidden lg:flex items-center gap-1.5 rounded-xl border border-white/[0.06] bg-slate-900/60 px-3 py-1.5 text-xs font-medium text-slate-400 transition hover:bg-rose-500/10 hover:text-rose-400 hover:border-rose-500/30"
+              className="hidden lg:flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 shadow-xs transition hover:bg-rose-50 hover:text-rose-700 hover:border-rose-200"
             >
               <LogOut className="h-3.5 w-3.5" />
               <span>Log out</span>
@@ -135,7 +135,7 @@ function MainLayout() {
             <button
               type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="xl:hidden p-2 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800 transition"
+              className="xl:hidden p-2 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition"
               aria-label="Toggle navigation menu"
             >
               {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -150,7 +150,7 @@ function MainLayout() {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="xl:hidden border-t border-slate-800 bg-slate-950/95 px-6 py-6 backdrop-blur-2xl"
+              className="xl:hidden border-t border-slate-200 bg-white/98 px-6 py-6 backdrop-blur-2xl shadow-xl"
             >
               <div className="space-y-6">
                 <div className="sm:hidden">
@@ -184,8 +184,8 @@ function MainLayout() {
                 </div>
 
                 {role === 'admin' && (
-                  <div className="pt-4 border-t border-slate-800/80">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-violet-400 mb-2">Admin Control Center</p>
+                  <div className="pt-4 border-t border-slate-200">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-purple-700 mb-2">Admin Control Center</p>
                     <div className="grid gap-1">
                       <NavLink className={adminNavClass} to="/admin" end onClick={closeMobile}>
                         Admin Overview
@@ -203,14 +203,14 @@ function MainLayout() {
                   </div>
                 )}
 
-                <div className="pt-4 border-t border-slate-800/80 flex items-center justify-between">
-                  <div className="text-xs text-slate-400">
-                    Logged in as <span className="font-semibold text-white">{user?.displayName || user?.email}</span>
+                <div className="pt-4 border-t border-slate-200 flex items-center justify-between">
+                  <div className="text-xs text-slate-600">
+                    Logged in as <span className="font-semibold text-slate-900">{user?.displayName || user?.email}</span>
                   </div>
                   <button
                     type="button"
                     onClick={() => { closeMobile(); logOut(); }}
-                    className="flex items-center gap-1.5 rounded-lg bg-rose-500/10 px-3 py-1.5 text-xs font-semibold text-rose-400 hover:bg-rose-500/20 transition"
+                    className="flex items-center gap-1.5 rounded-lg bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-700 hover:bg-rose-100 transition"
                   >
                     <LogOut className="h-3.5 w-3.5" />
                     <span>Log out</span>
@@ -228,24 +228,24 @@ function MainLayout() {
       </main>
 
       {/* FYP Evaluation Footer */}
-      <footer className="border-t border-white/[0.06] bg-slate-950/60 backdrop-blur-xl mt-16 text-slate-400 text-xs">
+      <footer className="border-t border-slate-200 bg-white/80 backdrop-blur-xl mt-16 text-slate-600 text-xs">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 py-8">
-          <div className="grid gap-8 md:grid-cols-4 pb-8 border-b border-white/[0.06]">
+          <div className="grid gap-8 md:grid-cols-4 pb-8 border-b border-slate-200">
             {/* System Info */}
             <div className="space-y-3 md:col-span-2">
               <div className="flex items-center gap-2">
-                <div className="h-6 w-6 rounded-lg bg-cyan-500/20 border border-cyan-500/30 flex items-center justify-center text-cyan-400 font-black text-xs">
+                <div className="h-6 w-6 rounded-lg bg-indigo-50 border border-indigo-200 flex items-center justify-center text-indigo-600 font-black text-xs">
                   P
                 </div>
-                <span className="font-bold text-white text-sm">PurePlay</span>
+                <span className="font-bold text-slate-900 text-sm">PurePlay</span>
                 <span className="badge-slate text-[10px] font-mono">
                   v1.0 Production
                 </span>
               </div>
-              <p className="text-slate-400 text-xs leading-relaxed max-w-md">
+              <p className="text-slate-600 text-xs leading-relaxed max-w-md">
                 Automated multi-modal video filtering and censorship platform utilizing NudeNet deep learning and real-time audio profanity suppression to safeguard child and adolescent media spaces.
               </p>
-              <div className="flex flex-wrap items-center gap-1.5 pt-1 text-[10px] font-mono text-slate-400">
+              <div className="flex flex-wrap items-center gap-1.5 pt-1 text-[10px] font-mono">
                 <span className="badge-slate">PyTorch</span>
                 <span className="badge-slate">NudeNet ONNX</span>
                 <span className="badge-slate">OpenCV</span>
@@ -256,17 +256,17 @@ function MainLayout() {
 
             {/* Academic Information */}
             <div className="space-y-1.5">
-              <p className="font-semibold text-slate-200 uppercase tracking-wider text-[11px]">Academic Reference</p>
-              <p className="text-slate-300 font-medium text-xs">COMSATS University Islamabad</p>
-              <p className="text-slate-400 text-xs">Department of Computer Science</p>
+              <p className="font-semibold text-slate-900 uppercase tracking-wider text-[11px]">Academic Reference</p>
+              <p className="text-slate-700 font-medium text-xs">COMSATS University Islamabad</p>
+              <p className="text-slate-600 text-xs">Department of Computer Science</p>
               <p className="text-slate-500 text-[11px] pt-0.5">Final Year Project Evaluation</p>
             </div>
 
             {/* Quick Links & Platform Status */}
             <div className="space-y-1.5">
-              <p className="font-semibold text-slate-200 uppercase tracking-wider text-[11px]">System Status</p>
-              <div className="flex items-center gap-1.5 text-emerald-400 font-medium text-xs">
-                <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+              <p className="font-semibold text-slate-900 uppercase tracking-wider text-[11px]">System Status</p>
+              <div className="flex items-center gap-1.5 text-emerald-700 font-medium text-xs">
+                <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
                 <span>AI Engines Operational</span>
               </div>
               <p className="text-slate-500 text-[11px]">Inference latency: ~18ms / frame</p>

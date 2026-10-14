@@ -87,20 +87,20 @@ function LandingPage() {
   ]
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 relative overflow-hidden flex flex-col justify-between">
+    <div className="min-h-screen bg-slate-50 text-slate-800 relative overflow-hidden flex flex-col justify-between">
       {/* Decorative ambient gradients */}
-      <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-cyan-500/10 rounded-full blur-[140px] pointer-events-none" />
-      <div className="absolute top-1/3 left-0 w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[140px] pointer-events-none" />
-      <div className="absolute bottom-10 right-1/4 w-[500px] h-[500px] bg-violet-600/10 rounded-full blur-[140px] pointer-events-none" />
+      <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-indigo-500/10 rounded-full blur-[140px] pointer-events-none" />
+      <div className="absolute top-1/3 left-0 w-[500px] h-[500px] bg-sky-500/10 rounded-full blur-[140px] pointer-events-none" />
+      <div className="absolute bottom-10 right-1/4 w-[500px] h-[500px] bg-emerald-500/10 rounded-full blur-[140px] pointer-events-none" />
 
       {/* Top Navigation Bar */}
-      <header className="border-b border-slate-800/80 bg-slate-950/70 backdrop-blur-xl sticky top-0 z-40">
+      <header className="border-b border-slate-200/80 bg-white/80 backdrop-blur-xl sticky top-0 z-40 shadow-xs">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 relative flex items-center justify-center">
               <img src="/logo.png" alt="PurePlay Logo" className="h-full w-full object-contain" />
             </div>
-            <span className="text-2xl font-black bg-gradient-to-r from-cyan-400 via-blue-400 to-indigo-400 bg-clip-text text-transparent">
+            <span className="text-2xl font-black bg-gradient-to-r from-indigo-600 via-sky-600 to-blue-600 bg-clip-text text-transparent">
               PurePlay
             </span>
           </div>
@@ -108,20 +108,20 @@ function LandingPage() {
           <div className="flex items-center gap-3">
             <button
               onClick={() => handleQuickDemo('guardian')}
-              className="hidden sm:inline-flex items-center gap-1.5 rounded-xl border border-cyan-500/30 bg-cyan-500/10 px-4 py-2 text-xs font-bold text-cyan-300 hover:bg-cyan-500/20 transition backdrop-blur-md"
+              className="hidden sm:inline-flex items-center gap-1.5 rounded-xl border border-indigo-200 bg-indigo-50 px-4 py-2 text-xs font-bold text-indigo-700 hover:bg-indigo-100 transition shadow-2xs"
             >
               <Sparkles className="h-3.5 w-3.5" />
               <span>Evaluator Demo (1-Click)</span>
             </button>
             <Link
               to="/login"
-              className="rounded-xl border border-slate-700 bg-slate-900/60 px-4 py-2 text-xs font-semibold text-slate-200 hover:bg-slate-800 transition"
+              className="btn-secondary text-xs"
             >
               Log In
             </Link>
             <Link
               to="/signup"
-              className="rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 px-4 py-2 text-xs font-semibold text-white shadow-lg shadow-cyan-500/20 hover:opacity-95 transition"
+              className="btn-primary text-xs"
             >
               Get Started
             </Link>
@@ -138,44 +138,44 @@ function LandingPage() {
             transition={{ duration: 0.5 }}
           >
             {/* Academic badge */}
-            <div className="inline-flex items-center gap-2 rounded-full border border-cyan-500/30 bg-cyan-500/10 px-3.5 py-1.5 text-xs font-semibold uppercase tracking-wider text-cyan-300 mb-6 backdrop-blur-md">
+            <div className="inline-flex items-center gap-2 rounded-full border border-indigo-200 bg-indigo-50 px-3.5 py-1.5 text-xs font-semibold uppercase tracking-wider text-indigo-700 mb-6 shadow-2xs">
               <Award className="h-4 w-4" />
               COMSATS University Final Year Project (FYP-1)
             </div>
 
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black leading-[1.1] text-white tracking-tight">
-              AI-Powered Video Moderation for <span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">Child-Safe Media</span>.
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black leading-[1.1] text-slate-900 tracking-tight">
+              AI-Powered Video Moderation for <span className="bg-gradient-to-r from-indigo-600 to-blue-600 bg-clip-text text-transparent">Child-Safe Media</span>.
             </h1>
 
-            <p className="mt-6 text-lg text-slate-400 leading-relaxed max-w-xl">
+            <p className="mt-6 text-lg text-slate-600 leading-relaxed max-w-xl">
               PurePlay autonomously analyzes uploaded video streams using trained deep learning models. It automatically censors adult nudity, graphic scenes, and profanity while allowing guardians to configure custom age-appropriate tolerance policies.
             </p>
 
             {/* Quick Evaluator Access Bar */}
-            <div className="mt-8 p-4 rounded-2xl border border-cyan-500/30 bg-gradient-to-br from-cyan-950/40 via-slate-900/60 to-slate-900/40 backdrop-blur-md">
+            <div className="mt-8 p-5 rounded-2xl border border-indigo-200 bg-white/95 shadow-sm">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-bold text-cyan-300 uppercase tracking-wider flex items-center gap-1.5">
-                  <Sparkles className="h-3.5 w-3.5 text-cyan-400" />
+                <span className="text-xs font-bold text-indigo-700 uppercase tracking-wider flex items-center gap-1.5">
+                  <Sparkles className="h-3.5 w-3.5 text-indigo-600" />
                   Instant Viva & Evaluation Access
                 </span>
-                <span className="text-[10px] text-slate-400 font-mono">No sign-up needed</span>
+                <span className="text-[10px] text-slate-500 font-mono">No sign-up needed</span>
               </div>
-              <p className="text-xs text-slate-400 mb-3">
+              <p className="text-xs text-slate-500 mb-4">
                 Experience all functional modules instantly with pre-configured roles:
               </p>
               <div className="flex flex-wrap gap-2.5">
                 <button
                   onClick={() => handleQuickDemo('guardian')}
-                  className="flex-1 min-w-[140px] flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 px-4 py-2.5 text-xs font-bold text-white shadow-lg shadow-cyan-500/25 hover:brightness-110 active:scale-95 transition"
+                  className="flex-1 min-w-[140px] flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-blue-600 px-4 py-2.5 text-xs font-bold text-white shadow-md shadow-indigo-500/25 hover:shadow-lg transition"
                 >
                   <Users className="h-4 w-4" />
                   <span>Launch Guardian View</span>
                 </button>
                 <button
                   onClick={() => handleQuickDemo('admin')}
-                  className="flex-1 min-w-[140px] flex items-center justify-center gap-2 rounded-xl border border-violet-500/40 bg-violet-500/15 px-4 py-2.5 text-xs font-bold text-violet-300 hover:bg-violet-500/25 active:scale-95 transition"
+                  className="flex-1 min-w-[140px] flex items-center justify-center gap-2 rounded-xl border border-purple-200 bg-purple-50 px-4 py-2.5 text-xs font-bold text-purple-700 hover:bg-purple-100 transition shadow-2xs"
                 >
-                  <ShieldCheck className="h-4 w-4 text-violet-400" />
+                  <ShieldCheck className="h-4 w-4 text-purple-600" />
                   <span>Launch Admin Portal</span>
                 </button>
               </div>
@@ -188,9 +188,9 @@ function LandingPage() {
               </Link>
               <Link
                 to="/gallery"
-                className="rounded-xl border border-slate-700 bg-slate-900/60 px-5 py-3 text-sm font-semibold text-slate-200 hover:bg-slate-800 hover:text-white transition flex items-center gap-2"
+                className="btn-secondary flex items-center gap-2 text-sm"
               >
-                <Play className="h-4 w-4 text-cyan-400" />
+                <Play className="h-4 w-4 text-indigo-600" />
                 <span>Browse Approved Gallery</span>
               </Link>
             </div>
@@ -203,23 +203,23 @@ function LandingPage() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="relative"
           >
-            <div className="glass-card rounded-3xl p-6 sm:p-8 border border-white/10 shadow-2xl relative overflow-hidden">
+            <div className="glass-card rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-xl relative overflow-hidden bg-white/95">
               {/* Window Header */}
-              <div className="flex items-center justify-between pb-4 mb-6 border-b border-slate-800">
+              <div className="flex items-center justify-between pb-4 mb-6 border-b border-slate-100">
                 <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-rose-500/80" />
-                  <div className="w-3 h-3 rounded-full bg-amber-500/80" />
-                  <div className="w-3 h-3 rounded-full bg-emerald-500/80" />
-                  <span className="text-xs font-mono text-slate-400 ml-2">pureplay-nudenet-engine::stream</span>
+                  <div className="w-3 h-3 rounded-full bg-rose-400" />
+                  <div className="w-3 h-3 rounded-full bg-amber-400" />
+                  <div className="w-3 h-3 rounded-full bg-emerald-400" />
+                  <span className="text-xs font-mono text-slate-500 ml-2">pureplay-nudenet-engine::stream</span>
                 </div>
-                <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                <span className="badge-emerald text-[10px] font-mono">
                   ● Real-time Filter ON
                 </span>
               </div>
 
               {/* Mock Media Stream Player */}
-              <div className="rounded-2xl bg-slate-950 border border-slate-800/80 p-4 space-y-4">
-                <div className="relative aspect-video rounded-xl bg-slate-900 overflow-hidden flex flex-col justify-between p-4 border border-slate-800">
+              <div className="rounded-2xl bg-slate-900 p-4 space-y-4">
+                <div className="relative aspect-video rounded-xl bg-slate-950 overflow-hidden flex flex-col justify-between p-4 border border-slate-800">
                   <div className="flex items-center justify-between z-10">
                     <span className="text-xs font-bold text-white px-2.5 py-1 rounded bg-black/60 backdrop-blur-md">
                       Frame 0482 / 30fps
@@ -240,8 +240,8 @@ function LandingPage() {
 
                   <div className="flex items-center justify-between z-10">
                     <div className="flex items-center gap-2">
-                      <div className="h-6 w-6 rounded-full bg-cyan-500/20 flex items-center justify-center text-cyan-400">
-                        <Play className="h-3 w-3 fill-cyan-400" />
+                      <div className="h-6 w-6 rounded-full bg-indigo-500/30 flex items-center justify-center text-indigo-300">
+                        <Play className="h-3 w-3 fill-indigo-300" />
                       </div>
                       <span className="text-xs font-mono text-slate-400">00:16 / 02:40</span>
                     </div>
@@ -255,13 +255,13 @@ function LandingPage() {
                 <div>
                   <div className="flex items-center justify-between text-xs text-slate-400 mb-1.5">
                     <span className="font-semibold text-slate-300">XAI Violation Timeline</span>
-                    <span className="text-[10px] font-mono text-cyan-400">2 triggers mitigated</span>
+                    <span className="text-[10px] font-mono text-sky-400">2 triggers mitigated</span>
                   </div>
-                  <div className="h-3 w-full bg-slate-900 rounded-full overflow-hidden flex">
+                  <div className="h-3 w-full bg-slate-950 rounded-full overflow-hidden flex">
                     <div className="w-[20%] bg-emerald-500/40" />
-                    <div className="w-[8%] bg-rose-500 shadow-[0_0_10px_#f43f5e]" />
+                    <div className="w-[8%] bg-rose-500" />
                     <div className="w-[35%] bg-emerald-500/40" />
-                    <div className="w-[7%] bg-amber-500 shadow-[0_0_10px_#f59e0b]" />
+                    <div className="w-[7%] bg-amber-500" />
                     <div className="w-[30%] bg-emerald-500/40" />
                   </div>
                 </div>
@@ -269,23 +269,23 @@ function LandingPage() {
 
               {/* Status Chips */}
               <div className="grid grid-cols-2 gap-3 mt-4">
-                <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800 flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-emerald-500/15 text-emerald-400">
+                <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-emerald-50 text-emerald-600 border border-emerald-200">
                     <CheckCircle className="h-4 w-4" />
                   </div>
                   <div>
-                    <p className="text-xs font-bold text-white">Audio Stream Clean</p>
-                    <p className="text-[10px] text-slate-400">Profanity suppression active</p>
+                    <p className="text-xs font-bold text-slate-900">Audio Stream Clean</p>
+                    <p className="text-[10px] text-slate-500">Profanity suppression active</p>
                   </div>
                 </div>
 
-                <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800 flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-rose-500/15 text-rose-400">
+                <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-rose-50 text-rose-600 border border-rose-200">
                     <EyeOff className="h-4 w-4" />
                   </div>
                   <div>
-                    <p className="text-xs font-bold text-white">Visual Redaction</p>
-                    <p className="text-[10px] text-slate-400">Kernel: 51×51 Gaussian</p>
+                    <p className="text-xs font-bold text-slate-900">Visual Redaction</p>
+                    <p className="text-[10px] text-slate-500">Kernel: 51×51 Gaussian</p>
                   </div>
                 </div>
               </div>
@@ -295,16 +295,16 @@ function LandingPage() {
       </section>
 
       {/* SDS Multi-Stage Architecture Section */}
-      <section className="border-t border-slate-800/80 bg-slate-900/40 py-20 px-6 backdrop-blur-xl">
+      <section className="border-t border-slate-200 bg-white py-20 px-6">
         <div className="mx-auto max-w-7xl">
           <div className="text-center max-w-3xl mx-auto mb-16">
-            <span className="text-xs font-bold uppercase tracking-widest text-cyan-400 bg-cyan-500/10 px-3 py-1 rounded-full border border-cyan-500/20">
+            <span className="badge-indigo text-xs font-mono">
               System Architecture & Methodology
             </span>
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-white mt-4 tracking-tight">
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 mt-4 tracking-tight">
               End-to-End Multi-Modal Filtering Pipeline
             </h2>
-            <p className="mt-3 text-slate-400 text-sm sm:text-base">
+            <p className="mt-3 text-slate-600 text-sm sm:text-base">
               Engineered according to the PurePlay Software Design Specification (SDS), integrating OpenCV, custom PyTorch models, and real-time stateful web sockets.
             </p>
           </div>
@@ -315,19 +315,19 @@ function LandingPage() {
               return (
                 <div
                   key={idx}
-                  className="rounded-2xl border border-slate-800 bg-slate-950/60 p-6 relative flex flex-col justify-between hover:border-cyan-500/40 transition group"
+                  className="rounded-2xl border border-slate-200 bg-slate-50 p-6 relative flex flex-col justify-between hover:border-indigo-300 hover:shadow-xs transition group"
                 >
                   <div className="flex items-center justify-between mb-4">
-                    <span className="text-2xl font-black font-mono text-cyan-500/40 group-hover:text-cyan-400 transition">
+                    <span className="text-2xl font-black font-mono text-indigo-300 group-hover:text-indigo-600 transition">
                       {step.step}
                     </span>
-                    <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-cyan-400 group-hover:scale-110 transition">
+                    <div className="p-2.5 rounded-xl bg-white border border-slate-200 text-indigo-600 shadow-2xs group-hover:scale-110 transition">
                       <Icon className="h-5 w-5" />
                     </div>
                   </div>
                   <div>
-                    <h3 className="font-bold text-white text-base mb-2">{step.title}</h3>
-                    <p className="text-xs text-slate-400 leading-relaxed">{step.desc}</p>
+                    <h3 className="font-bold text-slate-900 text-base mb-2">{step.title}</h3>
+                    <p className="text-xs text-slate-600 leading-relaxed">{step.desc}</p>
                   </div>
                 </div>
               )
@@ -337,13 +337,13 @@ function LandingPage() {
       </section>
 
       {/* Core Functional Modules */}
-      <section className="py-20 px-6">
+      <section className="py-20 px-6 bg-slate-50">
         <div className="mx-auto max-w-7xl">
           <div className="text-center max-w-3xl mx-auto mb-16">
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
               Engineered for Complete Family Media Control
             </h2>
-            <p className="mt-3 text-slate-400 text-sm sm:text-base">
+            <p className="mt-3 text-slate-600 text-sm sm:text-base">
               Comprehensive role-based isolation, policy enforcement, and auditability.
             </p>
           </div>
@@ -354,19 +354,19 @@ function LandingPage() {
               return (
                 <div
                   key={idx}
-                  className="glass-card rounded-2xl p-7 border border-slate-800 flex gap-5 hover:border-slate-700 transition"
+                  className="glass-card rounded-2xl p-7 border border-slate-200 flex gap-5 hover:border-slate-300 transition"
                 >
-                  <div className="p-3 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 h-fit">
+                  <div className="p-3 rounded-2xl bg-indigo-50 border border-indigo-200 text-indigo-600 h-fit shadow-2xs">
                     <Icon className="h-6 w-6" />
                   </div>
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
-                      <h3 className="font-bold text-white text-lg">{feat.title}</h3>
-                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">
+                      <h3 className="font-bold text-slate-900 text-lg">{feat.title}</h3>
+                      <span className="badge-slate text-[10px] font-mono">
                         {feat.tag}
                       </span>
                     </div>
-                    <p className="text-sm text-slate-400 leading-relaxed">{feat.desc}</p>
+                    <p className="text-sm text-slate-600 leading-relaxed">{feat.desc}</p>
                   </div>
                 </div>
               )
@@ -376,14 +376,14 @@ function LandingPage() {
       </section>
 
       {/* University Attribution Footer */}
-      <footer className="border-t border-slate-800/80 bg-slate-900/60 py-10 px-6 backdrop-blur-xl">
-        <div className="mx-auto max-w-7xl flex flex-col md:flex-row items-center justify-between gap-6 text-xs text-slate-400">
+      <footer className="border-t border-slate-200 bg-white py-10 px-6">
+        <div className="mx-auto max-w-7xl flex flex-col md:flex-row items-center justify-between gap-6 text-xs text-slate-500">
           <div className="flex items-center gap-3">
-            <div className="h-8 w-8 rounded-lg bg-cyan-500/20 flex items-center justify-center text-cyan-400 font-bold">
+            <div className="h-8 w-8 rounded-lg bg-indigo-50 border border-indigo-200 flex items-center justify-center text-indigo-600 font-bold">
               P
             </div>
             <div>
-              <p className="font-bold text-white">PurePlay Video Filtering Platform</p>
+              <p className="font-bold text-slate-900">PurePlay Video Filtering Platform</p>
               <p className="text-slate-500">COMSATS University Islamabad • Final Year Project (FYP-1)</p>
             </div>
           </div>
@@ -391,14 +391,14 @@ function LandingPage() {
           <div className="flex flex-wrap items-center gap-4">
             <button
               onClick={() => handleQuickDemo('guardian')}
-              className="text-cyan-400 hover:underline font-semibold"
+              className="text-indigo-600 hover:underline font-semibold"
             >
               Evaluator Quick Launch →
             </button>
-            <Link to="/login" className="hover:text-white transition">
+            <Link to="/login" className="hover:text-slate-900 transition">
               Log In
             </Link>
-            <Link to="/signup" className="hover:text-white transition">
+            <Link to="/signup" className="hover:text-slate-900 transition">
               Sign Up
             </Link>
           </div>

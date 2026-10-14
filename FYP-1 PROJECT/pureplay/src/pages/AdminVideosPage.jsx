@@ -85,7 +85,7 @@ function AdminVideosPage() {
   if (loading) {
     return (
       <div className="flex h-64 items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-cyan-500 border-t-transparent" />
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-indigo-600 border-t-transparent" />
       </div>
     )
   }
@@ -93,16 +93,16 @@ function AdminVideosPage() {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <section className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <section className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-slate-200">
         <div>
           <div className="flex items-center gap-2.5">
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight flex items-center gap-2.5">
-              <Video className="h-7 w-7 text-cyan-400" />
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2.5">
+              <Video className="h-7 w-7 text-purple-700" />
               Content Repository & Moderation Logs
             </h1>
             <span className="badge-slate font-mono text-[10px]">Cloud Datastore</span>
           </div>
-          <p className="mt-1 text-slate-400 text-xs sm:text-sm">
+          <p className="mt-1 text-slate-600 text-xs sm:text-sm">
             Inspect real-time asset telemetry, verify classification confidence, and execute moderation overrides.
           </p>
         </div>
@@ -112,15 +112,15 @@ function AdminVideosPage() {
       <section className="glass-card rounded-2xl p-6">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-6">
           {/* Status Filter Buttons */}
-          <div className="flex items-center gap-1.5 bg-slate-950/60 border border-white/[0.06] p-1 rounded-xl self-start">
+          <div className="flex items-center gap-1.5 bg-slate-100 border border-slate-200 p-1 rounded-xl self-start">
             {['all', 'Flagged', 'Approved', 'Pending'].map((st) => (
               <button
                 key={st}
                 onClick={() => setStatusFilter(st)}
                 className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-all ${
                   statusFilter === st
-                    ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30'
-                    : 'text-slate-400 hover:text-slate-200'
+                    ? 'bg-white text-indigo-700 border border-slate-200 shadow-2xs'
+                    : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
                 {st === 'all' ? 'All Records' : st}
@@ -141,9 +141,9 @@ function AdminVideosPage() {
           </div>
         </div>
 
-        <div className="overflow-x-auto rounded-xl border border-white/[0.06]">
+        <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white">
           <table className="min-w-full text-left text-sm">
-            <thead className="border-b border-white/[0.06] bg-slate-950/60 text-[11px] uppercase tracking-wider text-slate-400 font-semibold">
+            <thead className="border-b border-slate-200 bg-slate-50 text-[11px] uppercase tracking-wider text-slate-500 font-semibold">
               <tr>
                 <th className="py-3 px-4">Video Details</th>
                 <th className="py-3 px-4">Uploader</th>
@@ -152,22 +152,22 @@ function AdminVideosPage() {
                 <th className="py-3 px-4 text-right">Moderator Controls</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/[0.04] bg-slate-950/30">
+            <tbody className="divide-y divide-slate-100 bg-white">
               {filteredVideos.map((row) => {
                 const title = row.title || row.fileName || row.file_name
                 const fileUrl = row.download_url || row.fileUrl
                 const currentStatus = row.status || 'Pending'
 
                 return (
-                  <tr key={row.id} className="text-slate-200 hover:bg-slate-800/25 transition-colors">
+                  <tr key={row.id} className="text-slate-700 hover:bg-slate-50 transition-colors">
                     <td className="py-3.5 px-4 max-w-[260px]">
-                      <div className="font-semibold text-white truncate" title={title}>
+                      <div className="font-semibold text-slate-900 truncate" title={title}>
                         {title}
                       </div>
                       {row.description && (
-                        <p className="text-xs text-slate-400 truncate line-clamp-1 mt-0.5">{row.description}</p>
+                        <p className="text-xs text-slate-500 truncate line-clamp-1 mt-0.5">{row.description}</p>
                       )}
-                      <div className="flex items-center gap-2 text-[10px] font-mono text-slate-500 mt-1">
+                      <div className="flex items-center gap-2 text-[10px] font-mono text-slate-400 mt-1">
                         <span>{formatBytes(row.file_size)}</span>
                         <span>•</span>
                         <span>{row.mime_type || 'video/mp4'}</span>
@@ -175,8 +175,8 @@ function AdminVideosPage() {
                     </td>
 
                     <td className="py-3.5 px-4 text-xs">
-                      <div className="text-slate-300 font-medium">{row.user_email || row.userEmail || 'Guardian'}</div>
-                      <div className="text-slate-500 font-mono text-[10px] mt-0.5">
+                      <div className="text-slate-900 font-medium">{row.user_email || row.userEmail || 'Guardian'}</div>
+                      <div className="text-slate-400 font-mono text-[10px] mt-0.5">
                         {row.uploaded_at || row.processedAt
                           ? new Date(row.uploaded_at || row.processedAt).toLocaleDateString()
                           : '—'}
@@ -188,14 +188,14 @@ function AdminVideosPage() {
                         <div className="flex flex-col gap-1 text-xs">
                           <span
                             className={`font-semibold font-mono text-[11px] ${
-                              row.ai_scores.nsfw > 0.7 ? 'text-rose-400' : 'text-slate-400'
+                              row.ai_scores.nsfw > 0.7 ? 'text-rose-600' : 'text-slate-600'
                             }`}
                           >
                             NSFW: {(row.ai_scores.nsfw * 100).toFixed(0)}%
                           </span>
                           <span
                             className={`font-semibold font-mono text-[11px] ${
-                              row.ai_scores.profanity > 0.7 ? 'text-amber-400' : 'text-slate-400'
+                              row.ai_scores.profanity > 0.7 ? 'text-amber-600' : 'text-slate-600'
                             }`}
                           >
                             Profanity: {(row.ai_scores.profanity * 100).toFixed(0)}%
@@ -224,7 +224,7 @@ function AdminVideosPage() {
                           <>
                             <button
                               onClick={() => setActiveVideo(row)}
-                              className="rounded-lg border border-slate-700/80 bg-slate-800/60 p-1.5 text-cyan-300 hover:bg-slate-800 transition"
+                              className="btn-secondary p-1.5 text-indigo-600"
                               title="Play Video"
                             >
                               <Play className="h-3.5 w-3.5" />
@@ -234,7 +234,7 @@ function AdminVideosPage() {
                               download
                               target="_blank"
                               rel="noreferrer"
-                              className="rounded-lg border border-indigo-500/30 bg-indigo-500/10 p-1.5 text-indigo-300 hover:bg-indigo-500/20 transition"
+                              className="btn-secondary p-1.5 text-slate-700"
                               title="Download Asset"
                             >
                               <Download className="h-3.5 w-3.5" />
@@ -247,7 +247,7 @@ function AdminVideosPage() {
                           <button
                             disabled={actionLoading === row.id}
                             onClick={() => handleApprove(row.id)}
-                            className="flex items-center gap-1 rounded-lg border border-emerald-500/30 bg-emerald-500/15 px-2.5 py-1 text-xs font-semibold text-emerald-300 hover:bg-emerald-500/25 transition disabled:opacity-50"
+                            className="flex items-center gap-1 rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 hover:bg-emerald-100 transition disabled:opacity-50"
                             title="Approve Video (Admin Override)"
                           >
                             <Check className="h-3 w-3" />
@@ -259,7 +259,7 @@ function AdminVideosPage() {
                         <button
                           disabled={actionLoading === row.id}
                           onClick={() => handleDelete(row.id)}
-                          className="rounded-lg border border-rose-500/30 bg-rose-500/15 p-1.5 text-rose-300 hover:bg-rose-500/25 transition disabled:opacity-50"
+                          className="rounded-lg border border-rose-200 bg-rose-50 p-1.5 text-rose-700 hover:bg-rose-100 transition disabled:opacity-50"
                           title="Delete from Firestore & Storage"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
@@ -279,11 +279,11 @@ function AdminVideosPage() {
 
       {/* Aggregated Rollup by User */}
       <section className="glass-card rounded-2xl p-6">
-        <h2 className="text-base font-bold text-white">Aggregated Activity Rollup by Account</h2>
-        <p className="mt-0.5 text-xs text-slate-400">Total uploads and violation metrics computed live from Firestore data.</p>
-        <div className="mt-5 overflow-x-auto rounded-xl border border-white/[0.06]">
+        <h2 className="text-base font-bold text-slate-900">Aggregated Activity Rollup by Account</h2>
+        <p className="mt-0.5 text-xs text-slate-500">Total uploads and violation metrics computed live from Firestore data.</p>
+        <div className="mt-5 overflow-x-auto rounded-xl border border-slate-200 bg-white">
           <table className="min-w-full text-left text-sm">
-            <thead className="border-b border-white/[0.06] bg-slate-950/60 text-[11px] uppercase tracking-wider text-slate-400 font-semibold">
+            <thead className="border-b border-slate-200 bg-slate-50 text-[11px] uppercase tracking-wider text-slate-500 font-semibold">
               <tr>
                 <th className="py-3 px-4">User Account</th>
                 <th className="py-3 px-4">Total Uploads</th>
@@ -291,11 +291,11 @@ function AdminVideosPage() {
                 <th className="py-3 px-4">Approved Assets</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/[0.04] bg-slate-950/30">
+            <tbody className="divide-y divide-slate-100 bg-white">
               {byUser.map((row) => (
-                <tr key={row.userId || row.userEmail} className="text-slate-200 hover:bg-slate-800/20 transition-colors">
-                  <td className="py-3.5 px-4 font-medium text-white text-xs sm:text-sm">{row.userEmail || row.userId}</td>
-                  <td className="py-3.5 px-4 text-slate-300 font-mono text-xs">{row.totalVideos}</td>
+                <tr key={row.userId || row.userEmail} className="text-slate-700 hover:bg-slate-50 transition-colors">
+                  <td className="py-3.5 px-4 font-semibold text-slate-900 text-xs sm:text-sm">{row.userEmail || row.userId}</td>
+                  <td className="py-3.5 px-4 text-slate-600 font-mono text-xs">{row.totalVideos}</td>
                   <td className="py-3.5 px-4 font-mono text-xs">
                     <span className="badge-rose text-[10px]">{row.flaggedCount}</span>
                   </td>

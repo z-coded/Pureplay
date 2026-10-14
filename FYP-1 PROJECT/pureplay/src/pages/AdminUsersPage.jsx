@@ -55,7 +55,7 @@ function AdminUsersPage() {
   if (loading) {
     return (
       <div className="flex h-64 items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-cyan-500 border-t-transparent" />
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-indigo-600 border-t-transparent" />
       </div>
     )
   }
@@ -63,16 +63,16 @@ function AdminUsersPage() {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <section className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <section className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-slate-200">
         <div>
           <div className="flex items-center gap-2.5">
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight flex items-center gap-2.5">
-              <Users className="h-7 w-7 text-cyan-400" />
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2.5">
+              <Users className="h-7 w-7 text-purple-700" />
               User Account Directory
             </h1>
             <span className="badge-slate font-mono text-[10px]">Auth Registry</span>
           </div>
-          <p className="mt-1 text-slate-400 text-xs sm:text-sm">
+          <p className="mt-1 text-slate-600 text-xs sm:text-sm">
             Search registered guardian accounts, monitor profile distribution, and execute governance actions.
           </p>
         </div>
@@ -81,7 +81,7 @@ function AdminUsersPage() {
       {/* Stats Row */}
       <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard label="Registered Accounts" value={users.length} icon={Users} subtitle="All platform users" />
-        <StatCard label="Active Accounts" value={users.length - suspendedCount} tone="cyan" icon={ShieldCheck} subtitle="In good standing" />
+        <StatCard label="Active Accounts" value={users.length - suspendedCount} tone="emerald" icon={ShieldCheck} subtitle="In good standing" />
         <StatCard label="Suspended Accounts" value={suspendedCount} tone="rose" icon={ShieldAlert} subtitle="Restricted access" />
         <StatCard label="Media Assets Logged" value={videos.length} tone="violet" icon={Users} subtitle="Firestore documents" />
       </section>
@@ -90,7 +90,7 @@ function AdminUsersPage() {
       <section className="glass-card rounded-2xl p-6">
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between mb-6">
           <div className="flex-1 space-y-1.5">
-            <label htmlFor="admin-user-search" className="text-xs font-semibold text-slate-300">
+            <label htmlFor="admin-user-search" className="text-xs font-semibold text-slate-700">
               Search Accounts
             </label>
             <div className="relative">
@@ -106,7 +106,7 @@ function AdminUsersPage() {
             </div>
           </div>
           <div className="space-y-1.5 md:w-48">
-            <span className="text-xs font-semibold text-slate-300">Filter by Status</span>
+            <span className="text-xs font-semibold text-slate-700">Filter by Status</span>
             <select
               value={status}
               onChange={(e) => setStatus(e.target.value)}
@@ -119,9 +119,9 @@ function AdminUsersPage() {
           </div>
         </div>
 
-        <div className="overflow-x-auto rounded-xl border border-white/[0.06]">
+        <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white">
           <table className="min-w-full text-left text-sm">
-            <thead className="border-b border-white/[0.06] bg-slate-950/60 text-[11px] uppercase tracking-wider text-slate-400 font-semibold">
+            <thead className="border-b border-slate-200 bg-slate-50 text-[11px] uppercase tracking-wider text-slate-500 font-semibold">
               <tr>
                 <th className="py-3 px-4">User Profile</th>
                 <th className="py-3 px-4">Email</th>
@@ -131,22 +131,22 @@ function AdminUsersPage() {
                 <th className="py-3 px-4 text-right">Moderation Action</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/[0.04] bg-slate-950/30">
+            <tbody className="divide-y divide-slate-100 bg-white">
               {filtered.map((u) => {
                 const displayName = u.display_name || u.displayName || 'Guardian User'
                 const joinedDate = u.created_at || u.joinedAt
                 const role = u.role || 'guardian'
 
                 return (
-                  <tr key={u.id} className="text-slate-200 hover:bg-slate-800/25 transition-colors">
-                    <td className="py-3.5 px-4 font-medium text-white">
+                  <tr key={u.id} className="text-slate-700 hover:bg-slate-50 transition-colors">
+                    <td className="py-3.5 px-4 font-medium text-slate-900">
                       <div className="text-xs sm:text-sm font-semibold">{displayName}</div>
-                      <div className="text-[10px] font-mono text-slate-500 truncate max-w-xs mt-0.5">{u.id}</div>
+                      <div className="text-[10px] font-mono text-slate-400 truncate max-w-xs mt-0.5">{u.id}</div>
                     </td>
-                    <td className="py-3.5 px-4 text-slate-300 text-xs font-mono">{u.email}</td>
+                    <td className="py-3.5 px-4 text-slate-600 text-xs font-mono">{u.email}</td>
                     <td className="py-3.5 px-4">
                       {role === 'admin' ? (
-                        <span className="badge-slate text-[10px] font-mono text-violet-400 border-violet-500/25 bg-violet-500/10">
+                        <span className="badge-slate text-[10px] font-mono text-purple-700 border-purple-200 bg-purple-50">
                           admin
                         </span>
                       ) : (
@@ -155,7 +155,7 @@ function AdminUsersPage() {
                         </span>
                       )}
                     </td>
-                    <td className="py-3.5 px-4 text-slate-400 text-xs font-mono">
+                    <td className="py-3.5 px-4 text-slate-500 text-xs font-mono">
                       {joinedDate ? new Date(joinedDate).toLocaleDateString() : '—'}
                     </td>
                     <td className="py-3.5 px-4">
@@ -175,8 +175,8 @@ function AdminUsersPage() {
                         onClick={() => toggleSuspend(u)}
                         className={`rounded-lg px-2.5 py-1 text-xs font-semibold transition-all ${
                           u.suspended
-                            ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 hover:bg-emerald-500/25'
-                            : 'bg-rose-500/15 text-rose-300 border border-rose-500/30 hover:bg-rose-500/25'
+                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100'
+                            : 'bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100'
                         }`}
                       >
                         {u.suspended ? 'Reinstate Account' : 'Suspend Account'}
@@ -193,7 +193,7 @@ function AdminUsersPage() {
         </div>
       </section>
 
-      <p className="text-[11px] text-slate-500 font-mono">
+      <p className="text-[11px] text-slate-400 font-mono">
         Directory records and suspension flags synchronize directly with Firebase Cloud Firestore.
       </p>
     </div>

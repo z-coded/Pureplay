@@ -205,15 +205,15 @@ function UploadPage() {
 
   return (
     <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="space-y-8">
-      <section>
+      <section className="pb-4 border-b border-slate-200">
         <div className="flex items-center gap-2.5">
-          <h1 className="flex items-center gap-2.5 text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
-            <UploadCloud className="h-7 w-7 text-cyan-400" />
+          <h1 className="flex items-center gap-2.5 text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">
+            <UploadCloud className="h-7 w-7 text-indigo-600" />
             Media Upload & AI Scanner
           </h1>
-          <span className="badge-cyan font-mono text-[10px]">Processing Pipeline</span>
+          <span className="badge-indigo font-mono text-[10px]">Processing Pipeline</span>
         </div>
-        <p className="mt-1 max-w-2xl text-xs sm:text-sm text-slate-400">
+        <p className="mt-1 max-w-2xl text-xs sm:text-sm text-slate-600">
           Upload video content directly to the PurePlay automated moderation pipeline. Assets are screened for visual nudity and profanity before indexing.
         </p>
       </section>
@@ -222,12 +222,12 @@ function UploadPage() {
         <div className="relative z-10 flex flex-col items-center">
           <div className="w-full max-w-2xl">
             {/* Active Profile Info */}
-            <div className="mb-6 flex items-center justify-between rounded-xl border border-white/[0.06] bg-slate-950/50 px-4 py-3">
+            <div className="mb-6 flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
               <div className="flex items-center gap-2.5">
-                <ShieldAlert className="h-4 w-4 text-cyan-400" />
-                <span className="text-xs font-medium text-slate-300">Active Viewing Profile</span>
+                <ShieldAlert className="h-4 w-4 text-indigo-600" />
+                <span className="text-xs font-semibold text-slate-600">Active Viewing Profile</span>
               </div>
-              <span className="text-xs font-bold text-cyan-300 font-mono">
+              <span className="text-xs font-bold text-indigo-700 font-mono">
                 {activeProfile?.name ?? 'Guardian Account'}
               </span>
             </div>
@@ -245,10 +245,10 @@ function UploadPage() {
                   {/* Dropzone */}
                   {!selectedFile ? (
                     <div
-                      className={`group relative flex cursor-pointer flex-col items-center justify-center rounded-2xl border border-dashed p-8 sm:p-10 text-center transition-all duration-200 ${
+                      className={`group relative flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed p-8 sm:p-10 text-center transition-all duration-200 ${
                         isDragging
-                          ? 'border-cyan-400 bg-cyan-500/10'
-                          : 'border-white/[0.12] bg-slate-950/40 hover:border-cyan-400/40 hover:bg-slate-950/60'
+                          ? 'border-indigo-500 bg-indigo-50/50'
+                          : 'border-slate-300 bg-slate-50/50 hover:border-indigo-400 hover:bg-slate-50'
                       }`}
                       onDragOver={onDragOver}
                       onDragLeave={onDragLeave}
@@ -262,26 +262,26 @@ function UploadPage() {
                         accept=".mp4,.webm"
                         onChange={(e) => handleFileSelect(e.target.files?.[0])}
                       />
-                      <div className="mb-3.5 flex h-14 w-14 items-center justify-center rounded-2xl bg-cyan-500/15 border border-cyan-500/25 text-cyan-300 transition-transform duration-200 group-hover:scale-105">
+                      <div className="mb-3.5 flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-50 border border-indigo-200 text-indigo-600 transition-transform duration-200 group-hover:scale-105">
                         <FileVideo className="h-7 w-7" />
                       </div>
-                      <h3 className="text-sm sm:text-base font-bold text-white">Choose a video file or drag and drop</h3>
-                      <p className="mt-1 text-xs text-slate-400">High-speed client validation & local frame sampling</p>
-                      <div className="mt-4 flex items-center gap-2 text-[10px] font-mono text-slate-400">
+                      <h3 className="text-sm sm:text-base font-bold text-slate-900">Choose a video file or drag and drop</h3>
+                      <p className="mt-1 text-xs text-slate-500">High-speed client validation & local frame sampling</p>
+                      <div className="mt-4 flex items-center gap-2 text-[10px] font-mono">
                         <span className="badge-slate">.MP4</span>
                         <span className="badge-slate">.WEBM</span>
                         <span className="badge-slate">Max 100MB</span>
                       </div>
                     </div>
                   ) : (
-                    <div className="flex items-center justify-between rounded-xl border border-cyan-500/30 bg-cyan-500/10 p-3.5">
+                    <div className="flex items-center justify-between rounded-xl border border-indigo-200 bg-indigo-50/80 p-3.5">
                       <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-500/20 text-cyan-400">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-100 text-indigo-600">
                           <FileVideo className="h-5 w-5" />
                         </div>
                         <div>
-                          <p className="font-semibold text-white text-xs sm:text-sm truncate max-w-sm">{selectedFile.name}</p>
-                          <p className="text-[11px] text-slate-400 mt-0.5">
+                          <p className="font-bold text-slate-900 text-xs sm:text-sm truncate max-w-sm">{selectedFile.name}</p>
+                          <p className="text-[11px] text-slate-600 mt-0.5 font-mono">
                             {formatBytes(selectedFile.size)} • {selectedFile.type || 'video'}
                           </p>
                         </div>
@@ -289,7 +289,7 @@ function UploadPage() {
                       <button
                         type="button"
                         onClick={() => setSelectedFile(null)}
-                        className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-800 hover:text-white transition"
+                        className="rounded-lg p-1.5 text-slate-500 hover:bg-rose-50 hover:text-rose-600 transition"
                         title="Remove file"
                       >
                         <X className="h-4 w-4" />
@@ -300,8 +300,8 @@ function UploadPage() {
                   {/* Metadata Fields */}
                   <div className="space-y-4">
                     <div>
-                      <label className="mb-1.5 block text-xs font-semibold text-slate-300">
-                        Video Title <span className="text-rose-400">*</span>
+                      <label className="mb-1.5 block text-xs font-semibold text-slate-700">
+                        Video Title <span className="text-rose-500">*</span>
                       </label>
                       <input
                         type="text"
@@ -314,8 +314,8 @@ function UploadPage() {
                     </div>
 
                     <div>
-                      <label className="mb-1.5 block text-xs font-semibold text-slate-300">
-                        Description <span className="text-rose-400">*</span>
+                      <label className="mb-1.5 block text-xs font-semibold text-slate-700">
+                        Description <span className="text-rose-500">*</span>
                       </label>
                       <textarea
                         required
@@ -330,8 +330,8 @@ function UploadPage() {
 
                   {/* Validation Error Banner */}
                   {validationError && (
-                    <div className="flex items-center gap-2 rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-xs text-rose-300">
-                      <AlertCircle className="h-4 w-4 shrink-0 text-rose-400" />
+                    <div className="flex items-center gap-2 rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs text-rose-700 font-medium">
+                      <AlertCircle className="h-4 w-4 shrink-0 text-rose-600" />
                       <span>{validationError}</span>
                     </div>
                   )}
@@ -357,12 +357,12 @@ function UploadPage() {
                 >
                   <div className="relative mb-8 h-32 w-32">
                     <svg className="h-full w-full -rotate-90" viewBox="0 0 100 100">
-                      <circle cx="50" cy="50" r="45" className="stroke-slate-800" strokeWidth="8" fill="none" />
+                      <circle cx="50" cy="50" r="45" className="stroke-slate-200" strokeWidth="8" fill="none" />
                       <motion.circle
                         cx="50"
                         cy="50"
                         r="45"
-                        className="stroke-cyan-500"
+                        className="stroke-indigo-600"
                         strokeWidth="8"
                         fill="none"
                         strokeLinecap="round"
@@ -372,11 +372,11 @@ function UploadPage() {
                       />
                     </svg>
                     <div className="absolute inset-0 flex flex-col items-center justify-center">
-                      <span className="text-3xl font-extrabold text-white">{progress}%</span>
+                      <span className="text-3xl font-extrabold text-slate-900">{progress}%</span>
                     </div>
                   </div>
-                  <h3 className="mb-2 text-xl font-bold text-white animate-pulse">{status}</h3>
-                  <p className="text-sm text-slate-400">Streamed to Firebase Storage with resumable chunking.</p>
+                  <h3 className="mb-2 text-xl font-bold text-slate-900 animate-pulse">{status}</h3>
+                  <p className="text-sm text-slate-500">Streamed to Firebase Storage with resumable chunking.</p>
                 </motion.div>
               )}
 
@@ -391,34 +391,34 @@ function UploadPage() {
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
                     transition={{ type: 'spring', bounce: 0.5 }}
-                    className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-emerald-500/20"
+                    className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-emerald-100"
                   >
-                    <CheckCircle2 className="h-10 w-10 text-emerald-400" />
+                    <CheckCircle2 className="h-10 w-10 text-emerald-600" />
                   </motion.div>
-                  <h3 className="mb-2 text-2xl font-bold text-white">Video Uploaded & Logged!</h3>
-                  <p className="mb-6 max-w-md text-sm text-slate-300">
+                  <h3 className="mb-2 text-2xl font-bold text-slate-900">Video Uploaded & Logged!</h3>
+                  <p className="mb-6 max-w-md text-sm text-slate-600">
                     Uploaded successfully to Storage and recorded in Firestore `videos` collection.
                   </p>
 
                   {uploadedVideoData && (
-                    <div className="mb-8 w-full rounded-2xl border border-slate-700 bg-slate-900/80 p-5 text-left">
+                    <div className="mb-8 w-full rounded-2xl border border-slate-200 bg-slate-50 p-5 text-left">
                       <div className="flex items-center justify-between mb-3">
-                        <span className="text-xs uppercase tracking-wider text-slate-400">Firestore Record</span>
+                        <span className="text-xs uppercase tracking-wider text-slate-500 font-semibold">Firestore Record</span>
                         <span
                           className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${
                             uploadedVideoData.status === 'Flagged'
-                              ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
+                              ? 'badge-rose'
                               : uploadedVideoData.status === 'Approved'
-                              ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
-                              : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                              ? 'badge-emerald'
+                              : 'badge-amber'
                           }`}
                         >
                           Status: {uploadedVideoData.status}
                         </span>
                       </div>
-                      <h4 className="text-lg font-bold text-white mb-1">{uploadedVideoData.title}</h4>
-                      <p className="text-xs text-slate-400 mb-3 line-clamp-2">{uploadedVideoData.description}</p>
-                      <div className="grid grid-cols-2 gap-2 text-xs font-mono text-slate-400">
+                      <h4 className="text-lg font-bold text-slate-900 mb-1">{uploadedVideoData.title}</h4>
+                      <p className="text-xs text-slate-600 mb-3 line-clamp-2">{uploadedVideoData.description}</p>
+                      <div className="grid grid-cols-2 gap-2 text-xs font-mono text-slate-500">
                         <div>Size: {formatBytes(uploadedVideoData.file_size)}</div>
                         <div>Type: {uploadedVideoData.mime_type}</div>
                       </div>
@@ -427,7 +427,7 @@ function UploadPage() {
 
                   <button
                     onClick={handleReset}
-                    className="rounded-xl bg-cyan-500 px-6 py-3 font-semibold text-slate-950 transition hover:bg-cyan-400"
+                    className="btn-primary"
                   >
                     Upload Another Video
                   </button>
@@ -441,14 +441,14 @@ function UploadPage() {
                   animate={{ opacity: 1, scale: 1 }}
                   className="flex flex-col items-center py-12 text-center"
                 >
-                  <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-rose-500/20">
-                    <AlertCircle className="h-10 w-10 text-rose-400" />
+                  <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-rose-100">
+                    <AlertCircle className="h-10 w-10 text-rose-600" />
                   </div>
-                  <h3 className="mb-2 text-2xl font-bold text-white">Upload Failed</h3>
-                  <p className="mb-8 max-w-md text-sm text-rose-300">{status}</p>
+                  <h3 className="mb-2 text-2xl font-bold text-slate-900">Upload Failed</h3>
+                  <p className="mb-8 max-w-md text-sm text-rose-600 font-medium">{status}</p>
                   <button
                     onClick={handleReset}
-                    className="rounded-xl bg-slate-800 px-6 py-3 font-semibold text-white transition hover:bg-slate-700"
+                    className="btn-secondary"
                   >
                     Try Again
                   </button>
