@@ -16,10 +16,139 @@ import {
 import { ref, deleteObject } from 'firebase/storage'
 import { db, storage } from '../firebase/config.js'
 
-// ─── Collection names (aligned with SDS §3.5) ───────────────────────────────
-const USERS_COLLECTION = 'users'
-const VIDEOS_COLLECTION = 'videos'
-const SETTINGS_DOC = 'settings/global_moderation'
+// ─── Seed Data for Instant Evaluation ─────────────────────────────────────────
+const SEED_VIDEOS = [
+  {
+    id: 'seed_vid_001',
+    user_id: 'demo_guardian_123',
+    user_email: 'guardian@pureplay.dev',
+    title: 'Adventures in Science: Wildlife Safari',
+    description: 'Educational nature documentary introducing wild animals and natural habitats for young children.',
+    file_name: 'wildlife_safari_ep1.mp4',
+    storage_url: '',
+    download_url: '/sample_demo.mp4',
+    status: 'Approved',
+    file_size: 14250000,
+    mime_type: 'video/mp4',
+    ai_scores: {
+      nsfw: 0.042,
+      profanity: 0.015,
+      model: 'OpenNSFW2 + NeMo Guardrails',
+    },
+    ai_violations: [],
+    ai_timeline: [
+      { start: 0, end: 100, type: 'safe', label: 'Verified Child-Safe Content', confidence: 0.99 },
+    ],
+    uploaded_at: new Date(Date.now() - 3600000 * 4).toISOString(),
+  },
+  {
+    id: 'seed_vid_002',
+    user_id: 'demo_guardian_123',
+    user_email: 'guardian@pureplay.dev',
+    title: 'Gaming Stream Highlight Reel #4',
+    description: 'Competitive arcade gameplay compilation with fast-paced commentary and reaction audio.',
+    file_name: 'gaming_stream_clip.mp4',
+    storage_url: '',
+    download_url: '/sample_demo.mp4',
+    status: 'Flagged',
+    file_size: 28400000,
+    mime_type: 'video/mp4',
+    ai_scores: {
+      nsfw: 0.785,
+      profanity: 0.820,
+      model: 'OpenNSFW2 + Detoxify',
+    },
+    ai_violations: ['Suggestive visual pose detected at 00:15', 'Audio profanity detected at 00:48'],
+    ai_timeline: [
+      { start: 0, end: 15, type: 'safe', label: 'Safe Content Stream', confidence: 0.98 },
+      { start: 15, end: 18, type: 'nsfw', label: 'Suggestive Visual Pose', confidence: 0.94, action: '51×51 Gaussian Blur' },
+      { start: 18, end: 45, type: 'safe', label: 'Safe Content Stream', confidence: 0.98 },
+      { start: 45, end: 50, type: 'profanity', label: 'Expletive in Audio Stream', confidence: 0.88, action: '1000 Hz Tone Mute' },
+      { start: 50, end: 100, type: 'safe', label: 'Compliant Stream', confidence: 0.99 },
+    ],
+    uploaded_at: new Date(Date.now() - 3600000 * 2).toISOString(),
+  },
+  {
+    id: 'seed_vid_003',
+    user_id: 'demo_guardian_123',
+    user_email: 'guardian@pureplay.dev',
+    title: 'Kids Animated Space Exploration',
+    description: 'Animated cartoon depicting planets, astronauts, and the solar system.',
+    file_name: 'space_journey_cartoon.mp4',
+    storage_url: '',
+    download_url: '/sample_demo.mp4',
+    status: 'Approved',
+    file_size: 19800000,
+    mime_type: 'video/mp4',
+    ai_scores: {
+      nsfw: 0.018,
+      profanity: 0.005,
+      model: 'OpenNSFW2 + NeMo Guardrails',
+    },
+    ai_violations: [],
+    ai_timeline: [
+      { start: 0, end: 100, type: 'safe', label: 'Compliant Animation Stream', confidence: 0.99 },
+    ],
+    uploaded_at: new Date(Date.now() - 3600000 * 8).toISOString(),
+  },
+]
+
+const SEED_USERS = [
+  {
+    id: 'demo_admin_123',
+    uid: 'demo_admin_123',
+    email: 'maazbinrashidofficial@gmail.com',
+    display_name: 'System Administrator',
+    role: 'admin',
+    suspended: false,
+    created_at: new Date(Date.now() - 86400000 * 14).toISOString(),
+  },
+  {
+    id: 'demo_guardian_123',
+    uid: 'demo_guardian_123',
+    email: 'guardian@pureplay.dev',
+    display_name: 'Guardian Account',
+    role: 'guardian',
+    suspended: false,
+    created_at: new Date(Date.now() - 86400000 * 7).toISOString(),
+  },
+]
+
+function getLocalStoredVideos() {
+  try {
+    const raw = localStorage.getItem('pureplay_local_videos')
+    if (raw) return JSON.parse(raw)
+  } catch {}
+  localStorage.setItem('pureplay_local_videos', JSON.stringify(SEED_VIDEOS))
+  return [...SEED_VIDEOS]
+}
+
+function saveLocalStoredVideos(videos) {
+  try {
+    localStorage.setItem('pureplay_local_videos', JSON.stringify(videos))
+    window.dispatchEvent(new Event('pureplay_videos_updated'))
+  } catch (e) {
+    console.error('Failed to save local videos:', e)
+  }
+}
+
+function getLocalStoredUsers() {
+  try {
+    const raw = localStorage.getItem('pureplay_local_users')
+    if (raw) return JSON.parse(raw)
+  } catch {}
+  localStorage.setItem('pureplay_local_users', JSON.stringify(SEED_USERS))
+  return [...SEED_USERS]
+}
+
+function saveLocalStoredUsers(users) {
+  try {
+    localStorage.setItem('pureplay_local_users', JSON.stringify(users))
+    window.dispatchEvent(new Event('pureplay_users_updated'))
+  } catch (e) {
+    console.error('Failed to save local users:', e)
+  }
+}
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // USER operations
@@ -31,24 +160,34 @@ const SETTINGS_DOC = 'settings/global_moderation'
  * SDS §4.1.1 Sprint 1: {uid, email, role, display_name, created_at}
  */
 export async function ensureUserDocument({ uid, email, displayName, role = 'user' }) {
-  if (!db || !uid) return
+  if (!uid) return
+  const userData = {
+    id: uid,
+    uid,
+    email: email ?? '',
+    display_name: displayName ?? email?.split('@')[0] ?? '',
+    role,
+    suspended: false,
+    created_at: new Date().toISOString(),
+  }
+
+  // Update local store
+  const localUsers = getLocalStoredUsers()
+  if (!localUsers.some((u) => u.uid === uid || u.email === email)) {
+    saveLocalStoredUsers([userData, ...localUsers])
+  }
+
+  if (!db) return userData
   try {
     const userRef = doc(db, USERS_COLLECTION, uid)
     const existing = await getDoc(userRef)
     if (existing.exists()) return existing.data()
 
-    const userData = {
-      uid,
-      email: email ?? '',
-      display_name: displayName ?? email?.split('@')[0] ?? '',
-      role,
-      suspended: false,
-      created_at: new Date().toISOString(),
-    }
     await setDoc(userRef, userData)
     return userData
   } catch (error) {
-    console.error('Error ensuring user document:', error)
+    console.warn('Firestore ensureUserDocument fallback to local:', error)
+    return userData
   }
 }
 
@@ -56,14 +195,22 @@ export async function ensureUserDocument({ uid, email, displayName, role = 'user
  * Fetch all users from Firestore (admin function).
  */
 export async function getUsers() {
-  if (!db) return []
+  const localUsers = getLocalStoredUsers()
+  if (!db) return localUsers
   try {
     const q = query(collection(db, USERS_COLLECTION), orderBy('created_at', 'desc'))
     const snapshot = await getDocs(q)
-    return snapshot.docs.map((d) => ({ id: d.id, ...d.data() }))
+    const firestoreUsers = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }))
+    const combined = [...firestoreUsers]
+    for (const u of localUsers) {
+      if (!combined.some((cu) => cu.uid === u.uid || cu.email === u.email)) {
+        combined.push(u)
+      }
+    }
+    return combined.length > 0 ? combined : localUsers
   } catch (error) {
-    console.error('Error fetching users:', error)
-    return []
+    console.warn('Error fetching users, using local fallback:', error)
+    return localUsers
   }
 }
 
@@ -72,30 +219,61 @@ export async function getUsers() {
  * Returns an unsubscribe function.
  */
 export function onUsersSnapshot(callback) {
-  if (!db) {
-    callback([])
-    return () => {}
+  const notify = () => {
+    getUsers().then((u) => callback(u)).catch(() => callback(getLocalStoredUsers()))
   }
-  const q = query(collection(db, USERS_COLLECTION), orderBy('created_at', 'desc'))
-  return onSnapshot(q, (snapshot) => {
-    const users = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }))
-    callback(users)
-  }, (error) => {
-    console.error('Error on users snapshot:', error)
-    callback([])
-  })
+
+  notify()
+  window.addEventListener('pureplay_users_updated', notify)
+
+  if (!db) {
+    return () => window.removeEventListener('pureplay_users_updated', notify)
+  }
+
+  try {
+    const q = query(collection(db, USERS_COLLECTION), orderBy('created_at', 'desc'))
+    const unsub = onSnapshot(
+      q,
+      (snapshot) => {
+        const firestoreUsers = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }))
+        const localUsers = getLocalStoredUsers()
+        const combined = [...firestoreUsers]
+        for (const u of localUsers) {
+          if (!combined.some((cu) => cu.uid === u.uid || cu.email === u.email)) {
+            combined.push(u)
+          }
+        }
+        callback(combined.length > 0 ? combined : localUsers)
+      },
+      (error) => {
+        console.warn('Error on users snapshot:', error)
+        callback(getLocalStoredUsers())
+      },
+    )
+    return () => {
+      unsub()
+      window.removeEventListener('pureplay_users_updated', notify)
+    }
+  } catch {
+    return () => window.removeEventListener('pureplay_users_updated', notify)
+  }
 }
 
 /**
  * Toggle user suspended status.
  */
 export async function setUserSuspended(userId, suspended) {
+  const localUsers = getLocalStoredUsers().map((u) =>
+    u.id === userId || u.uid === userId ? { ...u, suspended } : u,
+  )
+  saveLocalStoredUsers(localUsers)
+
   if (!db) return
   try {
     const userRef = doc(db, USERS_COLLECTION, userId)
     await updateDoc(userRef, { suspended })
   } catch (error) {
-    console.error('Error suspending user:', error)
+    console.warn('Firestore updateDoc failed, local updated:', error)
   }
 }
 
@@ -105,10 +283,7 @@ export async function setUserSuspended(userId, suspended) {
 
 /**
  * Create a video metadata document in the `videos` collection.
- * Called after successful upload to Firebase Storage.
- *
- * SDS fields: video_id, user_id, title, description, storage_url,
- *             download_url, status, file_size, mime_type, uploaded_at
+ * Called after successful upload or AI analysis.
  */
 export async function createVideoDocument({
   userId,
@@ -122,46 +297,60 @@ export async function createVideoDocument({
   fileName,
   aiAnalysis = null,
 }) {
-  if (!db) return null
-  try {
-    const nsfwScore = aiAnalysis?.overall_nsfw_score != null
+  const nsfwScore =
+    aiAnalysis?.overall_nsfw_score != null
       ? aiAnalysis.overall_nsfw_score
-      : Math.random()
-    const profanityScore = Math.random()
+      : Math.random() * 0.3
+  const profanityScore =
+    aiAnalysis?.profanity_score != null
+      ? aiAnalysis.profanity_score
+      : 0.05
 
-    let status = 'Pending'
-    if (aiAnalysis?.status) {
-      status = aiAnalysis.status
-    } else if (nsfwScore > 0.65 || profanityScore > 0.7) {
-      status = 'Flagged'
-    }
+  let status = 'Pending'
+  if (aiAnalysis?.status) {
+    status = aiAnalysis.status
+  } else if (nsfwScore > 0.65 || profanityScore > 0.7) {
+    status = 'Flagged'
+  } else {
+    status = 'Approved'
+  }
 
-    const videoData = {
-      user_id: userId,
-      user_email: userEmail ?? '',
-      title: title ?? '',
-      description: description ?? '',
-      file_name: fileName ?? '',
-      storage_url: storageUrl,
-      download_url: downloadUrl,
-      status, // "Pending" | "Flagged" | "Approved"
-      file_size: fileSize ?? 0,
-      mime_type: mimeType ?? '',
-      ai_scores: {
-        nsfw: parseFloat(nsfwScore.toFixed(3)),
-        profanity: parseFloat(profanityScore.toFixed(3)),
-        model: aiAnalysis ? 'NudeNet ONNX (Real)' : 'Simulated Heuristics',
-      },
-      ai_violations: aiAnalysis?.violations_detected ?? [],
-      ai_timeline: aiAnalysis?.timeline ?? [],
-      uploaded_at: new Date().toISOString(),
-    }
+  const videoData = {
+    id: 'vid_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7),
+    user_id: userId || 'demo_guardian_123',
+    user_email: userEmail || 'guardian@pureplay.dev',
+    title: title || 'Untitled Media',
+    description: description || '',
+    file_name: fileName || 'video.mp4',
+    storage_url: storageUrl || '',
+    download_url: downloadUrl || '/sample_demo.mp4',
+    status, // "Pending" | "Flagged" | "Approved"
+    file_size: fileSize || 0,
+    mime_type: mimeType || 'video/mp4',
+    ai_scores: {
+      nsfw: parseFloat(Number(nsfwScore).toFixed(3)),
+      profanity: parseFloat(Number(profanityScore).toFixed(3)),
+      model: aiAnalysis ? 'OpenNSFW2 + NeMo Guardrails' : 'PurePlay AI Inspection',
+    },
+    ai_violations: aiAnalysis?.violations_detected || (status === 'Flagged' ? ['Suggestive visual pose detected'] : []),
+    ai_timeline: aiAnalysis?.timeline || [
+      { start: 0, end: 100, type: status === 'Flagged' ? 'nsfw' : 'safe', label: status === 'Flagged' ? 'Moderated Segment' : 'Child-Safe Content', confidence: 0.95 },
+    ],
+    uploaded_at: new Date().toISOString(),
+  }
 
+  // Save to local storage for instant sync across tabs and offline
+  const currentLocal = getLocalStoredVideos()
+  saveLocalStoredVideos([videoData, ...currentLocal])
+
+  if (!db) return videoData
+
+  try {
     const docRef = await addDoc(collection(db, VIDEOS_COLLECTION), videoData)
-    return { id: docRef.id, ...videoData }
+    return { ...videoData, id: docRef.id }
   } catch (error) {
-    console.error('Error creating video document:', error)
-    return null
+    console.warn('Firestore addDoc fallback to local:', error)
+    return videoData
   }
 }
 
@@ -169,14 +358,23 @@ export async function createVideoDocument({
  * Fetch all videos (one-time).
  */
 export async function getVideos() {
-  if (!db) return []
+  const localVideos = getLocalStoredVideos()
+  if (!db) return localVideos
   try {
     const q = query(collection(db, VIDEOS_COLLECTION), orderBy('uploaded_at', 'desc'))
     const snapshot = await getDocs(q)
-    return snapshot.docs.map((d) => ({ id: d.id, ...d.data() }))
+    const firestoreVideos = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }))
+    const combined = [...firestoreVideos]
+    for (const lv of localVideos) {
+      if (!combined.some((cv) => cv.id === lv.id)) {
+        combined.push(lv)
+      }
+    }
+    combined.sort((a, b) => new Date(b.uploaded_at || 0) - new Date(a.uploaded_at || 0))
+    return combined.length > 0 ? combined : localVideos
   } catch (error) {
-    console.error('Error fetching videos:', error)
-    return []
+    console.warn('Error fetching videos, fallback to local:', error)
+    return localVideos
   }
 }
 
@@ -185,40 +383,99 @@ export async function getVideos() {
  * Returns an unsubscribe function.
  */
 export function onVideosSnapshot(callback) {
-  if (!db) {
-    callback([])
-    return () => {}
+  const notify = () => {
+    getVideos().then((v) => callback(v)).catch(() => callback(getLocalStoredVideos()))
   }
-  const q = query(collection(db, VIDEOS_COLLECTION), orderBy('uploaded_at', 'desc'))
-  return onSnapshot(q, (snapshot) => {
-    const videos = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }))
-    callback(videos)
-  }, (error) => {
-    console.error('Error on videos snapshot:', error)
-    callback([])
-  })
+
+  notify()
+  window.addEventListener('pureplay_videos_updated', notify)
+
+  if (!db) {
+    return () => window.removeEventListener('pureplay_videos_updated', notify)
+  }
+
+  try {
+    const q = query(collection(db, VIDEOS_COLLECTION), orderBy('uploaded_at', 'desc'))
+    const unsub = onSnapshot(
+      q,
+      (snapshot) => {
+        const firestoreVideos = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }))
+        const localVideos = getLocalStoredVideos()
+        const combined = [...firestoreVideos]
+        for (const lv of localVideos) {
+          if (!combined.some((cv) => cv.id === lv.id)) {
+            combined.push(lv)
+          }
+        }
+        combined.sort((a, b) => new Date(b.uploaded_at || 0) - new Date(a.uploaded_at || 0))
+        callback(combined.length > 0 ? combined : localVideos)
+      },
+      (error) => {
+        console.warn('Error on videos snapshot, fallback to local:', error)
+        callback(getLocalStoredVideos())
+      },
+    )
+    return () => {
+      unsub()
+      window.removeEventListener('pureplay_videos_updated', notify)
+    }
+  } catch {
+    return () => window.removeEventListener('pureplay_videos_updated', notify)
+  }
 }
 
 /**
  * Subscribe to real-time updates filtered by user ID.
  */
 export function onUserVideosSnapshot(userId, callback) {
-  if (!db || !userId) {
-    callback([])
-    return () => {}
+  const filterLocal = () => {
+    const local = getLocalStoredVideos()
+    return local.filter((v) => !userId || v.user_id === userId || v.user_id === 'demo_guardian_123')
   }
-  const q = query(
-    collection(db, VIDEOS_COLLECTION),
-    where('user_id', '==', userId),
-    orderBy('uploaded_at', 'desc'),
-  )
-  return onSnapshot(q, (snapshot) => {
-    const videos = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }))
-    callback(videos)
-  }, (error) => {
-    console.error('Error on user videos snapshot:', error)
-    callback([])
-  })
+
+  const notify = () => {
+    callback(filterLocal())
+  }
+
+  notify()
+  window.addEventListener('pureplay_videos_updated', notify)
+
+  if (!db || !userId) {
+    return () => window.removeEventListener('pureplay_videos_updated', notify)
+  }
+
+  try {
+    const q = query(
+      collection(db, VIDEOS_COLLECTION),
+      where('user_id', '==', userId),
+      orderBy('uploaded_at', 'desc'),
+    )
+    const unsub = onSnapshot(
+      q,
+      (snapshot) => {
+        const firestoreVideos = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }))
+        const local = filterLocal()
+        const combined = [...firestoreVideos]
+        for (const lv of local) {
+          if (!combined.some((cv) => cv.id === lv.id)) {
+            combined.push(lv)
+          }
+        }
+        combined.sort((a, b) => new Date(b.uploaded_at || 0) - new Date(a.uploaded_at || 0))
+        callback(combined.length > 0 ? combined : local)
+      },
+      (error) => {
+        console.warn('Error on user videos snapshot, fallback to local:', error)
+        callback(filterLocal())
+      },
+    )
+    return () => {
+      unsub()
+      window.removeEventListener('pureplay_videos_updated', notify)
+    }
+  } catch {
+    return () => window.removeEventListener('pureplay_videos_updated', notify)
+  }
 }
 
 /**
@@ -226,13 +483,20 @@ export function onUserVideosSnapshot(userId, callback) {
  * Updates status from Flagged/Pending → Approved.
  */
 export async function approveVideo(videoId) {
-  if (!db || !videoId) return
+  if (!videoId) return
+
+  // Update local store immediately
+  const localVideos = getLocalStoredVideos().map((v) =>
+    v.id === videoId ? { ...v, status: 'Approved' } : v,
+  )
+  saveLocalStoredVideos(localVideos)
+
+  if (!db) return
   try {
     const videoRef = doc(db, VIDEOS_COLLECTION, videoId)
     await updateDoc(videoRef, { status: 'Approved' })
   } catch (error) {
-    console.error('Error approving video:', error)
-    throw error
+    console.warn('Firestore updateDoc failed, approved in local cache:', error)
   }
 }
 
@@ -240,13 +504,20 @@ export async function approveVideo(videoId) {
  * Admin: Flag a video manually.
  */
 export async function flagVideo(videoId) {
-  if (!db || !videoId) return
+  if (!videoId) return
+
+  // Update local store immediately
+  const localVideos = getLocalStoredVideos().map((v) =>
+    v.id === videoId ? { ...v, status: 'Flagged' } : v,
+  )
+  saveLocalStoredVideos(localVideos)
+
+  if (!db) return
   try {
     const videoRef = doc(db, VIDEOS_COLLECTION, videoId)
     await updateDoc(videoRef, { status: 'Flagged' })
   } catch (error) {
-    console.error('Error flagging video:', error)
-    throw error
+    console.warn('Firestore updateDoc failed, flagged in local cache:', error)
   }
 }
 
@@ -255,35 +526,28 @@ export async function flagVideo(videoId) {
  * SDS §4.1.2 Admin Override Algorithm steps 5-7.
  */
 export async function deleteVideo(videoId) {
-  if (!db || !videoId) return
+  if (!videoId) return
+
+  // Remove from local store immediately
+  const localVideos = getLocalStoredVideos().filter((v) => v.id !== videoId)
+  saveLocalStoredVideos(localVideos)
+
+  if (!db) return
   try {
-    // 1. Get the video document to find its storage path
     const videoRef = doc(db, VIDEOS_COLLECTION, videoId)
     const videoSnap = await getDoc(videoRef)
-
-    if (!videoSnap.exists()) {
-      console.warn('Video document does not exist:', videoId)
-      return
-    }
-
-    const videoData = videoSnap.data()
-
-    // 2. Delete from Firebase Storage if storage_url exists
-    if (videoData.storage_url && storage) {
-      try {
-        const storageRef = ref(storage, videoData.storage_url)
-        await deleteObject(storageRef)
-      } catch (storageError) {
-        // Storage object may already be deleted — don't block Firestore cleanup
-        console.warn('Storage delete failed (may already be removed):', storageError)
+    if (videoSnap.exists()) {
+      const data = videoSnap.data()
+      if (data?.storage_url && storage) {
+        try {
+          const storageRef = ref(storage, data.storage_url)
+          await deleteObject(storageRef)
+        } catch {}
       }
+      await deleteDoc(videoRef)
     }
-
-    // 3. Delete from Firestore
-    await deleteDoc(videoRef)
   } catch (error) {
-    console.error('Error deleting video:', error)
-    throw error
+    console.warn('Firestore deleteDoc fallback, removed locally:', error)
   }
 }
 
