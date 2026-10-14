@@ -1,0 +1,30 @@
+{
+  "model": "NVIDIA-NeMo-Guardrails",
+  "epochs": 2,
+  "best_accuracy": 100.0,
+  "training_time_sec": 0.94,
+  "decisions": [
+    "SAFE_TO_STREAM",
+    "CENSOR_AND_STREAM",
+    "RESTRICTED_PIN_REQUIRED",
+    "BLOCKED_VIOLATION"
+  ],
+  "history": [
+    {
+      "epoch": 1,
+      "train_loss": 0.7977,
+      "train_acc": 82.81,
+      "val_loss": 0.2241,
+      "val_acc": 100.0
+    },
+    {
+      "epoch": 2,
+      "train_loss": 0.1037,
+      "train_acc": 100.0,
+      "val_loss": 0.0173,
+      "val_acc": 100.0
+    }
+  ],
+  "pt_path": "D:\\fyp\\FYP-1 PROJECT\\pureplay_ai\\pureplay_nemo_trained.pt",
+  "onnx_path": "D:\\fyp\\FYP-1 PROJECT\\pureplay_ai\\pureplay_nemo_trained.onnx"
+}

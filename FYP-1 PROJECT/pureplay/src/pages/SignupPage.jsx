@@ -1,0 +1,215 @@
+import { useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext.jsx'
+import { getFirebaseAuthMessage } from '../utils/firebaseAuthErrors.js'
+import GoogleSignInButton from '../components/GoogleSignInButton.jsx'
+import { Eye, EyeOff } from 'lucide-react'
+
+function SignupPage() {
+  const navigate = useNavigate()
+  const { signUp, signInWithGoogle, isFirebaseConfigured } = useAuth()
+  const [form, setForm] = useState({ displayName: '', email: '', password: '', confirmPassword: '' })
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [status, setStatus] = useState('')
+  const [error, setError] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setError('')
+    setStatus('')
+
+    if (form.password !== form.confirmPassword) {
+      setError('Passwords do not match.')
+      return
+    }
+
+    if (form.password.length < 6) {
+      setError('Password must be at least 6 characters.')
+      return
+    }
+
+    try {
+      setSubmitting(true)
+      await signUp(form.email, form.password, form.displayName.trim())
+      setStatus('Account created! Verification email sent.')
+      setTimeout(() => {
+        navigate('/dashboard')
+      }, 1000)
+    } catch (err) {
+      setError(
+        err?.message === 'Firebase is not configured'
+          ? 'Firebase is not configured. Add your VITE_FIREBASE_* values in .env and restart.'
+          : getFirebaseAuthMessage(err),
+      )
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  const handleGoogle = async () => {
+    setError('')
+    setStatus('')
+    try {
+      await signInWithGoogle()
+      navigate('/dashboard')
+    } catch (err) {
+      setError(
+        err?.message === 'Firebase is not configured'
+          ? 'Firebase is not configured. Add your VITE_FIREBASE_* values in .env and restart.'
+          : getFirebaseAuthMessage(err),
+      )
+    }
+  }
+
+  return (
+    <div className="min-h-[85vh] flex items-center justify-center px-4 py-8">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="w-full max-w-md rounded-3xl border border-slate-800 bg-slate-900/85 p-8 shadow-2xl backdrop-blur-xl relative overflow-hidden"
+      >
+        <div className="absolute top-0 right-0 w-48 h-48 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="relative z-10">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="h-9 w-9 rounded-xl bg-cyan-500/20 flex items-center justify-center">
+              <img src="/logo.png" alt="PurePlay" className="h-6 w-6 object-contain" />
+            </div>
+            <span className="text-xl font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
+              PurePlay
+            </span>
+          </div>
+
+          <h1 className="text-3xl font-black text-white tracking-tight">Create Account</h1>
+          <p className="mt-1 text-sm text-slate-400">Register to enforce AI media policies for your family.</p>
+
+          <div className="mt-6">
+            <GoogleSignInButton disabled={!isFirebaseConfigured} onClick={handleGoogle} />
+          </div>
+
+          <div className="relative my-6 text-center">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-slate-800" />
+            </div>
+            <span className="relative bg-slate-900 px-3 text-xs uppercase tracking-wider text-slate-500 font-mono">
+              or register email
+            </span>
+          </div>
+
+          <form className="space-y-4" onSubmit={handleSubmit}>
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">
+                Full Name
+              </label>
+              <input
+                className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-sm text-white placeholder-slate-500 focus:border-cyan-500 focus:outline-none"
+                placeholder="Sarah Johnson"
+                type="text"
+                required
+                value={form.displayName}
+                onChange={(e) => setForm((prev) => ({ ...prev, displayName: e.target.value }))}
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">
+                Email Address
+              </label>
+              <input
+                className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-sm text-white placeholder-slate-500 focus:border-cyan-500 focus:outline-none"
+                placeholder="name@pureplay.dev"
+                type="email"
+                required
+                value={form.email}
+                onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))}
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">
+                Password
+              </label>
+              <div className="relative">
+                <input
+                  className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 pr-11 text-sm text-white placeholder-slate-500 focus:border-cyan-500 focus:outline-none"
+                  placeholder="••••••••"
+                  type={showPassword ? 'text' : 'password'}
+                  required
+                  minLength={6}
+                  autoComplete="new-password"
+                  value={form.password}
+                  onChange={(e) => setForm((prev) => ({ ...prev, password: e.target.value }))}
+                />
+                <button
+                  type="button"
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200"
+                  onClick={() => setShowPassword(!showPassword)}
+                  aria-label="Toggle password visibility"
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">
+                Confirm Password
+              </label>
+              <div className="relative">
+                <input
+                  className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 pr-11 text-sm text-white placeholder-slate-500 focus:border-cyan-500 focus:outline-none"
+                  placeholder="••••••••"
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  required
+                  minLength={6}
+                  autoComplete="new-password"
+                  value={form.confirmPassword}
+                  onChange={(e) => setForm((prev) => ({ ...prev, confirmPassword: e.target.value }))}
+                />
+                <button
+                  type="button"
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  aria-label="Toggle confirm password visibility"
+                >
+                  {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+            </div>
+
+            {error && (
+              <p className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-xs text-rose-300">
+                {error}
+              </p>
+            )}
+
+            {status && (
+              <p className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-xs text-emerald-300">
+                {status}
+              </p>
+            )}
+
+            <button
+              className="w-full rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 py-3.5 font-bold text-white shadow-lg shadow-cyan-500/20 hover:brightness-110 active:scale-95 transition disabled:opacity-50 text-sm"
+              type="submit"
+              disabled={submitting}
+            >
+              {submitting ? 'Creating Secure Account...' : 'Create Guardian Account'}
+            </button>
+          </form>
+
+          <p className="mt-6 text-center text-xs text-slate-400">
+            Already have an account?{' '}
+            <Link to="/login" className="font-semibold text-cyan-400 hover:underline">
+              Log in
+            </Link>
+          </p>
+        </div>
+      </motion.div>
+    </div>
+  )
+}
+
+export default SignupPage

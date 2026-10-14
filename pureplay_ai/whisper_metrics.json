@@ -1,0 +1,29 @@
+{
+  "model": "OpenAI-Whisper-Adapter",
+  "epochs": 2,
+  "baseline_wer": 0.285,
+  "final_wer": 0.2059,
+  "final_cer": 0.0865,
+  "wer_improvement": "27.75%",
+  "training_time_sec": 2.19,
+  "history": [
+    {
+      "epoch": 1,
+      "train_loss": 5.5528,
+      "val_loss": 5.5505,
+      "wer": 0.2422,
+      "cer": 0.1017,
+      "wer_reduction_pct": 15.02
+    },
+    {
+      "epoch": 2,
+      "train_loss": 5.5486,
+      "val_loss": 5.5541,
+      "wer": 0.2059,
+      "cer": 0.0865,
+      "wer_reduction_pct": 27.75
+    }
+  ],
+  "pt_path": "D:\\fyp\\FYP-1 PROJECT\\pureplay_ai\\pureplay_whisper_trained.pt",
+  "onnx_path": "D:\\fyp\\FYP-1 PROJECT\\pureplay_ai\\pureplay_whisper_trained.onnx"
+}

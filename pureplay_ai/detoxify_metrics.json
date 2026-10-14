@@ -1,0 +1,38 @@
+{
+  "model": "Detoxify-MultiLabel",
+  "epochs": 2,
+  "best_f1_score": 0.9827,
+  "validation_accuracy": 99.11,
+  "training_time_sec": 0.96,
+  "classes": [
+    "toxicity",
+    "severe_toxicity",
+    "obscene",
+    "threat",
+    "insult",
+    "identity_attack",
+    "profanity"
+  ],
+  "history": [
+    {
+      "epoch": 1,
+      "train_loss": 0.4538,
+      "val_loss": 0.2351,
+      "accuracy": 85.12,
+      "precision": 1.0,
+      "recall": 0.4318,
+      "f1_score": 0.6032
+    },
+    {
+      "epoch": 2,
+      "train_loss": 0.1419,
+      "val_loss": 0.0462,
+      "accuracy": 99.11,
+      "precision": 1.0,
+      "recall": 0.9659,
+      "f1_score": 0.9827
+    }
+  ],
+  "pt_path": "D:\\fyp\\FYP-1 PROJECT\\pureplay_ai\\pureplay_detoxify_trained.pt",
+  "onnx_path": "D:\\fyp\\FYP-1 PROJECT\\pureplay_ai\\pureplay_detoxify_trained.onnx"
+}

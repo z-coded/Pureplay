@@ -1,0 +1,3073 @@
+Total pages: 73
+--- Page 1 ---
+   
+ 
+  
+COMSATS University, Islamabad Pakistan  
+ 
+VentureFit  
+ 
+By 
+ 
+Muhammad Haseeb Hassan       CIIT/ SP23-BCS -054/ISB  
+Saulat Abbas Bukhari                 CIIT/ SP23-BCS -084/ISB 
+ 
+ 
+Supervisor  
+Mr. Aamir Shabir Pare  
+ 
+ 
+Bachelor of Science in Computer Science ( 2023 -2027 ) 
+ 
+ 
+ 
+The candidate confirms that the work submitted is their own and appropriate  
+ credit has been given where reference has been made to the work of others . 
+ 
+
+
+--- Page 2 ---
+i 
+  
+COMSATS University, Islamabad Pakistan  
+ 
+ 
+VentureFit  
+ 
+ 
+A project presented to  
+COMSATS University, Islamabad  
+ 
+ 
+In partial fulfillment  
+of the requirement for the degree of  
+ 
+ 
+ 
+Bachelor of Science in Computer Science ( 2023 -2027 ) 
+ 
+ 
+By 
+ 
+ 
+Muhammad Haseeb Hassan       CIIT/ SP23-BCS -054/ISB  
+Saulat Abbas Bukhari                 CIIT/ SP23-BCS -084/ISB  
+ 
+ 
+ 
+ 
+
+
+--- Page 3 ---
+ii 
+ Abstract  
+A huge number of startup failures are attributed to “market misreading,” where founders build 
+products that solve non -existent problems due to a lack of structured market validation. 
+Currently, aspiring entrepreneurs rely on fragmented tools, manually scou ring platforms such 
+as Reddit for problem signals, collecting competitor data from multiple sources, and using 
+generic business plan templates that fail to provide personalized guidance. This process is slow, 
+unstructured, and often results in months of wa sted effort and resources. However, existing 
+solutions do not provide an integrated environment that systematically converts real market 
+discussions into actionable validation insights. VentureFit addresses this gap by consolidating 
+the entire early -stage validation process into a single AI -powered workspace. By automatically 
+mining discussions from open community platforms, applying thematic clustering to surface 
+customer pain points, and performing sentiment -driven competitor gap analysis, the platform 
+transforms scattered market signals into structured insights. The system further generates 
+actionable reports that guide founders through idea validation, competitor analysis, customer 
+discovery, launch planning, and go -to-market strategy development. By red ucing manual 
+research effort and enabling data -driven decision making, VentureFit increases the likelihood 
+of founders building products that address real market needs. The core analytical pipeline, 
+comprising topic modeling, sentiment scoring, and behavio ral clustering, is built and executed 
+in-house. LLM APIs are used solely for natural language report generation.   
+
+--- Page 4 ---
+iii 
+ Abbreviations  
+Abbreviation  Description  
+API Application Programming Interface  
+B2B Business -to-Business  
+B2C Business -to-Consumer  
+FAISS  Facebook AI Similarity Search  
+CAC  Customer Acquisition Cost  
+CSCS  Customizable Surveillance Control System  
+FYP Final Year Project  
+GTM  Go-To-Market  
+HN Hacker News  
+HTTPS  Hypertext Transfer Protocol Secure  
+JSON  JavaScript Object Notation  
+JWT  JSON Web Token  
+KPI Key Performance Indicator  
+LLM  Large Language Model  
+LTV  Lifetime Value  
+MVP  Minimum Viable Product  
+NLP  Natural Language Processing  
+NLTK  Natural Language Toolkit  
+ORM  Object -Relational Mapping  
+SRS Software Requirements Specification  
+TAM  Total Addressable Market  
+TLS Transport Layer Security  
+UI User Interface  
+UX User Experience  
+HDBSCAN  Hierarchical Density -Based Spatial Clustering 
+of Applications with Noise  
+WTP  Willingness to Pay  
+  
+ 
+
+--- Page 5 ---
+iv 
+ Contents  
+Abstract  ................................ ................................ ................................ ................................ ...... ii 
+Chapter 1: Introduction and Problem Definition  ................................ ................................ ....... 1 
+1.1  Overview of the Project  ................................ ................................ ................................ .. 1 
+1.2  Vision Statement  ................................ ................................ ................................ .............  1 
+1.3  Problem Statement  ................................ ................................ ................................ ..........  1 
+1.4  Problem Solution  ................................ ................................ ................................ ............  2 
+1.5  Objectives of the Proposed System ................................ ................................ .................  2 
+1.6  Scope  ................................ ................................ ................................ ...............................  2 
+1.6.1  Limitations and Constraints  ................................ ................................ .....................  3 
+1.7  Modules ................................ ................................ ................................ ...........................  3 
+Module 1.7.1: User Onboarding and Idea Intake  ................................ ................................ ... 3 
+Module 1.7.2: Problem Discovery Engine  ................................ ................................ .............  3 
+Module 1.7.3: Idea Validation Toolkit  ................................ ................................ ..................  4 
+Module 1.7.4: Competitor Landscape Analyzer  ................................ ................................ .... 4 
+Module 1.7.5: Early Customer Discovery and Segmentation ................................ ................  4 
+Module 1.7.6: Launch Planning Assistant  ................................ ................................ .............  4 
+Module 1.7.7: Go -To-Market Strategy Generator  ................................ ................................ . 5 
+Module 1.7.8: Early Growth Strategy Designer  ................................ ................................ .... 5 
+Module 1.7.9: Dashboard and Reporting  ................................ ................................ ...............  5 
+1.8  Related System Analysis and Literature Review  ................................ ............................  5 
+1.8.1  Literature Review ................................ ................................ ................................ ..... 5 
+1.8.2  Related System Analysis ................................ ................................ ..........................  6 
+1.9  Tools and Technologies  ................................ ................................ ................................ .. 7 
+1.10  Project Contribution  ................................ ................................ ................................ ...... 8 
+1.11  Relevance to Course Modules  ................................ ................................ ......................  8 
+Chapter 2: Requirement Analysis  ................................ ................................ ..............................  9 
+2.1  User Classes and Characteristics  ................................ ................................ ....................  9 
+2.2  Operating Environment  ................................ ................................ ................................ ... 9 
+2.3  Design and Implementation Constraints  ................................ ................................ .........  9 
+2.4  Use Case Diagram ................................ ................................ ................................ .........  10 
+2.5  Requirement Identifying Technique  ................................ ................................ .............  11 
+2.6  Functional Requirements  ................................ ................................ ..............................  12 
+2.6.1  Module 1: User Onboarding and Idea Intake  ................................ .........................  12 
+2.6.2  Module 2: Problem Discovery Engine  ................................ ................................ ... 14 
+2.6.3  Module 3: Idea Validation Toolkit  ................................ ................................ ........  17 
+2.6.4  Module 4: Competitor Landscape Analyser  ................................ ..........................  19 
+
+--- Page 6 ---
+v 
+ 2.6.5  Module 5: Early Customer Discovery and Segmentation  ................................ ...... 21 
+2.6.6  Module 6: Launch Planning Assistant  ................................ ................................ ... 22 
+2.6.7  Module 7: Go -To-Market Strategy Generator  ................................ .......................  23 
+2.6.8  Module 8: Early Growth Strategy Designer  ................................ ..........................  24 
+2.6.9  Module 9: Dashboard and Reporting  ................................ ................................ ..... 25 
+2.7  Non -Functional Requirements  ................................ ................................ ......................  27 
+2.7.1  Reliability  ................................ ................................ ................................ ...............  27 
+2.7.2  Usability  ................................ ................................ ................................ .................  27 
+2.7.3  Performance  ................................ ................................ ................................ ...........  27 
+2.7.4  Security  ................................ ................................ ................................ ..................  28 
+2.8  External Interface Requirements ................................ ................................ ...................  28 
+2.8.1  User Interface Requirements  ................................ ................................ ..................  28 
+2.8.2  Software Interfaces  ................................ ................................ ................................  28 
+2.8.3  Hardware Interfaces  ................................ ................................ ...............................  29 
+2.8.4  Communications Interfaces  ................................ ................................ ...................  29 
+Chapter 3: Design and Architecture  ................................ ................................ .........................  30 
+3.1  System Architecture Overview  ................................ ................................ .....................  30 
+3.2  Technologies and Services  ................................ ................................ ............................  32 
+3.3 Architecture Style / Pattern  ................................ ................................ ............................  33 
+1. Presentation Layer  ................................ ................................ ................................ ....... 33 
+2. Application Layer (API Layer)  ................................ ................................ ....................  33 
+3. Service Layer (Business Logic Layer)  ................................ ................................ .........  33 
+4. Data Layer  ................................ ................................ ................................ ....................  34 
+Justification for Layered Architecture  ................................ ................................ .............  34 
+Component Interaction ................................ ................................ ................................ ..... 34 
+3.4 Design Models  ................................ ................................ ................................ ...............  35 
+3.4.1 Design Models for Object -Oriented Development Approach  ................................  35 
+1. Activity Diagram  ................................ ................................ ................................ .........  35 
+2. Class Diagram  ................................ ................................ ................................ ..............  38 
+3. Sequence Diagram  ................................ ................................ ................................ ....... 38 
+4. State Transition Diagram  ................................ ................................ .............................  44 
+3.5  Data Design  ................................ ................................ ................................ ...................  45 
+Chapter 4: Implementation  ................................ ................................ ................................ ...... 48 
+4.1 Project Methodology & Algorithms  ................................ ................................ ..............  48 
+4.1.1 Project Methodology (Step -by-Step Approach)  ................................ .........................  48 
+4.1.2 Algorithm  ................................ ................................ ................................ ....................  48 
+4.2 Training Results & Model Evaluation  ................................ ................................ ...........  49 
+
+--- Page 7 ---
+vi 
+ 4.3 Security Techniques  ................................ ................................ ................................ ....... 50 
+4.4 External APIs/SDKs  ................................ ................................ ................................ ...... 50 
+4.5 User Interface  ................................ ................................ ................................ .................  51 
+4.6 Deployment  ................................ ................................ ................................ ....................  55 
+Chapter 5: Testing and Evaluation  ................................ ................................ ...........................  56 
+5.1 Unit Testing  ................................ ................................ ................................ ...................  56 
+5.2 Functional Testing  ................................ ................................ ................................ .........  57 
+5.3 Business Rules Testing  ................................ ................................ ................................ .. 60 
+5.4 Integration Testing  ................................ ................................ ................................ .........  61 
+References  ................................ ................................ ................................ ................................  63 
+Plagiarism Report ................................ ................................ ................................ .....................  64 
+ 
+ 
+  
+
+--- Page 8 ---
+vii 
+ List of Figures  
+Figure 1: Admin Use Case Diagram  ................................ ................................ ........................  10 
+Figure 2: Entrepreneur Use Case Diagram  ................................ ................................ ..............  11 
+Figure 3: Module 1 — User Onboarding and Idea Intake Mockup  ................................ .........  12 
+Figure 4: Module 2 — Problem Discovery Engine Mockup  ................................ ...................  14 
+Figure 5: Module 3 — Idea Validation Toolkit Mockup  ................................ .........................  17 
+Figure 6: Module 4 — Competitor Landscape Analyser Mockup:  ................................ .........  19 
+Figure 7: Module 5 — Customer Discovery and Segmentation Mockup  ...............................  21 
+Figure 8: Module 6 — Launch Planning Assistant Mockup  ................................ ...................  22 
+Figure 9: Module 7 — Go-To-Market Strategy Generator Mockup  ................................ ....... 23 
+Figure 10: Module 8 — Early Growth Strategy Designer Mockup ................................ .........  24 
+Figure 11: Module 9 — Dashboard and Reporting Mockup  ................................ ...................  25 
+Figure 12: System Architecture Diagram — VentureFit Full Platform (M1 -M9) ..................  31 
+Figure 13: Layered Architecture Diagram — VentureFit System (Layers 1 –4) .....................  34 
+Figure 14: Activity Diagram — Project Submission & Problem Discovery Pipeline  .............  36 
+Figure 15 : Activity Diagram — Idea Validation Flow  ................................ ............................  36 
+Figure 16 : Activity Diagram — Strategy Generation + Reporting Flow  ................................  37 
+Figure 17: Class Diagram — Full System Models and Services (M1 -M9) .............................  38 
+Figure 18: Sequence Diagram — User Onboarding Flow (M1)  ................................ ..............  38 
+Figure 19: Sequence Diagram — Problem Discovery Flow (M2)  ................................ ..........  39 
+Figure 20: Sequence Diagram — Idea Validation Flow (M3)  ................................ ................  39 
+Figure 21: Sequence Diagram — Competitor Landscape Analysis Flow (M4)  ......................  40 
+Figure 22: Sequence Diagram — Customer Discovery and Segmentation Flow (M5)  ..........  41 
+Figure 23: Sequence Diagram — Launch Planning Flow (M6)  ................................ ..............  41 
+Figure 24: Sequence Diagram — Go-To-Market Strategy Generation Flow (M7)  .................  42 
+Figure 25: Sequence Diagram — Growth Strategy Design Flow (M8)  ................................ .. 42 
+Figure 26: Sequence Diagram — Dashboard and Reporting Flow (M9)  ................................  43 
+Figure 27: State Machine Diagram — Project Analysis Lifecycle ................................ ..........  44 
+Figure 28: ERD  ................................ ................................ ................................ ........................  45 
+Figure 29: Login Screen ................................ ................................ ................................ ...........  51 
+Figure 30: Registration Screen  ................................ ................................ ................................ . 51 
+Figure 31: Dashboard Screen  ................................ ................................ ................................ ... 52 
+Figure 32: Password Recovery Screen  ................................ ................................ ....................  52 
+Figure 33: Project Creation Screen  ................................ ................................ ..........................  53 
+Figure 34: Analysis Screen  ................................ ................................ ................................ ...... 54 
+Figure 35: Idea Validation Screen  ................................ ................................ ...........................  55 
+
+--- Page 9 ---
+ 
+1 
+ Chapter 1: Introduction and Problem Definition  
+This chapter situates VentureFit within the startup ecosystem, articulates the problem it 
+addresses, defines the proposed solution and its objectives, surveys related systems, and 
+specifies the tools and technologies that will underpin the implementation.  
+1.1  Overview of the Project  
+VentureFit  is an AI -powered, web -based startup validation platform built for first -time 
+founders who need structured, evidence -based feedback on the viability of their ideas before 
+committing time and capital to product development. The platform accepts a founder’s concept 
+description and a set of seed keywords, then automatically retrieves relevant discussions from 
+a 3M -record offline corpus via FAISS semantic search and from live community APIs (Reddit, 
+Hacker News, and GitHub). These raw signals are processed thro ugh an entirely in -house NLP 
+pipeline comprising sentence -transformer embeddings (all -MiniLM -L6-v2), heuristic 
+complaint scoring, and HDBSCAN -based thematic clustering to surface validated pain points, 
+score idea -market fit, map competitor weaknesses, and construct customer personas. LLM 
+APIs (DeepSeek, Groq, HuggingFace) are used in Module 2 for query expansion and topic title 
+generation, and in the later stages of the pipeline (Modules 6 through 8) exclusively to generate 
+the prose of strategic reports; t hey play no role in analysis, scoring, or clustering.  
+The platform is delivered as a Next.js web application backed by a FastAPI service and a 
+PostgreSQL database. Its nine modules take a founder from raw idea intake through to a 
+downloadable Startup Validation Dossier, replacing what would otherwise be weeks  of 
+fragmented manual research with an automated pipeline that runs in the background and 
+presents findings through an interactive dashboard.  
+1.2  Vision Statement  
+For first-time founders who struggle to validate their startup ideas and navigate the messy early 
+stages of market research, the VentureFit  is an AI -powered validation platform that 
+transforms a raw concept into a data -backed, actionable roadmap. Unlike  fragmented tools that 
+leave founders to piece together insights manually, our product  automatically retrieves and 
+mines real community discussions via open APIs, scores ideas against market signals, maps 
+competitors via live scraping and datasets, and generates  customized go -to-market strategies 
+dramatically increasing the probability of building something people actually want.  
+1.3  Problem Statement  
+Many startup founders struggle to determine whether their business idea addresses a genuine 
+and significant market problem. Without structured validation methods, entrepreneurs often 
+rely on personal assumptions, intuition, or feedback from a small group o f individuals. This 
+approach frequently results in the development of products that do not meet real customer 
+needs. Currently, validating a startup idea requires founders to manually research online 
+discussions, analyze user complaints, identify competito rs, and interpret scattered market 
+signals from various sources. This process is time -consuming and requires significant effort to 
+identify patterns and meaningful insights from unstructured data. In many cases, entrepreneurs 
+lack the technical expertise n eeded to perform sentiment analysis, trend identification, or 
+structured market research. As a result, founders may misunderstand customer problems, 
+overlook potential opportunities, or underestimate the level of competition in the market. 
+Existing tools s uch as survey platforms, discussion forums, and business planning templates 
+
+--- Page 10 ---
+ 
+2 
+ provide limited assistance because they focus on isolated tasks rather than the entire validation 
+process. These tools also assume that founders already understand their target market and know 
+what questions to ask. Consequently, there is no integrated sys tem that automatically gathers, 
+analyzes, and interprets market data to guide entrepreneurs in evaluating the viability of their 
+ideas. The absence of such a system leads to inefficient research processes and increases the 
+risk of startup failure. VentureF it is developed to address this problem by providing a unified 
+platform that automates market research, identifies customer pain points, evaluates startup 
+ideas, analyzes competitors, and generates strategic insights to support data -driven decision 
+making.  
+1.4  Problem Solution  
+VentureFit acts as an intelligent co -pilot for early -stage startup validation. The platform ingests 
+a founder's initial idea and systematically gathers evidence from multiple sources to assess 
+viability. It then presents all findings through an intuitive d ashboard, guiding the founder 
+through each stage of validation: problem discovery, idea scoring, competitor analysis, 
+customer identification, launch planning, and growth strategy design. By automating data 
+collection and analysis, VentureFit reduces valid ation time from months to days.  
+1.5  Objectives of the Proposed System  
+BO-1: Reduce founder market research time significantly through automated data collection 
+and AI -driven thematic synthesis.  
+BO-2: Provide quantitative evidence of problem -solution fit using real user discussions, 
+sentiment analysis, and volume -trend scoring.  
+BO-3: Identify at least three distinct customer segments with corresponding needs, 
+demographics, and channel preferences.  
+BO-4: Generate a competitive gap analysis highlighting unmet needs and differentiation 
+opportunities using curated datasets and live scraping.  
+BO-5: Deliver a customized MVP scope, phased timeline, and budget estimate based on idea 
+complexity and team parameters.  
+BO-6: Produce a data -backed go -to-market strategy with channel recommendations and 
+tailored messaging.  
+BO-7: Equip founders with a retention and growth framework to acquire and retain the first 
+100 users.  
+BO-8: Create a reusable validation knowledge base that evolves as the founder refines their 
+idea.  
+1.6  Scope  
+VentureFit is a web -based platform comprising a backend processing engine and a frontend 
+interactive dashboard. The backend handles all data acquisition, NLP processing, and analysis, 
+while the frontend provides a seamless experience for idea intake and vi sualisations. The 
+system utilizes structured database storage and a task queue for managing long -running 
+background analysis. The platform is strictly scoped to early -stage validation and does not 
+include post -launch features like fundraising tracking or l ive deployment. The intelligence 
+foundation relies on four data sources: a 3M -record FAISS offline index for semantic retrieval; 
+live community APIs (Reddit native search, PullPush, and Arctic Shift for Reddit; Hacker 
+News Algolia; GitHub Issues) for real -time discussions; curated competitor datasets enhanced 
+by live scraping of public pages; and LLM APIs for query expansion, topic title generation, 
+
+--- Page 11 ---
+ 
+3 
+ and natural language report generation. All core NLP analysis (complaint extraction, filtering, 
+clustering, and scoring) runs on locally executed models.  
+1.6.1  Limitations and Constraints  
+LI-1: Problem discovery quality depends on the volume of relevant discussions retrievable via 
+open community APIs; niche markets may yield sparse results, mitigated by the FAISS offline 
+index and relaxed re -fetching from live sources.  
+LI-2: Competitor analysis is aid -oriented and not an exhaustive market intelligence tool.  
+LI-3: Dependence on LLM APIs (DeepSeek, Groq, HuggingFace) for query expansion and 
+topic title generation in Module 2, and report generation in Modules 6 –8; deterministic 
+template fallbacks are implemented for all LLM outages.  
+LI-4: Customer segmentation is data -informed and approximate, not individually verified.  
+LI-5: Timeline and budget estimates are structured guides based on industry averages.  
+LI-6: NLP processing is currently constrained to English -language content only.  
+LI-7: Live scraping is limited to publicly accessible pages; anti -scraping measures may revert 
+the system to cached or fallback datasets.  
+LI-8: Fallback dataset usage may lack real -time "trend" accuracy compared to live API 
+signals.  
+LI-9: The prototype demonstration operates on data retrieved at evaluation time via open 
+community discussion APIs. The NLP and clustering pipeline is generalized and not restricted 
+to specific ideas  output quality for any given concept scales directly wi th the volume of relevant 
+discussions available through these sources.  
+1.7  Modules  
+VentureFit is composed of nine functional modules, each scoped to a distinct stage of the 
+validation workflow.  
+Module 1.7.1: User Onboarding and Idea Intake  
+● FE-1: Secure user registration and login to establish isolated workspaces.  
+● FE-2: Project creation interface for inputting startup idea details, target industry, and 
+keywords.  
+● FE-3: Secure storage of user data and project history to maintain multiple simultaneous 
+projects.  
+● FE-4: Automatic trigger of the validation pipeline via background task queuing.  
+Module 1.7.2: Problem Discovery Engine  
+● FE-1: A Dual -Path Retrieval system that performs semantic search over a 3M -record 
+FAISS offline index using LLM -expanded queries and concurrently fetches live 
+discussions from Reddit (native search, PullPush, Arctic Shift), Hacker News Algolia, and 
+GitHub Issue s using expanded keyword tokens from the project context.  
+● FE-2: A unified NLP preprocessing pipeline that performs tokenization, stopword 
+removal, and normalization on all incoming raw text from both sources to ensure data 
+consistency for machine learning analysis.  
+● FE-3: An advanced Thematic Clustering process that applies HDBSCAN -based density 
+clustering (with Agglomerative and KMeans fallbacks) on all -MiniLM -L6-v2 sentence -
+transformer embeddings to group retrieved complaints into coherent, actionable problem 
+themes.  
+
+--- Page 12 ---
+ 
+4 
+ ● FE-4: A Composite Severity Scoring engine that evaluates identified themes based on 
+discussion volume, sentiment urgency, and historical trends, providing qualitative 
+evidence through representative quotes and source URLs.  
+● FE-5: An interactive visualization suite featuring a Problem Landscape Chart showing 
+topic severity scores and a refinement interface for users to validate, prioritize, or discard 
+specific themes based on their startup goals.  
+Module 1.7.3: Idea Validation Toolkit  
+● FE-1: A context -aware analysis engine that consolidates identified problem themes with 
+the user's initial idea description to prepare for deep -dive assessment.  
+● FE-2: A multidimensional scoring system using a rule -based weighted scoring engine 
+applied to discovered problem themes to evaluate the startup concept’s alignment with 
+pain points, market size potential, and uniqueness. LLM generation is used only for 
+producing  the qualitative explanation text of the final score.  
+● FE-3: A dynamic Problem -Solution Fit matrix that explicitly maps proposed product 
+features against the specific market pain points discovered during research.  
+● FE-4: A comprehensive Validation Confidence Report that provides a numeric score 
+alongside qualitative explanations and targeted suggestions for closing identified market 
+gaps.  
+Module 1.7.4: Competitor Landscape Analyzer  
+● FE-1: An Automated Discovery Engine that identifies potential competitors by searching 
+curated startup datasets and performing targeted web scraping of curated startup 
+directories and public product listing pages based on the user’s specific niche.  
+● FE-2: A Live Scraping System that automatically navigates to public competitor landing 
+pages to extract their current feature sets and value propositions, with results cached and 
+refreshed periodically.  
+● FE-3: A Sentiment -Driven Weakness Analysis module that analyzes community 
+discussion sentiment around identified competitors using the same retrieved discussion 
+data to surface common failings and user frustrations.  
+● FE-4: A manual override interface that allows users to add specific competitors or refine 
+the list generated by the automated discovery engine.  
+● FE-5: A Gap Analysis Report and feature comparison matrix that highlights "market 
+voids" where current solutions are failing to meet user demands.  
+Module 1.7.5: Early Customer Discovery and Segmentation  
+● FE-1: Behavioral profiling of discussion participants based on posting patterns, 
+subreddit context, and linguistic markers to infer contextual roles and interest clusters.  
+● FE-2: Behavioral segmentation using clustering applied to language and engagement 
+patterns.  
+● FE-3: Persona profile creation including inferred goals, motivations, and pain points.  
+● FE-4: Mapping identified pain points to specific solution features for each persona.  
+● FE-5: Suggestions for early adopter locations and outreach message templates.  
+Module 1.7.6: Launch Planning Assistant  
+● FE-1: Rule-based questionnaire for MVP scoping and complexity assessment.  
+● FE-2: Recommendation of a phased MVP scope prioritized by impact.  
+● FE-3: Timeline estimator broken into design, build, test, and launch phases.  
+
+--- Page 13 ---
+ 
+5 
+ ● FE-4: Effort -complexity estimate using relative scoring based on feature count and 
+industry benchmarks.  
+● FE-5: Launch Readiness Checklist (landing pages, analytics, legal).  
+● FE-6: Customisable task tracking for pre -launch progress.  
+Module 1.7.7: Go -To-Market Strategy Generator  
+● FE-1: A channel recommendation engine that suggests optimal B2B or B2C marketing 
+strategies based on the identified customer segments.  
+● FE-2: A messaging framework that generates positioning statements, value propositions, 
+and marketing hooks  
+● FE-3: An Outreach Playbook generator that creates draft outreach templates for email 
+and social media channels.  
+● FE-4: A collaborative editing interface where users can refine and finalize all generated 
+strategy outputs to fit their specific brand voice.  
+Module 1.7.8: Early Growth Strategy Designer  
+● FE-1: A structured acquisition framework designed to guide founders through early user 
+outreach strategy and channel prioritization.  
+● FE-2: A retention and engagement planner that maps out specific onboarding tactics and 
+growth loops suitable for the product type.  
+● FE-3: A key metrics dashboard template that defines critical indicators for activation, 
+retention, and viral coefficient tracking.  
+● FE-4: A growth plan export utility that allows for the extraction of a standalone, 
+actionable growth roadmap.  
+Module 1.7.9: Dashboard and Reporting  
+● FE-1: A unified home screen featuring high -level visualizations for theme volume, market 
+sentiment, and competitor positioning.  
+● FE-2: A professional export engine that compiles all findings into a comprehensive 
+"Startup Validation Dossier" in PDF format.  
+● FE-3: An on -demand re -analysis feature that allows founders to manually trigger a 
+refresh of metrics and reports when new data is available.  
+1.8  Related System Analysis and Literature Review  
+1.8.1  Literature Review  
+Prior research on early -stage market validation consistently identifies two failure modes. 
+Founders either skip validation entirely or rely on tools that are too narrow in scope to provide 
+meaningful insights. The Lean Startup methodology proposed by Ries in 2011 offers a 
+framework for iterative, evidence -based product development, but it assumes access to real 
+customer feedback, a resource that first -time founders often do not have. More recent work by 
+Wei and colleagues in 2022 demonstrates that large lan guage models can support chain -of-
+thought reasoning for generating strategic text, which informs VentureFit’s deliberate use of 
+LLM APIs in the later modules.  
+The technical foundation of VentureFit’s analytics is drawn directly from established NLP 
+research. Sentence -BERT, introduced by Reimers and Gurevych in 2019, demonstrates that 
+fine-tuned transformer models produce semantically meaningful sentence embeddin gs suitable 
+for similarity search, which underpins VentureFit’s use of the all -MiniLM -L6-v2 model for 
+
+--- Page 14 ---
+ 
+6 
+ both FAISS retrieval and clustering. HDBSCAN, introduced by McInnes and colleagues in 
+2017, is a density -based clustering algorithm that handles variable -density clusters and noise 
+without requiring a fixed cluster count, making it well -suited for the unev en distribution of 
+complaint topics found in real community discussions.  
+Existing tools and platforms fail to integrate these capabilities. Manual browsing of online 
+communities is unstructured and slow. Lean Canvas and Strategyzer provide frameworks for 
+planning but do not integrate data. SurveyMonkey requires a pre -existing a udience. VentureFit 
+addresses this gap by providing an automated, end -to-end pipeline that combines discussion 
+mining, NLP clustering, competitor analysis, and strategic report generation specifically 
+designed for early -stage founders.  
+1.8.2  Related System Analysis  
+Table 1.1: Related System Analysis  
+Application 
+Name  Weakness  Proposed Project Solution  
+Reddit / Quora 
+(manual)  Unstructured; time -consuming to 
+identify patterns across thousands 
+of posts; highly prone to 
+confirmation bias; produces no 
+quantified output.  VentureFit automates retrieval via 
+open APIs and FAISS semantic 
+search, then applies HDBSCAN 
+clustering on sentence -
+transformer embeddings and 
+heuristic complaint scoring to 
+produce ranked, evidence -backed 
+problem themes with composite 
+severity scores.  
+Lean Canvas / 
+Strategyzer  Fully manual frameworks with no 
+data integration. Founders must 
+already understand their market 
+to derive value. Outputs are 
+assumption -based rather than 
+evidence -based.  VentureFit replaces manual 
+assumption inputs with automated 
+market signal mining. Scores and 
+reports are generated directly 
+from real community 
+conversations, not the founder's 
+prior beliefs.  
+SurveyMonkey  Requires a known target audience 
+before deployment. Responses 
+are limited by the founder's 
+existing network. Cannot surface 
+unknown pain points or 
+competitor weaknesses.  VentureFit's Customer Discovery 
+module infers demographics and 
+segments from discussion 
+behaviour, enabling audience 
+discovery rather than merely 
+audience querying.  
+ 
+  
+
+--- Page 15 ---
+ 
+7 
+ 1.9  Tools and Technologies  
+Table 1.2: Tools and Technologies for the Proposed Project  
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Tools  
+And 
+Technologies  
+ Tools  Version  Rationale  
+VS Code  Latest  Ide 
+PostgreSQL  Latest  Structured project storage  
+LLM API  Latest  Query  expansion  and topic  
+title generation  (Module  
+2); natural  language  report  
+generation  (Modules  6–8). 
+Primary:  DeepSeek;  
+fallback  chain:  Groq  → 
+HuggingFace  → 
+deterministic  templates  
+Technology  Version  Rationale  
+Python / FastAPI  Latest  Async REST API and 
+backend orchestration  
+React JS / Next.js  Latest  Frontend user interface 
+and dashboard rendering  
+Tailwind  CSS Latest  Modern  responsive  UI 
+sentence -transformers / 
+HDBSCAN  Latest  Sentence embeddings (all -
+MiniLM -L6-v2) for 
+FAISS retrieval and 
+clustering; HDBSCAN for 
+primary thematic 
+clustering with 
+Agglomerative and 
+KMeans fallbacks; scikit -
+learn for fallback 
+clustering  
+spaCy / NLTK  Latest  Text preprocessing 
+(tokenization, stopword 
+removal, normalization)  
+FAISS  Latest  Offline semantic retrieval 
+over 3M -record Reddit 
+corpus; inner product 
+similarity search over L2 -
+normalised 384 -dim 
+embeddings  
+BeautifulSoup  Latest  Data scraping  
+Open Community 
+Discussion APIs (e.g. Reddit Latest  Free unrestricted APIs for 
+community discussion 
+
+--- Page 16 ---
+ 
+8 
+ public JSON endpoint, 
+Arctic Shift, HN Algolia)  retrieval; no authentication 
+required  
+1.10  Project Contribution  
+VentureFit  makes several concrete technical and conceptual contributions that distinguish it 
+from existing solutions.  
+• Custom -Built NLP Pipeline: The analytical core (Modules 2 –5) is implemented entirely 
+in-house using sentence -transformer embeddings (all -MiniLM -L6-v2) for semantic 
+search and clustering, HDBSCAN for thematic clustering, and scikit -learn for 
+clustering fall backs. LLM APIs are used for query expansion and topic title generation 
+in Module 2 and scoped to report text generation in Modules 6 –8. 
+• Integrated  End-to-End Validation : Combines  discovery,  analysis,  and planning  into 
+a single  guided  pipeline.  
+• Automated Thematic Clustering: Applies HDBSCAN on sentence -transformer 
+embeddings to surface latent pain points, with volume - and engagement -weighted 
+severity scoring.  
+• Dual -Layer  Data  Acquisition : Implements high -availability logic combining a 3M -
+record FAISS offline index with live community API fetchers (Reddit, Hacker News, 
+GitHub), supporting hybrid, faiss_only, and online_only retrieval modes.  
+• Behavioral  Segment  Generation : Uses  clustering  on metadata  to build  grounded  
+founder  personas.  
+• Hybrid  Competitor  Analysis : Merges static datasets with live scraping for real -time 
+market void detection.  
+Contribution Impact : 
+VentureFit  delivers a unified, automated pipeline for early -stage startup validation, combining 
+community discussion mining, NLP analysis, competitor assessment, and strategic report 
+generation. By providing actionable insights, behavioral personas, and data -driven 
+recommendations, it accelerates validation from months to days. The platform reduces risk for 
+first-time founders, improves decision -making, and offers a scalable, reliable approach to 
+assessing idea viability.  
+1.11  Relevance to Course Modules  
+• Web  Technologies:  Developed  a high-performance  interactive  dashboard  using  
+Next.js  and React,  implementing  Server -Side Rendering  (SSR)  for fast data 
+visualization  and state management.  
+• Artificial  Intelligence : Thematic  clustering  and LLM -powered  strategy  generation.  
+• Machine Learning: sentence -transformer embedding (all -MiniLM -L6-v2), FAISS 
+semantic retrieval, HDBSCAN clustering with Agglomerative and KMeans fallbacks, 
+heuristic complaint scoring, and NLP preprocessing pipelines.  
+• Software  Engineering : SDLC  phases,  modular  architecture,  and requirement  
+gathering.   
+
+--- Page 17 ---
+ 
+9 
+ Chapter 2: Requirement Analysis  
+This chapter documents the system requirements for VentureFit. It identifies the user classes 
+who will interact with the platform, describes the operating environment and design 
+constraints, presents a unified use case diagram, and provides the full set of  functional 
+requirements derived from the mockups through mockup -based requirement analysis. Backend 
+ML/NLP workflows are captured through event -response tables. Non -functional requirements 
+and external interface requirements conclude the chapter.  
+2.1  User Classes and Characteristics  
+Table 2.1: User Classes and Characteristics  
+User Classes  Description  
+Founder/  
+Entrepreneur  
+(Primary User)  The main user of VentureFit. A first -time or early -stage entrepreneur, 
+typically non -technical, who has a startup idea and requires structured 
+validation guidance. Founders create projects, submit idea intake 
+forms, review analysis outputs across all modul es, refine generated 
+strategies, and export validation dossiers. They are expected to have 
+basic web application literacy but no knowledge of NLP or machine 
+learning. The interface is designed to shield them completely from the 
+technical pipeline.  
+Administrator 
+(Secondary User)  A system manager responsible for overseeing the platform’s 
+operations. Administrators manage user accounts, monitor task 
+queues, review logs, and maintain system integrity. They have access 
+to administrative dashboards but do not interact with project -specific 
+analysis outputs.  
+2.2  Operating Environment  
+OE-1: The system shall operate as a web -based application accessible through modern 
+desktop browsers, including Google Chrome, Mozilla Firefox, Microsoft Edge, and Safari 
+(current and one prior stable version), over an HTTPS connection.  
+OE-2: The backend system shall operate on a Linux -based server environment, such as 
+Ubuntu 22.04 LTS or an equivalent distribution, with sufficient processing power, 
+memory, and storage to support application and database operations.  
+OE-3: The system should support users accessing the application from geographically 
+distributed locations via the internet, while application servers and databases shall be 
+hosted on a centralized cloud or on -premises infrastructure.  
+OE-4: The system shall rely on a stable internet connection for interaction with external 
+APIs and third -party services. In case of temporary unavailability, the system shall 
+continue to function using cached or fallback data where applicable.  
+OE-5: All communication between client and server shall be secured using HTTPS with 
+TLS 1.2 or higher to ensure data confidentiality and integrity.  
+2.3  Design and Implementation Constraints  
+CON -1: The frontend shall be implemented using Next.js (App Router) and React. Tailwind 
+CSS shall be used for all styling. No alternative frontend frameworks shall be used.  
+CON -2: The backend shall be implemented in Python using the FastAPI framework with typed 
+models defined using Pydantic.  
+
+--- Page 18 ---
+ 
+10 
+ CON -3: All data shall be stored in PostgreSQL. An ORM layer shall be implemented using 
+either SQLAlchemy or SQLModel.  
+CON -4: All NLP processing shall be performed using locally executed open -source libraries, 
+including sentence -transformers, FAISS, HDBSCAN, scikit -learn, and spaCy or NLTK. No 
+cloud -based NLP services shall be used.  
+CON -5: LLM APIs shall be used for query expansion and topic title generation within Module 
+2, and for natural language report generation within Modules 6, 7, and 8. They shall not be 
+used for data analysis, classification, or scoring.  
+CON -6: All external data shall be retrieved from publicly accessible, unauthenticated sources. 
+No paid third -party APIs shall be used.  
+CON -7: The system shall access only publicly available web content and shall implement retry 
+and fallback mechanisms to handle access limitations.  
+CON -8: User authentication shall be implemented using JWT -based session management. 
+Passwords shall be stored as salted hashes using bcrypt.  
+2.4  Use Case Diagram  
+ 
+Figure 1: Admin Use Case Diagram  
+
+
+--- Page 19 ---
+ 
+11 
+  
+Figure 2: Entrepreneur Use Case Diagram  
+2.5  Requirement Identifying Technique  
+This section describes the techniques used to identify and document the functional 
+requirements of the system. To ensure comprehensive coverage, two complementary 
+approaches are employed. Mockup -Based Requirement Analysis  is used for all front -end-
+
+
+--- Page 20 ---
+ 
+12 
+ facing features, with the mockup for each of the nine modules serving as the source of truth. 
+Interactive elements such as buttons, forms, menus, filter controls, data visualizations, and 
+export options are analyzed to derive functional requirements, which  are then documented in a 
+standard table format including the feature, functional requirement identifier and statement, 
+and applicable business rules. For backend processes where no direct user interface interaction 
+occurs, Event–Response Tables  are used t o model the system’s response to specific triggering 
+events, including project submission, HDBSCAN clustering completion, FAISS retrieval, and 
+LLM API failures. By using these two techniques together, the system’s functional 
+requirements are fully captured , ensuring both frontend interactions and backend workflows 
+are documented without delving into design -level implementation details.  
+2.6  Functional Requirements  
+The following sub -sections present the mockup -based functional requirements for each of the 
+nine modules, followed by the event -response tables for the backend pipeline.  
+2.6.1  Module 1: User Onboarding and Idea Intake  
+ 
+Figure 3: Module 1 — User Onboarding and Idea Intake Mockup  
+Table 2.2: Functional Requirements Derived from Module 1 Mockup  
+Feature (derived 
+from UI)  Functional Requirement (FR -ID: 
+Statement)  Business Rule  
+User Registration  FR1.1: The system shall display a 
+registration form capturing the user's 
+name, email address, and password.  The system shall reject 
+duplicate email addresses 
+with an informative error 
+message.  
+
+--- Page 21 ---
+ 
+13 
+ Password 
+Complexity 
+Enforcement  FR1.2: The system shall enforce a 
+minimum password length of 8 
+characters containing at least one 
+uppercase letter, one lowercase 
+letter, and one digit.  Passwords shall be stored as 
+hashed. Plaintext passwords 
+shall never be persisted or 
+logged.  
+User Login  FR1.3: The system shall authenticate 
+a user by validating the submitted 
+email and password against stored 
+credentials and issuing a JWT 
+session token upon success.  N/A 
+Idea Title Input  FR1.4: The system shall provide a 
+text field for the founder to enter a 
+project (idea) title of up to 120 
+characters.  The title field is mandatory. 
+Submission shall be blocked 
+if the field is empty.  
+Idea Description 
+Input  FR1.5: The system shall provide a 
+multi -line text area for the founder to 
+enter an idea description of up to 
+2,000 characters.  The description field is 
+mandatory and must contain 
+at least 50 characters before 
+the pipeline can be 
+triggered.  
+Target Industry 
+Selection  FR1.6: The system shall provide a 
+dropdown selector populated with 
+pre-defined industry categories (e.g., 
+Smart Mobility, FinTech, 
+HealthTech, EdTech, SaaS/B2B, E -
+Commerce).  N/A 
+Seed Keywords Tag 
+Input  FR1.7: The system shall allow the 
+founder to enter and store between 2 
+and 10 seed keywords as removable 
+tags. At least 2 seed keywords are 
+required before project 
+submission. Keywords shall 
+be stripped of leading and 
+trailing whitespace before 
+storage.  
+Start Validation 
+Pipeline Button  FR1.8: The system shall, upon 
+clicking the 'Start Validation 
+Pipeline' button, validate all required 
+fields, persist the project record, and 
+enqueue a background analysis task.  All mandatory fields (title, 
+description, at least 2 
+keywords) must be valid 
+before the task is enqueued. 
+The UI shall display a 
+progress indicator 
+immediately after 
+enqueuing.  
+Recent Projects List  FR1.9: The system shall display a list 
+of the user's most recent projects 
+showing project name, industry, 
+creation date, pipeline status, and a 
+progress indicator.  Projects shall be sorted by 
+creation date in descending 
+order. Status values shall 
+include Complete, Running, 
+Needs Review, and Paused.  
+Dashboard Statistics 
+Cards  FR1.10: The system shall display 
+three summary statistics on the 
+workspace dashboard: Total Projects, 
+Validations Complete, and Average 
+Confidence Score.  Statistics shall reflect the 
+authenticated user's data and 
+update after each pipeline 
+completion.  
+
+--- Page 22 ---
+ 
+14 
+ 2.6.2  Module 2: Problem Discovery Engine  
+ 
+Figure 4: Module 2 — Problem Discovery Engine Mockup  
+Table 2.3: Functional Requirements Derived from Module 2 Mockup  
+Feature (derived 
+from UI)  Functional Requirement (FR -ID: 
+Statement)  Business Rule  
+Pipeline Progress & 
+Runtime Status  FR2.1: The system shall display a 
+Pipeline Progress panel showing a 
+completion percentage, a Runtime Status 
+Board indicator (IDLE or RUNNING), 
+and a stable state label, along with 
+summary statistics including documents 
+processed and topics generated.  Pipeline progress percentage 
+and runtime state shall reflect 
+the current background analysis 
+status. Status shall update in 
+real time during execution.  
+Sign Out  FR1.11: The system shall invalidate 
+the user's JWT session token and 
+redirect to the login screen upon 
+selecting 'Sign Out'.  All locally cached project 
+data shall be cleared from 
+the browser session on sign -
+out. 
+
+--- Page 23 ---
+ 
+15 
+ Retrieval Mode 
+Selector  FR2.2: The system shall display a 
+Retrieval Mode dropdown allowing the 
+user to select between available retrieval 
+modes (e.g., Vector Corpus Only (Static) 
+or Hybrid (Vector Corpus + Live 
+Streams)), and shall reflect the currently 
+active mode used for the a nalysis run.  The selected retrieval mode 
+shall be saved per project and 
+applied on re -run. The UI shall 
+clearly indicate whether 
+displayed results are from the 
+offline index, live APIs, or 
+both.  
+Topic Volume Chart 
+(Most Discussed 
+Topics)  FR2.3: The system shall render a 
+horizontal bar chart displaying the most 
+discussed topics ranked by post volume, 
+labelled “Most Discussed Topics” under 
+the Topic Volume section.  Topics shall be ordered by 
+descending volume. Bar lengths 
+shall be proportional to the 
+topic’s post count relative to the 
+highest -volume topic.  
+Data Source 
+Breakdown (Input 
+Composition)  FR2.4: The system shall render a bar 
+chart labelled “Input Composition” under 
+the Data Source Breakdown section, 
+displaying the number of documents 
+contributed by each data source.  Chart values shall reflect the 
+actual document counts after 
+filtering and cleaning. The chart 
+shall display both Vectors and 
+Documents breakdowns.  
+Problem Theme Cards 
+— Title, Volume and 
+Pain Score  FR2.5: The system shall render an 
+ordered list of Problem Theme cards, 
+each displaying the theme title, a Volume 
+count (number of matching posts), a Pain 
+percentage score (0 –100%), a detailed 
+description of the core issue, and a 
+Source Distribution breakdo wn showing 
+the number of posts per platform (e.g., 
+Reddit: N).  Problem themes shall be 
+ordered by descending Volume 
+count. Each card shall display a 
+coloured left -border accent 
+corresponding to its rank. Pain 
+score shall be displayed as a 
+percentage and visually 
+highlighted in red to indicate 
+severity.  
+Re-run Analysis 
+Button  FR2.6: The system shall provide a “Re -
+run Analysis” button (Fresh Run) that re -
+launches the full topic discovery pipeline 
+using the same project brief and currently 
+selected retrieval mode.  Re-run is only available when 
+no analysis is currently running. 
+Previous results shall be 
+overwritten upon completion of 
+the new run.  
+Delete Project Control  FR2.7: The system shall provide a 
+“Delete Project” option under Project 
+Control that permanently removes the 
+project and all associated analysis data.  Delete action shall require an 
+explicit confirmation dialog 
+before execution. Deletion is 
+irreversible and shall remove all 
+associated pipeline results, 
+themes, and stored data.  
+Table 2.4: Event -Response Table — Module 2 Backend NLP Pipeline  
+Event 
+Name  Trigger  Source  System 
+State 
+(Before)  Response  System 
+State 
+(After)  Exception 
+Handling  
+Project 
+Submitted  Founder 
+clicks 
+"Start 
+Validation 
+Pipeline"  Module 
+1 
+Frontend  Project 
+created; 
+status = 
+Pending  Validate 
+inputs; 
+Store 
+project 
+data; Start 
+analysis 
+process  Status = 
+Running  If validation 
+fails, 
+display 
+error and do 
+not start 
+analysis  
+
+--- Page 24 ---
+ 
+16 
+ Data 
+Retrieval 
+Initiated  Analysis 
+process 
+starts  System  Status = 
+Running  Retrieve 
+relevant 
+data using 
+keywords; 
+Combine 
+and 
+organize 
+data Data 
+ready for 
+processing  If live 
+retrieval 
+returns 
+insufficient 
+data, retry 
+using 
+FAISS 
+offline 
+index or 
+relaxed 
+retrieval 
+parameters  
+Insufficient 
+Data 
+Detected  Retrieved 
+data below 
+threshold  System  Partial 
+data 
+available  Retry with 
+FAISS 
+offline 
+index or 
+relaxed 
+retrieval 
+parameters; 
+Continue 
+analysis  Data 
+sufficient 
+for 
+processing  Display 
+notification 
+indicating 
+limited data 
+availability  
+Data 
+Processing 
+Completed  Data ready 
+for 
+processing  System  Raw data 
+available  Process 
+data; 
+Identify and 
+group 
+themes  Themes 
+generated  If 
+processing 
+fails, log 
+error and 
+continue 
+with 
+available 
+data 
+Theme 
+Analysis 
+Completed  Themes 
+identified  System  Themes 
+available  Analyze 
+themes for 
+volume and 
+pain score; 
+Assign 
+ranks  Ranked 
+themes 
+available  If scoring 
+fails, assign 
+default 
+values and 
+continue  
+Analysis 
+Completed  All 
+processing 
+finished  System  Processing 
+ongoing  Store 
+results; 
+Update UI 
+with 
+findings  Status = 
+Complete  If final 
+update fails, 
+retry 
+display 
+update  
+Table 2.5: Functional Requirements Derived from Event -Response Table — Module 2 
+Backend NLP Pipeline  
+Event  Functional Requirement (FR -ID: Statement)  Business Rule  
+Data 
+Retrieval  FR2.8: The system shall retrieve relevant data 
+based on user -provided keywords.  Retrieved data must 
+match user input context.  
+Data 
+Processing  FR2.9: The system shall process retrieved data 
+to identify and group problem themes.  Similar data points shall 
+be grouped together.  
+
+--- Page 25 ---
+ 
+17 
+ Problem 
+Ranking  FR2.10: The system shall rank identified 
+problem themes by descending volume and 
+pain score.  Ranking shall follow 
+predefined criteria.  
+2.6.3  Module 3: Idea Validation Toolkit  
+ 
+Figure 5: Module 3 — Idea Validation Toolkit Mockup  
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+
+--- Page 26 ---
+ 
+18 
+ Table 2.6: Functional Requirements Derived from Module 3 Mockup  
+Feature (derived 
+from UI)  Functional Requirement (FR -ID: 
+Statement)  Business Rule  
+Validation Score 
+Display  FR3.1: The system shall display a 
+circular validation score (out of 100) 
+accompanied by a Validation Grade 
+letter and a qualitative label 
+summarising the overall potential 
+(e.g., “Strong potential — refine 
+focus”).  The qualitative label shall be 
+derived from the numeric 
+score range. The Validation 
+Grade and label shall always 
+be displayed alongside the 
+score circle.  
+Validation 
+Dimension Progress 
+Bars FR3.2: The system shall display four 
+named validation dimensions as 
+metric panels: Market Signal 
+(percentage), Pain Severity 
+(percentage), Demand Volume (post 
+count), and Uniqueness (percentage), 
+each with its current computed value.  Each of the four dimensions 
+shall be displayed with a 
+distinct label and unit. 
+Market Signal and Pain 
+Severity are percentages (0 –
+100%); Demand Volume is 
+an integer post count; 
+Uniqueness is a percentage 
+(0–100%).  
+Problem -Solution 
+Fit List  FR3.3: The system shall render a 
+ranked list mapping each identified 
+problem theme to the proposed 
+solution, displaying a horizontal 
+progress bar, a fit percentage, and a 
+status badge (Strong Fit, Partial Fit, 
+or Weak Fit) for each entry.  Fit score thresholds: Strong 
+Fit >= 65%, Partial Fit 40 –
+64%, Weak Fit < 40%. 
+Entries shall be ordered by 
+descending fit percentage.  
+Actionable 
+Recommendations 
+Panel  FR3.5: The system shall display an 
+Actionable Recommendations panel 
+listing data -driven suggestions 
+derived from the validation scores, 
+presented as a bulleted list below the 
+Problem -Solution Fit section.  Recommendations shall be 
+generated from the 
+computed dimension scores 
+and fit results. At least two 
+recommendations shall 
+always be displayed when 
+validation data is available.  
+ 
+  
+
+--- Page 27 ---
+ 
+19 
+ 2.6.4  Module 4: Competitor Landscape Analyser  
+ 
+Figure 6: Module 4 — Competitor Landscape Analyser Mockup:  
+Table 2.7: Functional Requirements Derived from Module 4 Mockup  
+Feature (derived 
+from UI)  Functional Requirement (FR -ID: 
+Statement)  Business Rule  
+Auto -Discovery 
+Status Banner  FR4.1: The system shall display a 
+banner indicating the source (e.g., 
+Crunchbase, ProductHunt, startup 
+directory scraping) and timestamp of 
+the most recent automatic competitor 
+discovery scan.  Timestamp shall indicate 
+latest available data.  
+Feature Gap 
+Comparison Matrix  FR4.2: The system shall render a 
+scrollable table listing product 
+features as rows and identified 
+competitors (including the user's 
+product) as columns, with each cell 
+displaying a status chip: Unique The user's product column 
+shall always occupy the first 
+data column and be visually 
+highlighted with a distinct 
+column background. 
+'Unique' status is assigned 
+
+
+--- Page 28 ---
+ 
+20 
+ (teal), Yes (green), Partial (amber), 
+No (red), or Planned (grey).  when the feature is absent 
+from all other competitors.  
+Add Competitor 
+Button  FR4.3: The system shall provide an 
+'Add Competitor' button that opens a 
+form allowing the founder to 
+manually enter a competitor name 
+and URL for inclusion in the matrix.  N/A 
+Refresh Button  FR4.4: The system shall provide a 
+'Refresh' button that re -triggers live 
+scraping of public competitor 
+landing pages to update feature and 
+value proposition data.  Data refresh shall update 
+existing data.  
+Competitor 
+Sentiment Bar Chart  FR4.5: The system shall render a 
+stacked horizontal bar chart showing 
+the sentiment distribution (positive, 
+neutral, negative percentages) of 
+community discussions about each 
+identified competitor.  Sentiment values shall be 
+derived from processed 
+discussion data related to 
+each competitor.  
+Competitive 
+Assessment  FR4.6: The system shall display a 
+competitive assessment including 
+threat level and key strengths or 
+weaknesses.  Threat levels shall be 
+categorized as High, 
+Medium, or Low.  
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+--- Page 29 ---
+ 
+21 
+ 2.6.5  Module 5: Early Customer Discovery and Segmentation  
+ 
+Figure 7: Module 5 — Customer Discovery and Segmentation Mockup  
+Table 2.8: Functional Requirements Derived from Module 5 Mockup  
+Feature (derived 
+from UI)  Functional Requirement (FR -ID: 
+Statement)  Business Rule  
+Customer Persona 
+Cards  FR5.1: The system shall render one 
+card per identified customer 
+segment, each displaying a persona 
+name, demographic descriptor, 
+segment tag (Primary, Secondary, 
+Niche), a goals list, a pain points list, 
+and an outreach channel tag list.  Persona data shall be 
+generated from processed 
+discussion data and user 
+behavior patterns.  
+Persona Details  FR5.2: The system shall display 
+persona attributes including segment 
+size, fit score, and associated pain 
+points.  Fit Score shall represent the 
+alignment between persona 
+pain points and proposed 
+solution features.  
+Outreach System  FR5.3: The system shall display 
+outreach channels and message 
+templates.  N/A 
+Summary Panel  FR5.4: The system shall display 
+segmentation summary and allow 
+copying of templates.  N/A 
+ 
+
+
+--- Page 30 ---
+ 
+22 
+ 2.6.6  Module 6: Launch Planning Assistant  
+ 
+Figure 8: Module 6 — Launch Planning Assistant Mockup  
+Table 2.9: Functional Requirements Derived from Module 6 Mockup  
+Feature (derived 
+from UI)  Functional Requirement (FR -ID: 
+Statement)  Business Rule  
+MVP Scoping 
+Requirements Panel  FR6.1: The system shall display a 
+summarised  panel of MVP scoping 
+parameters derived from the rule -
+based questionnaire, including core 
+platform type, primary data source, 
+monetisation model for v1, and items 
+excluded from the MVP.  An 'Edit Scope' button shall 
+allow the founder to re -
+submit the questionnaire and 
+regenerate the plan without 
+losing checklist progress.  
+Phased Timeline 
+with Progress 
+Indicators  FR6.2: The system shall render a 
+vertical timeline displaying four 
+phases: Discovery and Design, Core 
+Build, Closed Beta, and Public 
+Launch. Each phase shall show its 
+name, date range, duration, a 
+progress bar, and a list of key tasks.  Phase progress percentages 
+shall be editable by the 
+founder. The timeline shall 
+not enforce sequential 
+progression; a founder may 
+mark a later phase as in -
+progress before an earlier 
+one is complete.  
+Budget Estimator 
+Breakdown  FR6.3: The system shall display an 
+estimated budget breakdown across 
+categories.  Budget estimates shall be 
+generated based on project 
+parameters, displayed per 
+category, and the total shall 
+
+
+--- Page 31 ---
+ 
+23 
+ equal the sum of all 
+categories.  
+Checklist  FR6.4: The system shall display an 
+interactive checklist with the ability 
+to update status and add tasks.  Checklist items shall be 
+persistently stored per 
+project. The founder may 
+manually toggle items 
+between Done, In Progress, 
+and Pending. The system 
+shall pre -populate items 
+based on the MVP 
+questionnaire output.  
+2.6.7  Module 7: Go -To-Market Strategy Generator  
+ 
+Figure 9: Module 7 — Go-To-Market Strategy Generator Mockup  
+Table 2.10: Functional Requirements Derived from Module 7 Mockup  
+Feature (derived 
+from UI)  Functional Requirement (FR -ID: 
+Statement)  Business Rule  
+Positioning System  FR7.1: The system shall display 
+positioning statements and value 
+propositions with the ability for users 
+to edit them.  User modifications shall be 
+saved and associated with 
+the respective project.  
+Outreach Strategy  FR7.2: The system shall display an 
+outreach strategy including message 
+templates that can be edited by the 
+user.  Templates shall be 
+customizable and stored for 
+reuse within the project.  
+
+
+--- Page 32 ---
+ 
+24 
+ Channel 
+Recommendation  FR7.3: The system shall suggest 
+appropriate marketing channels 
+based on the target audience.  Recommended channels 
+shall align with the 
+identified customer 
+segments.  
+2.6.8  Module 8: Early Growth Strategy Designer  
+ 
+Figure 10: Module 8 — Early Growth Strategy Designer Mockup  
+Table 2.11: Functional Requirements Derived from Module 8 Mockup  
+Feature (derived 
+from UI)  Functional Requirement (FR -ID: 
+Statement)  Business Rule  
+Growth Metrics  FR8.1: The system shall display key 
+performance metrics relevant to 
+product growth.  Metrics shall be relevant to 
+the project context and 
+reflect available data.  
+Funnel 
+Visualization  FR8.2: The system shall display an 
+acquisition funnel representing user 
+conversion stages.  Funnel stages shall follow a 
+logical sequence of user 
+conversion.  
+Growth Strategies  FR8.3: The system shall display 
+recommended growth strategies.  Strategies shall align with 
+the product type and 
+identified customer 
+segments.  
+ 
+  
+
+
+--- Page 33 ---
+ 
+25 
+ 2.6.9  Module 9: Dashboard and Reporting  
+ 
+Figure 11: Module 9 — Dashboard and Reporting Mockup  
+Table 2.12: Functional Requirements Derived from Module 9 Mockup  
+Feature (derived 
+from UI)  Functional Requirement (FR -ID: 
+Statement)  Business Rule  
+Completion Display  FR9.1: The system shall display 
+module completion status and allow 
+navigation to each module.  Completion status shall 
+update after each module 
+execution.  
+Insights Display  FR9.2: The system shall display 
+summary insights and key findings 
+from all modules.  Insights shall be aggregated 
+from completed modules 
+only.  
+Metrics Display  FR9.3: The system shall display 
+growth metrics and overall project 
+readiness.  Metrics shall reflect the 
+latest available project data.  
+Report Export  FR9.4: The system shall allow 
+exporting a complete validation 
+report and notify the user via 
+dashboard notification when ready.  Report shall include outputs 
+from all completed modules.  
+Re-Run  FR9.5: The system shall allow re -
+running the analysis pipeline.  Re-running shall overwrite 
+previous results for the 
+selected project.  
+ 
+ 
+ 
+ 
+ 
+ 
+
+
+--- Page 34 ---
+ 
+26 
+ Table 2.13: Event -Response Table — LLM Report Generation (Modules 6, 7, and 8)  
+Event 
+Name  Trigger  Source  System 
+State 
+(Before)  Response  System 
+State 
+(After)  Exception 
+Handling  
+Analysis 
+Completed  Modules 2 –
+5 
+completed  System  Analysis 
+data 
+available  Prepare 
+input data; 
+Generate 
+strategy 
+outputs for 
+Modules 6, 
+7, and 8  Strategy 
+generation 
+started  If input data 
+is 
+insufficient, 
+display error 
+and skip 
+generation  
+Strategy 
+Generation 
+Successful  Output 
+successfully 
+generated  System  Generation 
+in progress  Store 
+generated 
+outputs; 
+Display 
+results in 
+respective 
+modules  Modules 
+marked 
+Complete  If output 
+incomplete, 
+flag for 
+review  
+Strategy 
+Generation 
+Failed  Generation 
+fails System  Generation 
+in progress  Apply 
+fallback 
+logic; 
+Generate 
+basic 
+outputs  Modules 
+marked 
+Fallback 
+Mode  Display 
+warning 
+message to 
+user 
+Report 
+Export 
+Requested  User clicks 
+export  Module 
+9 
+Frontend  All 
+modules 
+complete  Generate 
+report; 
+Prepare 
+download; 
+Notify user 
+via 
+dashboard 
+notification  Report 
+available  If generation 
+fails, display 
+retry option  
+Table 2.14: Functional Requirements Derived from Table 2.13 — LLM Report Generation 
+(Modules 6, 7, and 8)  
+Event  Functional Requirement  Business Rule  
+Modules 2 –5 
+Analysis 
+Completes  FR6.5: The system shall prepare input data 
+from Modules 2 –5 outputs and initiate 
+generation of strategy outputs for Modules 6, 
+7, and 8  Generation shall only 
+start when sufficient 
+data is available  
+Strategy 
+Generation 
+Successful  FR6.6: The system shall store and display 
+generated outputs in respective modules  Outputs shall be 
+consistent with 
+processed data  
+Strategy 
+Generation 
+Failed  FR6.7: The system shall apply fallback logic 
+if generation fails  Fallback outputs shall 
+remain relevant to 
+project context  
+
+--- Page 35 ---
+ 
+27 
+ Report Export 
+Requested  FR9.6: The system shall generate and provide 
+downloadable report  Report shall include 
+outputs from completed 
+modules  
+2.7  Non -Functional Requirements  
+The following non -functional requirements define the quality attributes that VentureFit must 
+satisfy in addition to its functional behaviour.  
+2.7.1  Reliability  
+REL-1: The system shall achieve a minimum uptime of 99.5% over any rolling 30 -day period, 
+excluding scheduled maintenance of up to two hours per month, communicated at least 24 
+hours in advance.  
+REL-2: The background analysis pipeline shall tolerate failure of any single external data 
+source, including Reddit API, Hacker News Algolia, GitHub Issues API, or LLM API, without 
+halting execution; FAISS offline retrieval shall serve as the fallback for live API failures, and 
+the DeepSeek → Groq → HuggingFace → deterministic template chain shall handle LLM 
+outages automatically.  
+REL-3: All pipeline state shall be persisted to the PostgreSQL database before and after each 
+stage transition, preventing data loss in the event of a worker crash. Background task retry 
+logic shall allow the pipeline to resume from the last successfully c ompleted stage.  
+REL-4: The system shall log all unhandled exceptions with full stack traces in a structured 
+logging system, while application errors presented to end users shall not expose stack traces 
+or database query details.  
+2.7.2  Usability  
+USE-1: A first -time founder shall be able to create a project, submit an idea, and navigate to 
+the Problem Discovery results screen within five minutes without consulting documentation.  
+USE-2: All data visualizations, including heatmaps, progress bars, funnel diagrams, and 
+timeline charts, shall include text labels or tooltips conveying the same information as the 
+visual encoding, to support users with color perception limitations.  
+USE-3: Contextual guidance shall be displayed adjacent to every input field and complex UI 
+element, explaining its purpose and the expected input format.  
+USE-4: The dashboard shall maintain consistent visual language across all nine modules, 
+including color coding, typography, icon set, and spacing conventions.  
+USE-5: The system shall provide explicit confirmation dialogs for all irreversible actions, such 
+as re -running the pipeline, discarding pain points, or deleting a project.  
+2.7.3  Performance  
+PER-1: All dashboard page loads displaying cached analysis results shall complete within 
+three seconds with over a 20 Mbps internet connection, measured from the HTTP request to 
+full interactive UI rendering.  
+PER-2: The complete background analysis pipeline (Modules 2 –5) shall finish within 10-15 
+minutes for a standard project containing 1,000 to 2,000 retrieved discussion posts.  
+PER-3: Live competitor scraping shall complete within 120 seconds for up to five competitor 
+URLs, with individual URLs exceeding a 30 -second timeout skipped and flagged with a 
+“Scrape timed out” indicator.  
+PER-4:PDF dossier generation shall complete within 60 seconds for a standard completed 
+project; jobs exceeding this threshold shall automatically switch to asynchronous processing.  
+
+--- Page 36 ---
+ 
+28 
+ PER-5: The system shall support a minimum of 50 concurrent users performing dashboard 
+interactions without exceeding the PER -1 page load threshold.  
+2.7.4  Security  
+SEC-1: VentureFit shall ensure that only authenticated and authorized users can access 
+sensitive functionalities, with all credentials stored securely using salted hashes.  
+SEC-2: Session management policies shall prevent unauthorized reuse of authentication 
+tokens, and all data in transit shall be encrypted using TLS 1.2 or higher.  
+SEC-3: Sensitive operations require secure verification to prevent tampering or accidental 
+data loss.  
+SEC-4: Security logs shall record all access attempts and administrative actions for auditing 
+purposes, while ensuring no sensitive data is exposed.  
+2.8  External Interface Requirements  
+This section defines the interfaces through which VentureFit interacts with users, software 
+components, hardware, and communication systems.  
+2.8.1  User Interface Requirements  
+UI-1: The interface shall be fully responsive, correctly rendering on desktop screens with a 
+minimum width of 1280 pixels and on tablet screens with a minimum width of 768 pixels, 
+maintaining usability and layout consistency.  
+UI-2: Form validation errors shall appear inline beneath the relevant input field within 300 
+milliseconds of a failed submission attempt. Error messages shall be displayed in red and 
+provide clear, actionable instructions to correct the input.  
+UI-3: All asynchronous operations, including pipeline execution, PDF export, and competitor 
+scraping, shall display a clearly visible progress indicator to prevent the user from 
+encountering unresponsive buttons or blank screens.  
+UI-4: Sidebar navigation shall remain fixed during vertical scrolling on all module screens, 
+ensuring navigation links are always accessible.  
+UI-5: The color scheme, button styles, typographic hierarchy, and iconography shall remain 
+consistent across all nine modules, with no module introducing visual elements that deviate 
+from the global design system.  
+2.8.2  Software Interfaces  
+SI-1: Reddit Public JSON API: The backend shall query the Reddit public JSON endpoint 
+(https://www.reddit.com/search.json) using seed keywords as query parameters. No OAuth 
+authentication is required. The system shall respect the endpoint’s rate limits and  implement 
+exponential backoff for HTTP 429 responses.  
+SI-2: Hacker News Algolia API:  The backend shall query the Hacker News Algolia search 
+API (https://hn.algolia.com/api/v1/search) to retrieve relevant discussion posts. No 
+authentication is required.  
+SI-3: Arctic Shift and PullPush Reddit APIs: The backend shall query Arctic Shift and PullPush 
+concurrently with the native Reddit JSON endpoint to retrieve Reddit historical discussion 
+data, providing broader coverage than the live endpoint alone.  
+SI-3a: GitHub Issues API: The backend shall query the GitHub Issues API to retrieve developer 
+pain-point discussions. Authentication requires a GITHUB_TOKEN environment variable; if 
+the token is absent the GitHub fetch is skipped and the pipeline continues  with the remaining 
+sources.  
+
+--- Page 37 ---
+ 
+29 
+ SI-4: LLM API: The backend shall send structured JSON payloads to the configured LLM API 
+endpoint for query expansion and topic title generation in Module 2, and for report text 
+generation in Modules 6, 7, and 8. The primary provider is DeepSeek, with Groq  and 
+HuggingFace as fallbacks and deterministic templates as the final fallback. API credentials 
+shall be supplied via environment variables and securely stored.  
+SI-5: PostgreSQL Database: The backend shall interact with the PostgreSQL database 
+exclusively through the SQLAlchemy ORM layer. Direct raw SQL queries are not permitted 
+except within explicitly authorized database migration scripts.  
+2.8.3  Hardware Interfaces  
+No direct hardware interfaces are required. The system is a web -based application that runs on 
+standard server hardware and client devices with a modern web browser.  
+2.8.4  Communications Interfaces  
+CI-1: The system shall provide in -application dashboard notifications for key events such as 
+pipeline completion and report availability.  
+CI-2: All client -to-server communications shall occur over HTTPS on port 443. Real -time 
+pipeline status updates may use WebSocket connections secured via the WSS protocol.  
+  
+
+--- Page 38 ---
+ 
+30 
+ Chapter 3: Design and Architecture  
+3.1  System Architecture Overview  
+The system follows a modular client -server architecture where the frontend, backend services, 
+database layer, and external processing components are clearly separated. The architecture is 
+designed to support scalable idea analysis, real -time processing of user inputs, and intelligent 
+problem discovery using AI -based retrieval and clustering techniques.  
+The system is divided into four main layers: the presentation layer, application layer, 
+processing layer, and data layer. Each layer communicates through well -defined APIs and 
+service interfaces to ensure separation of concerns, scalability, and maintainab ility. 
+The frontend is responsible for user interaction and is implemented using Next.js. It 
+communicates with backend APIs to handle authentication, project creation, and analysis 
+visualization. The backend is built using FastAPI, which exposes RESTful endpoints  for all 
+system operations. These APIs handle request validation, business logic execution, and 
+coordination with processing services.  
+The processing layer is the core intelligence component of the system. It includes modules for 
+problem discovery, semantic search, clustering, scoring, and idea validation. This layer uses 
+sentence -transformer embeddings for vector representation of text, FAISS for similarity search, 
+and scikit -learn -based clustering algorithms for grouping related problem statements. Custom 
+NLP filters are used to extract complaint -oriented insights from raw textual data.  
+The data layer consists of PostgreSQL, which stores persistent system data such as users, 
+projects, keywords, problem topics, and validation results. In addition, a vector corpus is 
+maintained for FAISS -based retrieval to enable semantic search over large -scale embeddings.  
+Security is enforced at multiple levels. Authentication is handled using JWT tokens stored in 
+HTTP -only cookies. Passwords are hashed using bcrypt to prevent plaintext storage. Input 
+validation is enforced using Pydantic schemas, and API access is protecte d using CORS 
+policies.  
+External integrations include Reddit, Hacker News, and GitHub APIs for real -time data 
+collection, along with optional LLM services such as DeepSeek, Groq, and HuggingFace for 
+query expansion and text refinement.  
+3.1.1 Purpose  
+The purpose of this architecture is to provide a clear conceptual view of how the system 
+operates at a high level. It illustrates how user interactions flow through the frontend, how 
+requests are processed by backend services, how data is stored and retrie ved from the database, 
+and how AI -based modules generate insights.  
+This design helps stakeholders understand the interaction between components, the role of each 
+subsystem, and the technologies used in implementing intelligent startup idea validation.  
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+--- Page 39 ---
+ 
+31 
+  
+Figure 12: System Architecture Diagram — VentureFit Full Platform (M1 -M9)  
+Table 3.1: Architecture Components and Security Mechanisms  
+Architecture 
+Component  Description  Technology Used  Security Mechanism  
+Frontend Layer  User interface for 
+project creation, 
+dashboard, and analysis 
+visualization  Next.js, React.js  Input validation, 
+secure API calls  
+Backend API 
+Layer  Handles authentication, 
+project management, 
+and analysis requests  FastAPI  JWT authentication, 
+CORS protection  
+Authentication 
+Service  Manages user login, 
+registration, and session 
+handling  FastAPI, bcrypt, 
+JWT  Password hashing 
+(bcrypt), HTTP -only 
+cookies, token 
+verification  
+Processing Layer 
+(AI Pipeline)  Performs problem 
+discovery, clustering, 
+and idea validation  Sentence 
+Transformers, 
+FAISS, Scikit -
+learn  API access restriction, 
+input sanitization  
+Problem 
+Discovery Engine  Extracts and clusters 
+real-world startup 
+problems from online 
+data NLP, HDBSCAN, 
+KMeans  Data filtering, source 
+validation  
+Idea Validation 
+Engine  Evaluates idea -market 
+fit and generates scores  Cosine similarity, 
+weighted scoring  Data integrity checks  
+
+
+--- Page 40 ---
+ 
+32 
+ Database Layer  Stores users, projects, 
+topics, and validation 
+results  PostgreSQL  Foreign key 
+constraints, access 
+control  
+Vector Store  Stores embeddings for 
+semantic search  FAISS  Read -only index 
+protection  
+External APIs  Fetches real -world 
+discussions and market 
+signals  Reddit API, 
+Hacker News API, 
+GitHub API  Rate limiting, whitelist 
+filtering  
+Communication 
+Layer  Handles interaction 
+between frontend and 
+backend services  REST APIs 
+(JSON)  HTTPS, authentication 
+headers  
+ 
+3.2  Technologies and Services  
+The backend uses FastAPI for route declaration, Pydantic for schema validation, SQLAlchemy 
+for ORM mapping, bcrypt for password hashing, JWT for session tokens, and PostgreSQL for 
+persistence. The frontend uses Next.js application routes and React componen ts. The 
+processing layer uses sentence -transformer embeddings, FAISS retrieval, NumPy vector 
+operations, scikit -learn clustering fallbacks, custom complaint -focused filters, and custom 
+weighted scoring.  
+Table 3.2: Technology and Service Mapping  
+Technology / 
+Service  Description  Purpose of Usage  Location / Module Used  
+FastAPI  Python web 
+framework for 
+APIs  Handles backend 
+routing and REST 
+API development  backend/app/routes, main.py  
+Pydantic  Data validation 
+library  Validates 
+request/response 
+schemas  backend/app/schemas.py  
+SQLAlchemy  ORM 
+framework  Maps Python 
+objects to 
+PostgreSQL tables  backend/app/models  
+PostgreSQL  Relational 
+database  Stores users, 
+projects, topics, 
+and analysis 
+results  backend/database  
+bcrypt  Password 
+hashing library  Securely hashes 
+and verifies user 
+passwords  backend/app/auth.py  
+JWT (JSON 
+Web Token)  Authentication 
+mechanism  Maintains secure 
+user sessions  backend/app/auth.py  
+Next.js  React -based 
+frontend 
+framework  Builds user 
+interface and 
+routing system  frontend/src/app  
+React.js  UI library  Component -based 
+frontend 
+development  frontend/src/components  
+
+--- Page 41 ---
+ 
+33 
+ Sentence 
+Transformers  NLP 
+embedding 
+model  Converts text into 
+vector 
+representations  backend/services/embedding.py  
+FAISS  Vector 
+similarity 
+search library  Performs semantic 
+retrieval over 
+embeddings  backend/services/faiss_retrieval.py  
+NumPy  Numerical 
+computing 
+library  Handles vector 
+and matrix 
+operations  backend/services  
+Scikit -learn  Machine 
+learning library  Used for 
+clustering fallback 
+(KMeans, 
+Agglomerative)  backend/services/clustering.py  
+Custom NLP 
+Filters  Rule -based text 
+processing 
+logic  Extracts complaint 
+statements from 
+raw text  backend/services/preprocessing.py  
+Weighted 
+Scoring 
+System  Custom 
+algorithm  Computes topic 
+importance based 
+on metrics  backend/services/scoring.py  
+3.3 Architecture Style / Pattern  
+The VentureFit system follows a Layered Architecture Pattern , which separates the system 
+into distinct layers based on responsibility. This architecture was selected to ensure 
+modularity, maintainability, scalability, and clear separation of concerns between user 
+interface, application logic, and data management.  
+The layered architecture divides the system into four main layers:  
+1. Presentation Layer  
+This layer consists of the Next.js frontend application. It is responsible for user interaction, 
+including project creation, authentication, dashboard visualization, and display of analytical 
+results. It communicates with the backend through REST APIs.  
+2. Application Layer (API Layer)  
+This layer is implemented using FastAPI. It handles request routing, input validation, 
+authentication using JWT, and coordination between frontend and backend services. It acts as 
+the bridge between the user interface and business logic.  
+3. Service Layer (Business Logic Layer)  
+This layer contains the core system logic and processing components. It includes:  
+• ProblemDiscoveryPipeline  
+• IdeaValidator  
+• CompetitorService  
+• CustomerDiscoveryService  
+• LaunchPlanningService  
+
+--- Page 42 ---
+ 
+34 
+ • GTMStrategyService  
+• GrowthStrategyService  
+• ReportingService  
+Each service is responsible for executing a specific module of the system and encapsulates 
+domain -specific logic independently.  
+4. Data Layer  
+This layer is implemented using PostgreSQL with SQLAlchemy ORM. It stores persistent 
+system data such as users, projects, keywords, problem topics, validation results, and strategy 
+outputs.  
+Justification for Layered Architecture  
+This architecture was chosen because:  
+• It provides clear separation between frontend, backend, and data logic  
+• It improves system maintainability and scalability  
+• It allows independent development of modules  
+• It supports asynchronous background processing for heavy AI workloads  
+Component Interaction  
+The frontend sends requests to FastAPI APIs, which forward them to service layer 
+components. The service layer processes data, interacts with external APIs and databases, and 
+returns structured responses back to the frontend.  
+ 
+Figure 13: Layered Architecture Diagram — VentureFit System (Layers 1 –4) 
+
+
+--- Page 43 ---
+ 
+35 
+ 3.4 Design Models  
+This section presents the design models used in the VentureFit  system. The system follows an 
+object -oriented development approach  supported by data flow -based modeling for 
+analytical pipelines. These models represent the structure, behavior, and interaction of system 
+components.  
+The design models focus only on core workflows and critical system processes , excluding 
+trivial operations such as login, logout, or basic profile updates.  
+The following design models are included:  
+• Activity Diagram  
+• Class Diagram  
+• Sequence Diagram  
+• State Transition Diagram  
+Each model plays a specific role in describing system behavior, structure, or lifecycle 
+management.  
+3.4.1 Design Models for Object -Oriented Development Approach  
+The VentureFit system uses an object -oriented approach where the system is decomposed 
+into classes, objects, and services representing real -world entities and system behaviors.  
+1. Activity Diagram  
+The activity diagram represents the workflow of the problem discovery and analysis pipeline. 
+It shows how data flows through retrieval, preprocessing, clustering, scoring, and validation 
+stages.  
+
+--- Page 44 ---
+ 
+36 
+  
+Figure 14: Activity Diagram — Project Submission & Problem Discovery Pipeline  
+ 
+ 
+Figure 15: Activity Diagram — Idea Validation Flow  
+
+
+--- Page 45 ---
+ 
+37 
+  
+Figure 16: Activity Diagram — Strategy Generation + Reporting Flow  
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+
+--- Page 46 ---
+ 
+38 
+ 2. Class Diagram  
+The class diagram presents the complete object -oriented structure of the VentureFit system, 
+showing all model classes (entities persisted in PostgreSQL) and all service classes (domain 
+logic for Modules 1 through 9) with their attributes, methods, and rela tionships.  
+ 
+ 
+Figure 17: Class Diagram — Full System Models and Services (M1 -M9) 
+3. Sequence Diagram  
+This sequence diagram captures the user onboarding flow for Module 1.  
+ 
+Figure 18: Sequence Diagram — User Onboarding Flow (M1)  
+ 
+ 
+ 
+ 
+ 
+ 
+
+
+--- Page 47 ---
+ 
+39 
+ This sequence diagram captures the problem discovery flow for Module 2, showing how a 
+project submission triggers a background pipeline that retrieves evidence, clusters 
+complaints, and persists ranked problem topics.  
+ 
+ 
+Figure 19: Sequence Diagram — Problem Discovery Flow (M2)  
+The idea validation sequence diagram shows how Module 3 computes a weighted fit score 
+using cosine similarity between the founder's idea and discovered topics, producing a grade 
+and actionable recommendations.  
+ 
+Figure 20: Sequence Diagram — Idea Validation Flow (M3)  
+ 
+ 
+ 
+ 
+
+
+--- Page 48 ---
+ 
+40 
+ This sequence diagram documents the competitor landscape analysis flow for Module 4, 
+where the system queries startup datasets and performs live scraping to identify market gaps.  
+ 
+ 
+ 
+Figure 21: Sequence Diagram — Competitor Landscape Analysis Flow (M4)  
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+
+--- Page 49 ---
+ 
+41 
+ The customer discovery sequence  diagram shows Module 5 applying behavioral clustering to 
+construct persona profiles and outreach templates from discovered discussion metadata.  
+ 
+ 
+Figure 22: Sequence Diagram — Customer Discovery and Segmentation Flow (M5)  
+This diagram illustrates the launch planning flow for Module 6, where MVP questionnaire 
+responses are evaluated to produce phased timelines and budget estimates.  
+ 
+ 
+Figure 23: Sequence Diagram — Launch Planning Flow (M6)  
+
+
+--- Page 50 ---
+ 
+42 
+ The go -to-market strategy sequence diagram shows Module 7 leveraging LLM -generated 
+positioning, value propositions, and channel recommendations based on customer segments.  
+ 
+Figure 24: Sequence Diagram — Go-To-Market Strategy Generation Flow (M7)  
+This sequence diagram captures the growth strategy design flow for Module 8, producing 
+acquisition, retention, and KPI frameworks via LLM synthesis.  
+ 
+Figure 25: Sequence Diagram — Growth Strategy Design Flow (M8)  
+ 
+
+
+--- Page 51 ---
+ 
+43 
+ The dashboard and reporting sequence diagram shows Module 9 aggregating outputs from all 
+modules and compiling a comprehensive validation dossier for PDF export.  
+ 
+Figure 26: Sequence Diagram — Dashboard and Reporting Flow (M9)  
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+
+--- Page 52 ---
+ 
+44 
+ 4. State Transition Diagram  
+The state machine diagram models the lifecycle of a project analysis, showing all states from 
+Draft through to Complete, including failure and rerun transitions across all nine module 
+execution stages.  
+ 
+Figure 27: State Machine Diagram — Project Analysis Lifecycle  
+
+
+--- Page 53 ---
+ 
+45 
+ 3.5  Data Design  
+The VentureFit system uses a structured relational data model implemented using PostgreSQL. 
+The system follows an object -oriented mapping approach where each major system component 
+is represented as a separate database entity, ensuring modularity, scalabil ity, and data integrity.  
+The core data domain includes users, startup projects, and multiple analytical outputs generated 
+through the system pipeline. Each user can create multiple projects, where the project acts as 
+the central entity linking all system modules and their outputs.  
+The primary entities include Users, Projects, Keywords, Problem Topics, Idea Validation, 
+Competitor Analysis, Customer Segments, Launch Plans, GTM Strategy, and Growth Strategy. 
+These entities represent the full lifecycle of a startup idea from submission to strategic planning 
+and growth analysis.  
+The Projects entity serves as the central hub, connecting all generated outputs. Problem Topics 
+and Customer Segments follow one -to-many relationships with Projects, while analytical 
+outputs such as Idea Validation, Competitor Analysis, Launch Plan, GTM St rategy, and 
+Growth Strategy are stored as one -to-one relationships per project.  
+Data is processed through a multi -stage pipeline where raw user input is transformed into 
+structured insights. Initially, project data and keywords are stored in PostgreSQL and used to 
+trigger the problem discovery pipeline. This pipeline processes externa l data, applies NLP 
+techniques such as embeddings and clustering, and generates structured Problem Topic records.  
+AI-generated outputs such as recommendations, personas, and strategy plans are stored using 
+JSON fields to support flexible and dynamic data structures. Additionally, FAISS is used for 
+vector -based similarity search during the problem discovery phase.  
+ 
+Figure 28: ERD 
+Table 3.3: Database Entities and Data Structures  
+Entity  Description  Storage 
+Type  Relationships  Key Fields  
+Users  Stores registered user 
+accounts and 
+credentials  PostgreSQL  One-to-many with 
+Projects  id, email, 
+hashed_password, 
+created_at  
+Projects  Central hub entity; 
+each project triggers 
+the full pipeline  PostgreSQL  Many -to-one with 
+Users; one -to-many 
+with Topics, 
+Segments; one -to-one 
+with all output 
+entities  id, user_id, title, 
+description, 
+industry, status  
+Keywords  Seed keywords 
+entered by the user 
+for retrieval  PostgreSQL  Many -to-one with 
+Projects  id, project_id, 
+keyword  
+
+
+--- Page 54 ---
+ 
+46 
+ Problem 
+Topics  Clustered complaint 
+themes discovered by 
+the NLP pipeline  PostgreSQL  Many -to-one with 
+Projects  id, project_id, 
+title, 
+severity_score, 
+volume, quotes 
+(JSON)  
+Idea 
+Validation  Weighted fit score, 
+grade, and dimension 
+breakdown  PostgreSQL  One-to-one with 
+Projects  id, project_id, 
+score, grade, 
+risk_level, 
+dimensions 
+(JSON)  
+Competitor 
+Analysis  Competitor records 
+with gap analysis 
+results  PostgreSQL  One-to-one with 
+Projects  id, project_id, 
+competitors 
+(JSON), gaps 
+(JSON)  
+Customer 
+Segments  Behavioral clusters 
+representing target 
+personas  PostgreSQL  Many -to-one with 
+Projects  id, project_id, 
+persona_name, 
+demographics 
+(JSON), channels 
+(JSON)  
+Launch 
+Plan MVP scope, phased 
+timeline, and budget 
+estimate  PostgreSQL  One-to-one with 
+Projects  id, project_id, 
+mvp_features 
+(JSON), timeline 
+(JSON), 
+budget_estimate  
+GTM 
+Strategy  Channel 
+recommendations, 
+value propositions, 
+messaging  PostgreSQL  One-to-one with 
+Projects  id, project_id, 
+channels (JSON), 
+value_props 
+(JSON), 
+messaging 
+(JSON)  
+Growth 
+Strategy  Acquisition, 
+retention, and KPI 
+frameworks  PostgreSQL  One-to-one with 
+Projects  id, project_id, 
+acquisition 
+(JSON), retention 
+(JSON), kpis 
+(JSON)  
+FAISS 
+Vector 
+Index  3M-record offline 
+corpus of community 
+discussions as 
+embeddings  FAISS 
+(file-
+system)  Read -only; accessed 
+by Problem 
+Discovery Pipeline  Embedding 
+vectors (all -
+MiniLM -L6-v2, 
+384-dim)  
+Table 3.4: Data Storage Systems and Access Patterns  
+Storage 
+System  Purpose  Data Stored  Access Pattern / 
+Security  
+PostgreSQL  Primary relational store  Users, Projects, 
+Keywords, all module 
+output records  ORM via SQLAlchemy; 
+full CRUD; foreign -key 
+integrity  
+FAISS Index  Offline semantic 
+retrieval  384-dim sentence -
+transformer embeddings 
+for 3M community 
+posts  Read -only search at 
+query time; no writes 
+after build  
+
+--- Page 55 ---
+ 
+47 
+ JSON Fields 
+(PostgreSQL)  Flexible output storage  LLM -generated reports, 
+persona profiles, 
+strategy plans, 
+competitor lists  Stored as JSONB 
+columns within 
+relational tables  
+HTTP -only 
+Cookies  Session token transport  JWT access tokens 
+(signed, short -lived)  Issued on login; verified 
+on every protected API 
+call 
+External APIs 
+(live)  Real-time signal 
+collection  Reddit posts/comments, 
+Hacker News threads, 
+GitHub Issues  Read -only; rate -limited; 
+whitelisted endpoints  
+ 
+  
+
+--- Page 56 ---
+ 
+48 
+ Chapter 4: Implementation  
+This chapter discusses the implementation details of the project. It documents the core module 
+functionalities using pseudocode, API integration details, user interface descriptions, and 
+system deployment information. The implementation covers Modules 1 –3 only: user 
+onboarding, problem discovery, and idea validation.  
+4.1 Project Methodology & Algorithms  
+4.1.1 Project Methodology (Step -by-Step Approach)  
+1. User authentication is implemented using registration, login, logout, and JWT -based 
+authentication. Passwords are securely hashed using bcrypt, and sessions are 
+maintained using HTTP -only cookies.  
+2. Project intake is handled through a Next.js frontend form connected to FastAPI backend 
+APIs. Users submit title, description, industry, keywords, and retrieval mode.  
+3. On project creation, the backend stores project metadata and keywords in PostgreSQL 
+and triggers a background task for analysis.  
+4. The system supports three retrieval modes: hybrid, faiss_only, and online_only.  
+5. FAISS -based retrieval uses sentence -transformer embeddings to perform semantic 
+search over the stored vector database.  
+6. Online retrieval collects real -world data from Reddit, Hacker News, and GitHub APIs.  
+7. Retrieved documents are merged and processed through preprocessing and cleaning 
+pipelines.  
+8. Complaint extraction is performed using rule -based NLP heuristics to identify pain -
+point statements.  
+9. Cleaned complaints are embedded and clustered using HDBSCAN, with fallback to 
+Agglomerative and KMeans clustering.  
+10. Clusters are scored based on volume (70%), engagement (20%), and heuristic pain 
+severity (10%), with the final score clamped to [0, 95].  
+11. Problem topics are stored in PostgreSQL and passed to the Idea Validation module.  
+12. Idea validation computes cosine similarity between project and topics and generates 
+final metrics such as market signal, demand, uniqueness, and recommendations.  
+4.1.2 Algorithm  
+Table 4.1 Details of Algorithms Used in the Project  
+Algorithm Name  Details  
+Hybrid Retrieval 
+Algorithm  Input:  Project description, keywords, retrieval mode  
+Output:  Evidence dataset  
+Pseudocode : 1: check retrieval mode  
+2: if FAISS enabled → semantic search  
+3: if online enabled → fetch Reddit, HN, GitHub data  
+4: merge results  
+5: remove duplicates 6: return dataset  
+Complaint Extraction 
+Algorithm  Input:  Retrieved documents  
+Output:  Complaint statements  
+Pseudocode:  1: split text into sentences  
+2: remove noise and irrelevant text  
+
+--- Page 57 ---
+ 
+49 
+ 3: detect complaint patterns  
+4: filter relevant sentences  
+5: return cleaned complaints  
+Clustering Algorithm  Input:  Complaint embeddings  
+Output:  Problem clusters  
+Pseudocode:  1: generate embeddings  
+2: apply HDBSCAN clustering  
+3: fallback to Agglomerative if needed  
+4: fallback to KMeans if required  
+5: assign cluster labels  
+6: return topics  
+Topic Scoring 
+Algorithm  Input:  Clusters  
+Output:  Ranked topics  
+Pseudocode:  1: compute volume score  
+2: compute engagement score  
+3: compute heuristic pain severity score  
+4: weighted score = 0.7 × volume + 0.2 × engagement + 0.1 × 
+clamp(heuristic_pain_severity, 0, 1)  
+5: clamp score to [0, 95]  
+6: sort topics  
+Idea Validation 
+Algorithm  Input:  Project + topics  
+Output:  Validation result  
+Pseudocode:  1: embed project and topics  
+2: compute cosine similarity  
+3: calculate market signal  
+4: compute pain severity  
+5: compute uniqueness  
+6: generate final score and grade  
+7: return validation  
+4.2 Training Results & Model Evaluation  
+The system does not involve training a deep learning model. It relies on pretrained embeddings 
+and clustering algorithms.  
+Dataset Used:  
+• Reddit public discussions  
+• Hacker News posts  
+• GitHub issue discussions  
+Preprocessing:  
+• Text cleaning and normalization  
+• Deduplication  
+• Sentence segmentation  
+Evaluation Method:  
+• Cluster coherence evaluation  
+
+--- Page 58 ---
+ 
+50 
+ • Semantic similarity validation  
+• Topic ranking stability  
+Metrics:  
+• Topic relevance score  
+• Clustering stability score  
+• Semantic consistency accuracy  
+The system achieves its objective by converting raw online discussions into structured startup 
+problem insights and validating their business potential.  
+4.3 Security Techniques  
+• Password hashing using bcrypt  
+• JWT authentication using HTTP -only cookies  
+• Token revocation using database blacklist  
+• Input validation using Pydantic schemas  
+• SQL injection prevention via ORM  
+• CORS protection using FastAPI middleware  
+4.4 External APIs/SDKs  
+Table 4.2 Details of APIs used in the project  
+Name of API 
+and version  Description 
+of API  Purpose of usage  List down the API 
+endpoint/function/class in which 
+it is used  
+Reddit API  Public 
+discussion 
+API Fetch startup 
+problem 
+discussions  data_fetcher.fetch_reddit()  
+Hacker News 
+API Tech 
+discussion 
+API Retrieve startup -
+related posts  data_fetcher.fetch_hn()  
+GitHub API  Issue tracking 
+API Extract developer 
+pain points  data_fetcher.fetch_github()  
+DeepSeek API  LLM API  Query expansion 
+and 
+summarization  llm_service.expand_queries()  
+FAISS  Vector 
+similarity 
+search  Semantic retrieval  faiss_retrieval.search()  
+Sentence 
+Transformers  Embedding 
+model  Convert text into 
+vectors  embedding.encode()  
+ 
+ 
+ 
+
+--- Page 59 ---
+ 
+51 
+ 4.5 User Interface  
+The system is a web -based application built using Next.js (frontend) and FastAPI (backend).  
+ 
+Figure 29: Login Screen  
+ 
+Figure 30: Registration Screen  
+ 
+
+
+--- Page 60 ---
+ 
+52 
+  
+Figure 31: Dashboard Screen  
+ 
+Figure 32: Password Recovery Screen  
+
+
+--- Page 61 ---
+ 
+53 
+  
+Figure 33: Project Creation Screen  
+  
+ 
+
+
+--- Page 62 ---
+ 
+54 
+  
+Figure 34: Analysis Screen  
+
+
+--- Page 63 ---
+ 
+55 
+  
+Figure 35: Idea Validation Screen  
+4.6 Deployment  
+The system is deployed in a local development environment for FYP -1 demonstration. The 
+backend runs on FastAPI using Uvicorn server, while the frontend runs on Next.js.  
+A startup script manages:  
+• Backend initialization  
+• Automatic port allocation  
+• Environment variable setup  
+• Frontend -backend connection  
+• Dashboard launch at localhost:3000  
+ 
+ 
+ 
+
+
+--- Page 64 ---
+ 
+56 
+ Chapter 5: Testing and Evaluation  
+Once the system has been successfully developed, testing has to be conducted to ensure that 
+the system works as intended. This is also to check that the system meets the requirements 
+stated earlier. Besides that, system testing will help in finding the err ors that may be hidden 
+from the user. The testing must be completed before it is deployed for use.  
+There are few types of testing which include unit testing, functional testing, business rules 
+testing and integration testing.  
+5.1 Unit Testing  
+Unit testing verifies the smallest testable components of the software (e.g., individual 
+functions, methods, or classes) in isolation. The purpose is to ensure that each unit performs as 
+expected, independent of the full system.  
+Unit Testing 1:  validateEmail() function with valid and invalid inputs  
+Testing Objective:  To ensure the email validation function works correctly with valid and 
+invalid inputs.  
+Table 5.1: Unit Test 1 — validateEmail()  
+No. Test case/Test script  Attribute and 
+Value  Expected Result  Actual 
+Result  
+1 Call validateEmail() with 
+valid email  "abc@gmail.com"  Validates as 
+correct email 
+(True)  True  
+2 Call validateEmail() with 
+invalid email (missing @)  "abc.gmail.com"  Rejects input and 
+returns False  False  
+3 Call validateEmail() with 
+empty string  "" Rejects input and 
+returns False  False  
+Unit Testing 2:  hash_password() and verify_password() functions  
+Testing Objective:  To ensure the password hashing function produces a secure non -plaintext 
+output and that verification correctly distinguishes correct and incorrect passwords.  
+Table 5.2: Unit Test 2 — hash_password() and verify_password()  
+No. Test case/Test script  Attribute and 
+Value  Expected Result  Actual 
+Result  
+1 Call hash_password() 
+with a valid password  "Password123"  Returns bcrypt -
+hashed string (non -
+plaintext)  Hashed 
+string 
+returned  
+2 Call verify_password() 
+with correct password  Matching password 
+and hash  Returns True  True  
+3 Call verify_password() 
+with wrong password  Non-matching 
+password, same hash  Returns False  False  
+
+--- Page 65 ---
+ 
+57 
+ Unit Testing 3:  encode_text() — Sentence Embedding Generation  
+Testing Objective:  To ensure the sentence -transformer embedding function returns a valid 
+384-dimensional float vector for a standard input and handles empty string input safely without 
+crashing.  
+Table 5.3: Unit Test 3 — encode_text()  
+No. Test case/Test 
+script  Attribute and 
+Value  Expected Result  Actual Result  
+1 Call encode_text() 
+with valid text  "startup  idea 
+for food 
+delivery"  Returns 384 -
+dimensional float 
+vector  384-dimensional 
+vector returned 
+successfully  
+2 Call encode_text() 
+with empty string  "" Returns zero vector 
+or raises handled 
+ValueError  Empty input handled 
+gracefully; zero 
+vector returned  
+Unit Testing 4:  JWT token issuance and invalidation  
+Testing Objective:  To ensure a valid JWT session token is issued on successful login and 
+correctly invalidated on sign -out, with subsequent requests rejected.  
+Table 5.4: Unit Test 4 — JWT Token Issuance and Invalidation  
+No. Test case/Test 
+script  Attribute and Value  Expected Result  Actual Result  
+1 Call login() with 
+valid credentials  email: 
+user@gmail.com, 
+password: Test@1234  JWT token issued 
+and returned  JWT token issued 
+successfully  
+2 Call signOut() 
+with active 
+token  Valid active JWT 
+token  Token invalidated; 
+user redirected to 
+login  Token invalidated; 
+redirected to login 
+screen  
+3 Make API 
+request with 
+invalidated 
+token  Invalidated JWT token  Request rejected 
+with 401 
+Unauthorized  401 Unauthorized 
+returned  
+5.2 Functional Testing  
+Functional testing validates that the system modules work correctly as a whole, ensuring that 
+the developed system meets its specifications and requirements. Unlike unit testing, which 
+focuses on internal functions, functional testing evaluates user -facing  features through the UI 
+or APIs.  
+Functional Testing 1:  User Registration with valid and invalid inputs  
+Objective:  To ensure that a new account is created when all inputs are valid and that 
+appropriate errors are shown when registration rules are violated.  
+ 
+
+--- Page 66 ---
+ 
+58 
+ Table 5.5: Functional Testing 1 — User Registration  
+No. Test Case  Attribute and value  Expected Result  Actual 
+Result  Result  
+1 Register with 
+all valid 
+inputs  Name: John, Email: 
+john@gmail.com, 
+Password: Test@1234  Account created; 
+user redirected to 
+dashboard  Account 
+created 
+successfully  Pass 
+2 Register with 
+duplicate 
+email  Email already exists in 
+system  Error: "Email 
+already 
+registered" 
+displayed  Error message 
+displayed  Pass 
+3 Register with 
+password 
+below 8 
+characters  Password: abc1  Error: "Password 
+must be at least 8 
+characters" 
+displayed  Error message 
+displayed  Pass 
+4 Register with 
+password 
+lacking a digit  Password: 
+PasswordOnly  Error: "Password 
+must contain 
+letters and 
+numbers" 
+displayed  Error message 
+displayed  Pass 
+Functional Testing 2:  User Login with valid and invalid credentials  
+Objective:  To ensure that the correct dashboard is loaded for authenticated users and that 
+invalid login attempts are rejected with an error message.  
+Table 5.6: Functional Testing 2 — User Login  
+No. Test Case  Attribute and value  Expected 
+Result  Actual Result  Result  
+1 Login with 
+valid 
+credentials  Email: 
+user@gmail.com, 
+Password: Test@1234  Dashboard 
+loaded with 
+user projects  Dashboard 
+displayed 
+successfully  Pass 
+2 Login with 
+wrong 
+password  Email: 
+user@gmail.com, 
+Password: wrongpass  Error: "Invalid 
+credentials" 
+displayed  Error message 
+displayed  Pass 
+3 Login with 
+unregistered 
+email  Email: 
+unknown@x.com, 
+Password: Test@1234  Error: 
+"Account not 
+found" 
+displayed  Error message 
+displayed  Pass 
+Functional Testing 3:  Project Creation and Pipeline Trigger  
+Objective:  To ensure a new validation project is created and the analysis pipeline is queued 
+when all required fields are valid, and that validation errors are shown for incomplete inputs.  
+Table 5.7: Functional Testing 3 — Project Creation  
+No. Test Case  Attribute and 
+value  Expected Result  Actual Result  Result  
+
+--- Page 67 ---
+ 
+59 
+ 1 Submit project 
+with all valid 
+inputs  Title, description 
+(>50 chars), 3 
+keywords, 
+industry selected  Project created; 
+pipeline queued; 
+progress indicator 
+shown  Project created 
+and pipeline 
+queued 
+successfully  Pass 
+2 Submit with 
+fewer than 2 
+keywords  Title, description, 
+1 keyword  Error: "At least 2 
+seed keywords are 
+required"  Validation error 
+displayed  Pass 
+3 Submit with 
+empty 
+description  Title, no 
+description, 3 
+keywords  Error: 
+"Description is 
+required"  Validation error 
+displayed  Pass 
+4 Submit with 
+description 
+under 50 
+characters  Title, 20 -char 
+description, 3 
+keywords  Error: 
+"Description must 
+be at least 50 
+characters"  Validation error 
+displayed  Pass 
+Functional Testing 4:  Problem Discovery Results Display  
+Objective:  To ensure that after pipeline completion, problem theme cards are displayed in 
+descending order by volume with correct pain scores and source distributions.  
+Table 5.8: Functional Testing 4 — Problem Discovery Results  
+No. Test Case  Attribute and 
+value  Expected Result  Actual Result  Result  
+1 View results 
+of completed 
+analysis  project_id 
+with status = 
+Complete  Problem Theme cards 
+displayed with title, 
+volume, pain score, 
+and source breakdown  Themes displayed 
+correctly in 
+descending 
+volume order  Pass 
+2 View topic 
+volume chart  Completed 
+project with 
+≥2 themes  Horizontal bar chart 
+rendered with topics 
+ranked by post count  Chart rendered 
+correctly  Pass 
+Functional Testing 5:  Idea Validation Score Display  
+Objective:  To ensure the validation score, dimension metrics, and problem -solution fit matrix 
+are displayed correctly after analysis is complete.  
+Table 5.9: Functional Testing 5 — Idea Validation Score  
+No. Test Case  Attribute 
+and value  Expected Result  Actual 
+Result  Result  
+1 View 
+validation 
+score for 
+completed 
+project  project_id 
+with 
+completed 
+pipeline  Circular score (0 –100), grade 
+letter, and qualitative label 
+displayed  Score, grade, 
+and label 
+displayed 
+correctly  Pass 
+2 View 
+problem -
+solution fit 
+list project_id 
+with ≥3 
+problem 
+themes  Fit entries displayed with 
+percentage and badge 
+(Strong/Partial/Weak) in 
+descending order  Fit matrix 
+rendered 
+correctly  Pass 
+
+--- Page 68 ---
+ 
+60 
+ 3 Verify fit 
+badge 
+thresholds  Fit score = 
+70%, 50%, 
+30% Badges: Strong Fit, Partial 
+Fit, Weak Fit respectively  Correct 
+badges 
+displayed 
+per threshold  Pass 
+5.3 Business Rules Testing  
+Decision table based  testing technique is used to test business rules. The business rules were 
+defined in FRs and Use Cases.  
+Decision based testing uses a systematic approach where input and outputs are provided in 
+tabular form. It is a precise and compact way to model complicated logic. The table contains 
+conditions and actions used for test cases where conditions are inputs an d actions are outputs.  
+Business Rules Testing 1:  User Registration Rules (FR1.1, FR1.2)  
+Table 5.10: Decision Table — User Registration Rules  
+Condition  Rule 
+1 Rule 
+2 Rule 
+3 Rule 
+4 Rule 
+5 
+Email follows valid format?  Y N Y Y Y 
+Email is not already registered?  Y Y N Y Y 
+Password is at least 8 characters?  Y Y Y N Y 
+Password contains letters and numbers?  Y Y Y Y N 
+Create account  and redirect to dashboard  Y N N N N 
+Show "Invalid email format" error  N Y N N N 
+Show "Email already registered" error  N N Y N N 
+Show "Password must be at least 8 characters" 
+error  N N N Y N 
+Show "Password must contain letters and 
+numbers" error  N N N N Y 
+Table 5.11: Test Cases Derived from Decision Table 5.10  
+No. Email  Password  Expected Action  Actual 
+Result  Result  
+1 
+(Rule 
+1) john@gmail.com  Test@1234  Account created  Account 
+created  Pass 
+2 
+(Rule 
+2) john.gmail.com  Test@1234  "Invalid email 
+format" error  Error 
+displayed  Pass 
+3 
+(Rule 
+3) existing@gmail.com  Test@1234  "Email already 
+registered" error  Error 
+displayed  Pass 
+4 
+(Rule 
+4) john@gmail.com  abc1  "Password must be 
+at least 8 
+characters" error  Error 
+displayed  Pass 
+5 
+(Rule 
+5) john@gmail.com  PasswordOnly  "Password must 
+contain letters and 
+numbers" error  Error 
+displayed  Pass 
+
+--- Page 69 ---
+ 
+61 
+  
+Business Rules Testing 2:  Project Submission Rules (FR1.4, FR1.5, FR1.7, FR1.8)  
+Table 5.12: Decision Table — Project Submission Rules  
+Condition  Rule 
+1 Rule 
+2 Rule 
+3 Rule 
+4 
+Title field is not empty?  Y N Y Y 
+Description is >= 50 characters?  Y Y N Y 
+At least 2 keywords provided?  Y Y Y N 
+Create project and enqueue pipeline  Y N N N 
+Show "Title is required" error  N Y N N 
+Show "Description must be at least 50 characters" 
+error  N N Y N 
+Show "At least 2 keywords are required" error  N N N Y 
+Table 5.13: Test Cases Derived from Decision Table 5.12  
+No. Title  Description  Keywords  Expected 
+Action  Actual 
+Result  Result  
+1 
+(Rule 
+1) "Food 
+App"  Valid 60 -char 
+description  "food, 
+delivery, 
+startup"  Project created  Created 
+successfully  Pass 
+2 
+(Rule 
+2) (empty)  Valid 
+description  "food, 
+delivery"  "Title is 
+required" error  Error 
+displayed  Pass 
+3 
+(Rule 
+3) "Food 
+App"  "Short desc" 
+(10 chars)  "food, 
+delivery"  "Description 
+must be at least 
+50 characters" 
+error  Error 
+displayed  Pass 
+4 
+(Rule 
+4) "Food 
+App"  Valid 
+description  "food" (1 
+keyword)  "At least 2 
+keywords 
+required" error  Error 
+displayed  Pass 
+5.4 Integration Testing  
+Integration testing verifies that different modules of the system work together correctly. Unlike 
+unit testing (which checks isolated functions) and functional testing (which checks features 
+from a user's perspective), integration testing focuses on the interfaces, linkages, and data 
+flow between modules developed by different team members.  
+Since FYPs are team -based, integration testing is essential  to ensure that the combined work 
+of individual members forms a functioning system. Students must design at least one or two 
+integration scenarios to demonstrate how modules interact and exchange data.  
+Integration Testing 1:  Project Submission to Problem Discovery Pipeline (Module 'User 
+Onboarding and Idea Intake' ↔ Module 'Problem Discovery Engine')  
+
+--- Page 70 ---
+ 
+62 
+ Testing Objective:  To ensure the project submission is being processed correctly and the 
+interface between  module 'User Onboarding and Idea Intake' and module 'Problem Discovery 
+Engine' is running correctly . 
+Table 5.14: Integration Testing 1 — M1 ↔ M2 
+No. Test case/Test 
+script  Attribute and 
+value  Expected result  Actual result  Result  
+1 Create project in 
+M1 → 
+background task 
+queued for M2  Valid title, 60 -
+char 
+description, 3 
+keywords  Project record 
+persisted in DB; 
+pipeline task 
+enqueued; status = 
+Running  Project 
+saved; 
+pipeline task 
+queued  Pass 
+2 M2 pipeline 
+completes → 
+themes stored and 
+linked to project  project_id of 
+running 
+pipeline  Clustered problem 
+themes with volume 
+and pain scores 
+saved under correct 
+project_id  Themes 
+stored and 
+linked 
+correctly  Pass 
+3 M1 dashboard 
+reflects M2 
+pipeline status  project_id 
+(status: 
+Complete)  Project card on 
+dashboard shows 
+"Complete" status 
+with updated stats  Status 
+updated 
+correctly on 
+dashboard  Pass 
+Integration Testing 2:  Problem Discovery Output into Idea Validation Toolkit (Module 
+'Problem Discovery Engine' ↔ Module 'Idea Validation Toolkit')  
+Testing Objective:  To ensure the analysis results are being passed correctly and the interface 
+between  module 'Problem Discovery Engine' and module 'Idea Validation Toolkit' is running 
+correctly . 
+Table 5.15: Integration Testing 2 — M2 ↔ M3 
+No. Test case/Test 
+script  Attribute 
+and value  Expected result  Actual result  Result  
+1 M3 reads M2 
+themes → 
+validation score 
+computed  project_id 
+with 
+completed 
+M2 themes  Validation score (0 –
+100), grade, and 
+dimension metrics 
+computed and stored  Score 
+computed and 
+displayed 
+correctly  Pass 
+2 M3 renders 
+problem -
+solution fit 
+matrix from M2 
+pain points  project_id 
+with ≥3 
+ranked 
+themes  Fit matrix maps each 
+M2 theme to 
+proposed solution 
+with correct fit 
+percentage and badge  Matrix 
+rendered with 
+correct theme 
+labels and 
+badges  Pass 
+ 
+ 
+ 
+
+--- Page 71 ---
+ 
+63 
+ References  
+Books  
+E. Ries. The Lean Startup: How Today's Entrepreneurs Use Continuous Innovation to Create 
+Radically Successful Businesses . New York, NY: Crown Business, 2011.  
+Articles in a Journal  
+J. Wei et al. “Chain -of-Thought Prompting Elicits Reasoning in Large Language Models”. 
+Advances in Neural Information Processing Systems, vol. 35, 2022.  
+World Wide Web  
+J. Johnson, M. Douze, and H. Jegou. "Billion -scale similarity search with GPUs." IEEE 
+Transactions on Big Data, 2019.  
+ 
+ 
+ 
+ 
+ 
+ 
+  
+
+--- Page 72 ---
+ 
+64 
+ Plagiarism Report
+ 
+
+
+--- Page 73 ---
+ 
+65 
+  
+ 
+ 
+ 
+ 
+ 
+ 
+ 

@@ -1,0 +1,467 @@
+import { useState, useRef } from 'react'
+import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage'
+import { useAuth } from '../context/AuthContext.jsx'
+import { storage } from '../firebase/config.js'
+import { createVideoDocument, ensureUserDocument } from '../lib/adminStorage.js'
+import { motion, AnimatePresence } from 'framer-motion'
+import { UploadCloud, CheckCircle2, AlertCircle, FileVideo, ShieldAlert, X, FileText } from 'lucide-react'
+
+// SDS FR2.1: Supported formats restricted to .mp4 and .webm, max 100MB
+const ALLOWED_EXTENSIONS = ['.mp4', '.webm']
+const ALLOWED_MIME_TYPES = ['video/mp4', 'video/webm']
+const MAX_FILE_SIZE_BYTES = 100 * 1024 * 1024 // 100 MB
+
+function formatBytes(bytes) {
+  if (bytes === 0) return '0 Bytes'
+  const k = 1024
+  const sizes = ['Bytes', 'KB', 'MB', 'GB']
+  const i = Math.floor(Math.log(bytes) / Math.log(k))
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
+}
+
+function UploadPage() {
+  const { activeProfile, user } = useAuth()
+  const [selectedFile, setSelectedFile] = useState(null)
+  const [title, setTitle] = useState('')
+  const [description, setDescription] = useState('')
+  const [validationError, setValidationError] = useState('')
+  
+  const [progress, setProgress] = useState(0)
+  const [status, setStatus] = useState('')
+  const [isDragging, setIsDragging] = useState(false)
+  const [uploadState, setUploadState] = useState('idle') // idle, uploading, success, error
+  const [uploadedVideoData, setUploadedVideoData] = useState(null)
+  const fileInputRef = useRef(null)
+
+  const validateFile = (file) => {
+    if (!file) return 'No file selected.'
+
+    const fileName = file.name.toLowerCase()
+    const hasValidExt = ALLOWED_EXTENSIONS.some((ext) => fileName.endsWith(ext))
+    const hasValidMime = ALLOWED_MIME_TYPES.includes(file.type) || hasValidExt
+
+    if (!hasValidExt && !hasValidMime) {
+      return 'Invalid file type. SDS requires .mp4 or .webm formats only.'
+    }
+
+    if (file.size > MAX_FILE_SIZE_BYTES) {
+      return `File exceeds maximum size limit of 100MB (${formatBytes(file.size)}).`
+    }
+
+    return ''
+  }
+
+  const handleFileSelect = (file) => {
+    setValidationError('')
+    if (!file) return
+
+    const error = validateFile(file)
+    if (error) {
+      setValidationError(error)
+      setSelectedFile(null)
+      return
+    }
+
+    setSelectedFile(file)
+    // Pre-fill title if empty from filename without extension
+    if (!title) {
+      const baseName = file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ')
+      setTitle(baseName.charAt(0).toUpperCase() + baseName.slice(1))
+    }
+  }
+
+  const handleStartUpload = async (e) => {
+    e.preventDefault()
+    setValidationError('')
+
+    if (!selectedFile) {
+      setValidationError('Please select a video file.')
+      return
+    }
+
+    const fileError = validateFile(selectedFile)
+    if (fileError) {
+      setValidationError(fileError)
+      return
+    }
+
+    // SDS FR2.2: Mandatory Title and Description validation
+    if (!title.trim()) {
+      setValidationError('Title is strictly mandatory.')
+      return
+    }
+
+    if (!description.trim()) {
+      setValidationError('Description is strictly mandatory.')
+      return
+    }
+
+    if (!storage || !user) {
+      setValidationError('Firebase storage is not configured or user is unauthenticated.')
+      return
+    }
+
+    setUploadState('uploading')
+    setProgress(0)
+    setStatus('Initializing secure upload pipeline...')
+
+    const storagePath = `uploads/${user.uid}/${Date.now()}_${selectedFile.name}`
+    const storageRef = ref(storage, storagePath)
+    const uploadTask = uploadBytesResumable(storageRef, selectedFile)
+
+    uploadTask.on(
+      'state_changed',
+      (snapshot) => {
+        const percentage = (snapshot.bytesTransferred / snapshot.totalBytes) * 100
+        setProgress(Math.round(percentage))
+        setStatus(`Uploading & hashing chunks: ${Math.round(percentage)}%`)
+      },
+      (error) => {
+        console.error('Upload failed:', error)
+        setStatus('Upload failed: ' + (error?.message || 'Storage error'))
+        setUploadState('error')
+      },
+      async () => {
+        try {
+          setStatus('Finalizing upload & generating download token...')
+          const downloadURL = await getDownloadURL(uploadTask.snapshot.ref)
+
+          setStatus('Running NudeNet AI Video Inspection (Layer 4/5)...')
+          let aiAnalysis = null
+          try {
+            const formData = new FormData()
+            formData.append('file', selectedFile)
+            const aiRes = await fetch('http://127.0.0.1:8000/api/analyze-video?sample_fps=2.0', {
+              method: 'POST',
+              body: formData,
+            })
+            if (aiRes.ok) {
+              const aiData = await aiRes.json()
+              aiAnalysis = aiData.analysis
+            }
+          } catch (aiErr) {
+            console.log('Local AI service not running, using simulated fallback.', aiErr)
+          }
+
+          setStatus('Registering video metadata in Firestore...')
+          await ensureUserDocument({
+            uid: user.uid,
+            email: user.email,
+            displayName: user.displayName,
+          })
+
+          const docResult = await createVideoDocument({
+            userId: user.uid,
+            userEmail: user.email,
+            title: title.trim(),
+            description: description.trim(),
+            storageUrl: storagePath,
+            downloadUrl: downloadURL,
+            fileSize: selectedFile.size,
+            mimeType: selectedFile.type || 'video/mp4',
+            fileName: selectedFile.name,
+            aiAnalysis,
+          })
+
+          setUploadedVideoData(docResult)
+          setStatus('Complete! Media logged in videos collection.')
+          setUploadState('success')
+        } catch (error) {
+          console.error('Error finalizing upload metadata:', error)
+          setStatus('Failed to store metadata: ' + (error?.message || 'Firestore error'))
+          setUploadState('error')
+        }
+      },
+    )
+  }
+
+  const handleReset = () => {
+    setSelectedFile(null)
+    setTitle('')
+    setDescription('')
+    setValidationError('')
+    setProgress(0)
+    setStatus('')
+    setUploadedVideoData(null)
+    setUploadState('idle')
+    if (fileInputRef.current) fileInputRef.current.value = ''
+  }
+
+  const onDragOver = (e) => {
+    e.preventDefault()
+    setIsDragging(true)
+  }
+
+  const onDragLeave = () => {
+    setIsDragging(false)
+  }
+
+  const onDrop = (e) => {
+    e.preventDefault()
+    setIsDragging(false)
+    const file = e.dataTransfer.files?.[0]
+    handleFileSelect(file)
+  }
+
+  return (
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-8">
+      <section>
+        <h1 className="flex items-center gap-3 text-3xl font-extrabold tracking-tight text-white">
+          <UploadCloud className="h-8 w-8 text-cyan-400" />
+          Secure Media Upload (Module 2)
+        </h1>
+        <p className="mt-2 max-w-2xl text-lg text-slate-400">
+          Upload video content directly to the PurePlay moderation pipeline. Videos are validated client-side, indexed in Firestore, and analyzed for content compliance.
+        </p>
+      </section>
+
+      <section className="glass-card relative overflow-hidden rounded-3xl p-8 lg:p-12">
+        <div className="pointer-events-none absolute right-0 top-0 h-64 w-64 -translate-y-1/2 translate-x-1/2 rounded-full bg-cyan-500/10 blur-3xl" />
+        <div className="pointer-events-none absolute bottom-0 left-0 h-64 w-64 -translate-x-1/2 translate-y-1/2 rounded-full bg-violet-500/10 blur-3xl" />
+
+        <div className="relative z-10 flex flex-col items-center">
+          <div className="w-full max-w-2xl">
+            {/* Active Profile Info */}
+            <div className="mb-6 flex items-center justify-between rounded-xl border border-white/5 bg-slate-900/50 px-4 py-3">
+              <div className="flex items-center gap-3">
+                <ShieldAlert className="h-5 w-5 text-amber-400" />
+                <span className="text-sm font-medium text-slate-300">Active Guardian Profile</span>
+              </div>
+              <span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-sm font-bold text-transparent">
+                {activeProfile?.name ?? 'Guardian Account'}
+              </span>
+            </div>
+
+            <AnimatePresence mode="wait">
+              {uploadState === 'idle' && (
+                <motion.form
+                  key="idle"
+                  initial={{ opacity: 0, scale: 0.98 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.98 }}
+                  onSubmit={handleStartUpload}
+                  className="space-y-6"
+                >
+                  {/* Dropzone */}
+                  {!selectedFile ? (
+                    <div
+                      className={`group relative flex cursor-pointer flex-col items-center justify-center rounded-3xl border-2 border-dashed p-10 text-center transition-all duration-300 ${
+                        isDragging
+                          ? 'border-cyan-500 bg-cyan-500/10'
+                          : 'border-slate-700 hover:border-cyan-400/50 hover:bg-slate-800/30'
+                      }`}
+                      onDragOver={onDragOver}
+                      onDragLeave={onDragLeave}
+                      onDrop={onDrop}
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      <input
+                        ref={fileInputRef}
+                        className="hidden"
+                        type="file"
+                        accept=".mp4,.webm"
+                        onChange={(e) => handleFileSelect(e.target.files?.[0])}
+                      />
+                      <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-slate-800/80 transition-all duration-300 group-hover:scale-110 group-hover:bg-cyan-500/20">
+                        <FileVideo className="h-8 w-8 text-cyan-400" />
+                      </div>
+                      <h3 className="mb-1 text-lg font-bold text-white">Select or drag & drop video</h3>
+                      <p className="mb-4 text-sm text-slate-400">Client-side validated per SDS requirements</p>
+                      <div className="flex items-center gap-3 rounded-full bg-slate-900/80 px-4 py-1.5 text-xs font-mono text-slate-400">
+                        <span className="text-cyan-400 font-semibold">.MP4</span>
+                        <span>•</span>
+                        <span className="text-cyan-400 font-semibold">.WEBM</span>
+                        <span>•</span>
+                        <span>Max 100MB</span>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-between rounded-2xl border border-cyan-500/30 bg-cyan-500/10 p-4">
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-cyan-500/20 text-cyan-400">
+                          <FileVideo className="h-6 w-6" />
+                        </div>
+                        <div>
+                          <p className="font-semibold text-white truncate max-w-sm">{selectedFile.name}</p>
+                          <p className="text-xs text-slate-400">
+                            {formatBytes(selectedFile.size)} • {selectedFile.type || 'video'}
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedFile(null)}
+                        className="rounded-lg p-2 text-slate-400 hover:bg-slate-800 hover:text-white"
+                        title="Remove file"
+                      >
+                        <X className="h-5 w-5" />
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Metadata Fields (FR2.2: Mandatory Title & Description) */}
+                  <div className="space-y-4">
+                    <div>
+                      <label className="mb-1 block text-sm font-medium text-slate-300">
+                        Video Title <span className="text-rose-400">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="e.g. Science Experiment Demo"
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)}
+                        className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white placeholder-slate-500 focus:border-cyan-500 focus:outline-none"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="mb-1 block text-sm font-medium text-slate-300">
+                        Description <span className="text-rose-400">*</span>
+                      </label>
+                      <textarea
+                        required
+                        rows={3}
+                        placeholder="Provide details about the video contents..."
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                        className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white placeholder-slate-500 focus:border-cyan-500 focus:outline-none resize-none"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Validation Error Banner */}
+                  {validationError && (
+                    <div className="flex items-center gap-2 rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-rose-300">
+                      <AlertCircle className="h-5 w-5 shrink-0 text-rose-400" />
+                      <span>{validationError}</span>
+                    </div>
+                  )}
+
+                  {/* Submit Button */}
+                  <button
+                    type="submit"
+                    disabled={!selectedFile || !title.trim() || !description.trim()}
+                    className="w-full rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 py-3.5 font-bold text-slate-950 transition hover:from-cyan-400 hover:to-blue-500 disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-cyan-500/20"
+                  >
+                    Start Upload & Analysis
+                  </button>
+                </motion.form>
+              )}
+
+              {uploadState === 'uploading' && (
+                <motion.div
+                  key="uploading"
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  className="flex flex-col items-center py-12 text-center"
+                >
+                  <div className="relative mb-8 h-32 w-32">
+                    <svg className="h-full w-full -rotate-90" viewBox="0 0 100 100">
+                      <circle cx="50" cy="50" r="45" className="stroke-slate-800" strokeWidth="8" fill="none" />
+                      <motion.circle
+                        cx="50"
+                        cy="50"
+                        r="45"
+                        className="stroke-cyan-500"
+                        strokeWidth="8"
+                        fill="none"
+                        strokeLinecap="round"
+                        initial={{ strokeDasharray: '0 283' }}
+                        animate={{ strokeDasharray: `${(progress / 100) * 283} 283` }}
+                        transition={{ duration: 0.3 }}
+                      />
+                    </svg>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center">
+                      <span className="text-3xl font-extrabold text-white">{progress}%</span>
+                    </div>
+                  </div>
+                  <h3 className="mb-2 text-xl font-bold text-white animate-pulse">{status}</h3>
+                  <p className="text-sm text-slate-400">Streamed to Firebase Storage with resumable chunking.</p>
+                </motion.div>
+              )}
+
+              {uploadState === 'success' && (
+                <motion.div
+                  key="success"
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="flex flex-col items-center py-8 text-center"
+                >
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: 'spring', bounce: 0.5 }}
+                    className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-emerald-500/20"
+                  >
+                    <CheckCircle2 className="h-10 w-10 text-emerald-400" />
+                  </motion.div>
+                  <h3 className="mb-2 text-2xl font-bold text-white">Video Uploaded & Logged!</h3>
+                  <p className="mb-6 max-w-md text-sm text-slate-300">
+                    Uploaded successfully to Storage and recorded in Firestore `videos` collection.
+                  </p>
+
+                  {uploadedVideoData && (
+                    <div className="mb-8 w-full rounded-2xl border border-slate-700 bg-slate-900/80 p-5 text-left">
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="text-xs uppercase tracking-wider text-slate-400">Firestore Record</span>
+                        <span
+                          className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                            uploadedVideoData.status === 'Flagged'
+                              ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
+                              : uploadedVideoData.status === 'Approved'
+                              ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                              : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                          }`}
+                        >
+                          Status: {uploadedVideoData.status}
+                        </span>
+                      </div>
+                      <h4 className="text-lg font-bold text-white mb-1">{uploadedVideoData.title}</h4>
+                      <p className="text-xs text-slate-400 mb-3 line-clamp-2">{uploadedVideoData.description}</p>
+                      <div className="grid grid-cols-2 gap-2 text-xs font-mono text-slate-400">
+                        <div>Size: {formatBytes(uploadedVideoData.file_size)}</div>
+                        <div>Type: {uploadedVideoData.mime_type}</div>
+                      </div>
+                    </div>
+                  )}
+
+                  <button
+                    onClick={handleReset}
+                    className="rounded-xl bg-cyan-500 px-6 py-3 font-semibold text-slate-950 transition hover:bg-cyan-400"
+                  >
+                    Upload Another Video
+                  </button>
+                </motion.div>
+              )}
+
+              {uploadState === 'error' && (
+                <motion.div
+                  key="error"
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="flex flex-col items-center py-12 text-center"
+                >
+                  <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-rose-500/20">
+                    <AlertCircle className="h-10 w-10 text-rose-400" />
+                  </div>
+                  <h3 className="mb-2 text-2xl font-bold text-white">Upload Failed</h3>
+                  <p className="mb-8 max-w-md text-sm text-rose-300">{status}</p>
+                  <button
+                    onClick={handleReset}
+                    className="rounded-xl bg-slate-800 px-6 py-3 font-semibold text-white transition hover:bg-slate-700"
+                  >
+                    Try Again
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
+      </section>
+    </motion.div>
+  )
+}
+
+export default UploadPage

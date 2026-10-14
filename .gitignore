@@ -1,0 +1,52 @@
+# ==========================================
+# PurePlay — Git Ignore Configuration
+# ==========================================
+
+# Large zip archives & dumps
+*.zip
+*.tar.gz
+*.rar
+FYP-1 PROJECT.zip
+
+# Node & Frontend dependencies
+**/node_modules/
+**/dist/
+**/dist-ssr/
+*.local
+
+# Python compiled bytecode & environments
+**/__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.venv
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Environment variables & secrets
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# Temporary media frames & test caches
+**/_temp_frames/
+**/test_bleep*.wav
+**/demo_censored_*
+**/test_synthetic.*
+**/.cache/
+
+# IDE & OS specific files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
