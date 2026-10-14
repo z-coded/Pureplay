@@ -1,4 +1,4 @@
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import {
   ShieldCheck,
@@ -17,20 +17,7 @@ import {
   BarChart3,
   Award,
 } from 'lucide-react'
-import { useAuth } from '../context/AuthContext.jsx'
-
 function LandingPage() {
-  const navigate = useNavigate()
-  const { demoLogin } = useAuth()
-
-  const handleQuickDemo = (role) => {
-    demoLogin(role)
-    if (role === 'admin') {
-      navigate('/admin')
-    } else {
-      navigate('/dashboard')
-    }
-  }
 
   const pipelineSteps = [
     {
@@ -106,13 +93,6 @@ function LandingPage() {
           </div>
 
           <div className="flex items-center gap-3">
-            <button
-              onClick={() => handleQuickDemo('guardian')}
-              className="hidden sm:inline-flex items-center gap-1.5 rounded-xl border border-indigo-200 bg-indigo-50 px-4 py-2 text-xs font-bold text-indigo-700 hover:bg-indigo-100 transition shadow-2xs"
-            >
-              <Sparkles className="h-3.5 w-3.5" />
-              <span>Evaluator Demo (1-Click)</span>
-            </button>
             <Link
               to="/login"
               className="btn-secondary text-xs"
@@ -150,36 +130,6 @@ function LandingPage() {
             <p className="mt-6 text-lg text-slate-600 leading-relaxed max-w-xl">
               PurePlay autonomously analyzes uploaded video streams using trained deep learning models. It automatically censors adult nudity, graphic scenes, and profanity while allowing guardians to configure custom age-appropriate tolerance policies.
             </p>
-
-            {/* Quick Evaluator Access Bar */}
-            <div className="mt-8 p-5 rounded-2xl border border-indigo-200 bg-white/95 shadow-sm">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-bold text-indigo-700 uppercase tracking-wider flex items-center gap-1.5">
-                  <Sparkles className="h-3.5 w-3.5 text-indigo-600" />
-                  Instant Viva & Evaluation Access
-                </span>
-                <span className="text-[10px] text-slate-500 font-mono">No sign-up needed</span>
-              </div>
-              <p className="text-xs text-slate-500 mb-4">
-                Experience all functional modules instantly with pre-configured roles:
-              </p>
-              <div className="flex flex-wrap gap-2.5">
-                <button
-                  onClick={() => handleQuickDemo('guardian')}
-                  className="flex-1 min-w-[140px] flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-blue-600 px-4 py-2.5 text-xs font-bold text-white shadow-md shadow-indigo-500/25 hover:shadow-lg transition"
-                >
-                  <Users className="h-4 w-4" />
-                  <span>Launch Guardian View</span>
-                </button>
-                <button
-                  onClick={() => handleQuickDemo('admin')}
-                  className="flex-1 min-w-[140px] flex items-center justify-center gap-2 rounded-xl border border-purple-200 bg-purple-50 px-4 py-2.5 text-xs font-bold text-purple-700 hover:bg-purple-100 transition shadow-2xs"
-                >
-                  <ShieldCheck className="h-4 w-4 text-purple-600" />
-                  <span>Launch Admin Portal</span>
-                </button>
-              </div>
-            </div>
 
             <div className="mt-8 flex flex-wrap items-center gap-4">
               <Link to="/signup" className="btn-primary flex items-center gap-2 text-sm">
@@ -389,16 +339,10 @@ function LandingPage() {
           </div>
 
           <div className="flex flex-wrap items-center gap-4">
-            <button
-              onClick={() => handleQuickDemo('guardian')}
-              className="text-indigo-600 hover:underline font-semibold"
-            >
-              Evaluator Quick Launch →
-            </button>
-            <Link to="/login" className="hover:text-slate-900 transition">
+            <Link to="/login" className="hover:text-slate-900 transition font-medium">
               Log In
             </Link>
-            <Link to="/signup" className="hover:text-slate-900 transition">
+            <Link to="/signup" className="hover:text-slate-900 transition font-medium">
               Sign Up
             </Link>
           </div>

@@ -3,12 +3,12 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
 import { getFirebaseAuthMessage } from '../utils/firebaseAuthErrors.js'
 import GoogleSignInButton from '../components/GoogleSignInButton.jsx'
-import { Eye, EyeOff, ShieldCheck, UserCheck, Lock, Mail, ArrowRight, Sparkles } from 'lucide-react'
+import { Eye, EyeOff, Lock, Mail, ArrowRight } from 'lucide-react'
 import { motion } from 'framer-motion'
 
 function LoginPage() {
   const navigate = useNavigate()
-  const { logIn, signInWithGoogle, isFirebaseConfigured, demoLogin } = useAuth()
+  const { logIn, signInWithGoogle, isFirebaseConfigured } = useAuth()
   const [form, setForm] = useState({ email: '', password: '' })
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
@@ -46,15 +46,6 @@ function LoginPage() {
     }
   }
 
-  const handleDemo = (role) => {
-    demoLogin(role)
-    if (role === 'admin') {
-      navigate('/admin')
-    } else {
-      navigate('/dashboard')
-    }
-  }
-
   return (
     <div className="min-h-[85vh] flex items-center justify-center px-4 py-8">
       <motion.div
@@ -75,36 +66,6 @@ function LoginPage() {
           <h1 className="text-3xl font-black text-slate-900 tracking-tight">Welcome Back</h1>
           <p className="mt-1 text-sm text-slate-500">Sign in to manage profiles and video filters.</p>
 
-          {/* Quick Evaluator Access */}
-          <div className="mt-6 rounded-2xl border border-indigo-200 bg-indigo-50/70 p-4">
-            <div className="flex items-center justify-between mb-1.5">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-indigo-700 flex items-center gap-1.5">
-                <Sparkles className="h-3.5 w-3.5" /> Quick Evaluation Mode
-              </span>
-              <span className="text-[10px] text-slate-500 font-mono">1-Click Test</span>
-            </div>
-            <p className="text-xs text-slate-600 mb-3">
-              Instant access for viva examiners without entering credentials:
-            </p>
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                onClick={() => handleDemo('guardian')}
-                className="flex items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-blue-600 px-3 py-2 text-xs font-bold text-white shadow-md shadow-indigo-500/20 hover:brightness-110 active:scale-95 transition"
-              >
-                <UserCheck className="h-4 w-4" />
-                <span>Guardian Portal</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => handleDemo('admin')}
-                className="flex items-center justify-center gap-1.5 rounded-xl border border-purple-200 bg-purple-100 px-3 py-2 text-xs font-bold text-purple-800 hover:bg-purple-200 active:scale-95 transition"
-              >
-                <ShieldCheck className="h-4 w-4 text-purple-700" />
-                <span>Admin View</span>
-              </button>
-            </div>
-          </div>
 
           <div className="mt-6">
             <GoogleSignInButton disabled={!isFirebaseConfigured} onClick={handleGoogle} />
