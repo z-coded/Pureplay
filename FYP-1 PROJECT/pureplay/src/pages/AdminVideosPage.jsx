@@ -92,103 +92,109 @@ function AdminVideosPage() {
 
   return (
     <div className="space-y-8">
-      <section>
-        <h1 className="text-3xl font-bold text-white flex items-center gap-3">
-          <Video className="h-8 w-8 text-cyan-400" />
-          Content Repository & Moderation Logs
-        </h1>
-        <p className="mt-2 text-slate-400">
-          Full video log database from Firestore `videos` collection. Inspect metadata, status lifecycle, and execute administrator overrides (Approve/Delete).
-        </p>
+      {/* Header */}
+      <section className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2.5">
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight flex items-center gap-2.5">
+              <Video className="h-7 w-7 text-cyan-400" />
+              Content Repository & Moderation Logs
+            </h1>
+            <span className="badge-slate font-mono text-[10px]">Cloud Datastore</span>
+          </div>
+          <p className="mt-1 text-slate-400 text-xs sm:text-sm">
+            Inspect real-time asset telemetry, verify classification confidence, and execute moderation overrides.
+          </p>
+        </div>
       </section>
 
       {/* Main Filter & Table Section */}
-      <section className="rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-xl">
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+      <section className="glass-card rounded-2xl p-6">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-6">
           {/* Status Filter Buttons */}
-          <div className="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0">
+          <div className="flex items-center gap-1.5 bg-slate-950/60 border border-white/[0.06] p-1 rounded-xl self-start">
             {['all', 'Flagged', 'Approved', 'Pending'].map((st) => (
               <button
                 key={st}
                 onClick={() => setStatusFilter(st)}
-                className={`rounded-lg px-3.5 py-1.5 text-xs font-semibold transition ${
+                className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-all ${
                   statusFilter === st
-                    ? 'bg-cyan-500 text-slate-950 font-bold'
-                    : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                    ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30'
+                    : 'text-slate-400 hover:text-slate-200'
                 }`}
               >
-                {st === 'all' ? 'All Videos' : st}
+                {st === 'all' ? 'All Records' : st}
               </button>
             ))}
           </div>
 
           {/* Search Box */}
           <div className="relative w-full md:max-w-sm">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
             <input
               type="search"
               placeholder="Search title, email, or filename..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              className="w-full rounded-lg border border-slate-700 bg-slate-950 pl-9 pr-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-cyan-500 focus:outline-none"
+              className="input-field pl-10 pr-4 text-xs"
             />
           </div>
         </div>
 
-        <div className="mt-6 overflow-x-auto">
+        <div className="overflow-x-auto rounded-xl border border-white/[0.06]">
           <table className="min-w-full text-left text-sm">
-            <thead className="border-b border-slate-800 bg-slate-950/40 text-xs uppercase tracking-wider text-slate-400">
+            <thead className="border-b border-white/[0.06] bg-slate-950/60 text-[11px] uppercase tracking-wider text-slate-400 font-semibold">
               <tr>
-                <th className="py-3 px-4 font-medium">Video / Metadata</th>
-                <th className="py-3 px-4 font-medium">Uploader</th>
-                <th className="py-3 px-4 font-medium">AI Analysis</th>
-                <th className="py-3 px-4 font-medium">Status (SDS FR3.2)</th>
-                <th className="py-3 px-4 text-right font-medium">Actions (SDS FR3.4)</th>
+                <th className="py-3 px-4">Video Details</th>
+                <th className="py-3 px-4">Uploader</th>
+                <th className="py-3 px-4">AI Telemetry</th>
+                <th className="py-3 px-4">Safety Status</th>
+                <th className="py-3 px-4 text-right">Moderator Controls</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800">
+            <tbody className="divide-y divide-white/[0.04] bg-slate-950/30">
               {filteredVideos.map((row) => {
                 const title = row.title || row.fileName || row.file_name
                 const fileUrl = row.download_url || row.fileUrl
                 const currentStatus = row.status || 'Pending'
 
                 return (
-                  <tr key={row.id} className="text-slate-200 hover:bg-slate-800/40 transition">
-                    <td className="py-3 px-4 max-w-[260px]">
+                  <tr key={row.id} className="text-slate-200 hover:bg-slate-800/25 transition-colors">
+                    <td className="py-3.5 px-4 max-w-[260px]">
                       <div className="font-semibold text-white truncate" title={title}>
                         {title}
                       </div>
                       {row.description && (
-                        <p className="text-xs text-slate-400 truncate line-clamp-1">{row.description}</p>
+                        <p className="text-xs text-slate-400 truncate line-clamp-1 mt-0.5">{row.description}</p>
                       )}
-                      <div className="flex items-center gap-2 text-[11px] font-mono text-slate-500 mt-1">
+                      <div className="flex items-center gap-2 text-[10px] font-mono text-slate-500 mt-1">
                         <span>{formatBytes(row.file_size)}</span>
                         <span>•</span>
-                        <span>{row.mime_type || 'video'}</span>
+                        <span>{row.mime_type || 'video/mp4'}</span>
                       </div>
                     </td>
 
-                    <td className="py-3 px-4 text-xs">
-                      <div className="text-slate-300 font-medium">{row.user_email || row.userEmail || 'User'}</div>
+                    <td className="py-3.5 px-4 text-xs">
+                      <div className="text-slate-300 font-medium">{row.user_email || row.userEmail || 'Guardian'}</div>
                       <div className="text-slate-500 font-mono text-[10px] mt-0.5">
                         {row.uploaded_at || row.processedAt
-                          ? new Date(row.uploaded_at || row.processedAt).toLocaleString()
+                          ? new Date(row.uploaded_at || row.processedAt).toLocaleDateString()
                           : '—'}
                       </div>
                     </td>
 
-                    <td className="py-3 px-4">
+                    <td className="py-3.5 px-4">
                       {row.ai_scores ? (
                         <div className="flex flex-col gap-1 text-xs">
                           <span
-                            className={`font-semibold ${
+                            className={`font-semibold font-mono text-[11px] ${
                               row.ai_scores.nsfw > 0.7 ? 'text-rose-400' : 'text-slate-400'
                             }`}
                           >
                             NSFW: {(row.ai_scores.nsfw * 100).toFixed(0)}%
                           </span>
                           <span
-                            className={`font-semibold ${
+                            className={`font-semibold font-mono text-[11px] ${
                               row.ai_scores.profanity > 0.7 ? 'text-amber-400' : 'text-slate-400'
                             }`}
                           >
@@ -196,46 +202,42 @@ function AdminVideosPage() {
                           </span>
                         </div>
                       ) : (
-                        <div className="text-xs text-slate-500">
+                        <div className="text-[11px] text-slate-500 font-mono">
                           NSFW: {row.nsfwHits ?? 0} | Prof: {row.profanityHits ?? 0}
                         </div>
                       )}
                     </td>
 
-                    <td className="py-3 px-4">
-                      <span
-                        className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-bold ${
-                          currentStatus === 'Approved'
-                            ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                            : currentStatus === 'Flagged'
-                            ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
-                            : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
-                        }`}
-                      >
-                        ● {currentStatus}
-                      </span>
+                    <td className="py-3.5 px-4">
+                      {currentStatus === 'Approved' ? (
+                        <span className="badge-emerald">● Approved</span>
+                      ) : currentStatus === 'Flagged' ? (
+                        <span className="badge-rose">● Flagged</span>
+                      ) : (
+                        <span className="badge-amber">● Pending</span>
+                      )}
                     </td>
 
-                    <td className="py-3 px-4 text-right">
+                    <td className="py-3.5 px-4 text-right">
                       <div className="flex items-center justify-end gap-1.5">
                         {fileUrl && (
                           <>
                             <button
                               onClick={() => setActiveVideo(row)}
-                              className="rounded-lg bg-cyan-500/10 p-2 text-cyan-400 hover:bg-cyan-500/20 transition"
+                              className="rounded-lg border border-slate-700/80 bg-slate-800/60 p-1.5 text-cyan-300 hover:bg-slate-800 transition"
                               title="Play Video"
                             >
-                              <Play className="h-4 w-4" />
+                              <Play className="h-3.5 w-3.5" />
                             </button>
                             <a
                               href={fileUrl}
                               download
                               target="_blank"
                               rel="noreferrer"
-                              className="rounded-lg bg-indigo-500/10 p-2 text-indigo-400 hover:bg-indigo-500/20 transition"
+                              className="rounded-lg border border-indigo-500/30 bg-indigo-500/10 p-1.5 text-indigo-300 hover:bg-indigo-500/20 transition"
                               title="Download Asset"
                             >
-                              <Download className="h-4 w-4" />
+                              <Download className="h-3.5 w-3.5" />
                             </a>
                           </>
                         )}
@@ -245,10 +247,10 @@ function AdminVideosPage() {
                           <button
                             disabled={actionLoading === row.id}
                             onClick={() => handleApprove(row.id)}
-                            className="flex items-center gap-1 rounded-lg bg-emerald-500/20 px-2 py-1.5 text-xs font-semibold text-emerald-300 border border-emerald-500/30 hover:bg-emerald-500/30 transition disabled:opacity-50"
+                            className="flex items-center gap-1 rounded-lg border border-emerald-500/30 bg-emerald-500/15 px-2.5 py-1 text-xs font-semibold text-emerald-300 hover:bg-emerald-500/25 transition disabled:opacity-50"
                             title="Approve Video (Admin Override)"
                           >
-                            <Check className="h-3.5 w-3.5" />
+                            <Check className="h-3 w-3" />
                             <span>Approve</span>
                           </button>
                         )}
@@ -257,10 +259,10 @@ function AdminVideosPage() {
                         <button
                           disabled={actionLoading === row.id}
                           onClick={() => handleDelete(row.id)}
-                          className="rounded-lg bg-rose-500/10 p-2 text-rose-400 hover:bg-rose-500/20 transition disabled:opacity-50"
+                          className="rounded-lg border border-rose-500/30 bg-rose-500/15 p-1.5 text-rose-300 hover:bg-rose-500/25 transition disabled:opacity-50"
                           title="Delete from Firestore & Storage"
                         >
-                          <Trash2 className="h-4 w-4" />
+                          <Trash2 className="h-3.5 w-3.5" />
                         </button>
                       </div>
                     </td>
@@ -270,37 +272,41 @@ function AdminVideosPage() {
             </tbody>
           </table>
           {filteredVideos.length === 0 && (
-            <p className="py-8 text-center text-sm text-slate-500">No videos match the search criteria.</p>
+            <p className="py-12 text-center text-xs text-slate-500">No media records match the current filter query.</p>
           )}
         </div>
       </section>
 
       {/* Aggregated Rollup by User */}
-      <section className="rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-xl">
-        <h2 className="text-xl font-semibold text-white">Violations & Activity Rollup by Account</h2>
-        <p className="mt-1 text-sm text-slate-400">Aggregated user statistics from `videos` Firestore collection.</p>
-        <div className="mt-6 overflow-x-auto">
+      <section className="glass-card rounded-2xl p-6">
+        <h2 className="text-base font-bold text-white">Aggregated Activity Rollup by Account</h2>
+        <p className="mt-0.5 text-xs text-slate-400">Total uploads and violation metrics computed live from Firestore data.</p>
+        <div className="mt-5 overflow-x-auto rounded-xl border border-white/[0.06]">
           <table className="min-w-full text-left text-sm">
-            <thead className="border-b border-slate-700 text-slate-400 text-xs uppercase tracking-wider">
+            <thead className="border-b border-white/[0.06] bg-slate-950/60 text-[11px] uppercase tracking-wider text-slate-400 font-semibold">
               <tr>
-                <th className="py-3 px-4 font-medium">User Account</th>
-                <th className="py-3 px-4 font-medium">Total Uploads</th>
-                <th className="py-3 px-4 font-medium">Flagged Count</th>
-                <th className="py-3 px-4 font-medium">Approved Count</th>
+                <th className="py-3 px-4">User Account</th>
+                <th className="py-3 px-4">Total Uploads</th>
+                <th className="py-3 px-4">Flagged Assets</th>
+                <th className="py-3 px-4">Approved Assets</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800">
+            <tbody className="divide-y divide-white/[0.04] bg-slate-950/30">
               {byUser.map((row) => (
-                <tr key={row.userId || row.userEmail} className="text-slate-200">
-                  <td className="py-3 px-4 font-medium text-white">{row.userEmail || row.userId}</td>
-                  <td className="py-3 px-4 text-slate-300">{row.totalVideos}</td>
-                  <td className="py-3 px-4 text-rose-300 font-semibold">{row.flaggedCount}</td>
-                  <td className="py-3 px-4 text-emerald-300 font-semibold">{row.approvedCount}</td>
+                <tr key={row.userId || row.userEmail} className="text-slate-200 hover:bg-slate-800/20 transition-colors">
+                  <td className="py-3.5 px-4 font-medium text-white text-xs sm:text-sm">{row.userEmail || row.userId}</td>
+                  <td className="py-3.5 px-4 text-slate-300 font-mono text-xs">{row.totalVideos}</td>
+                  <td className="py-3.5 px-4 font-mono text-xs">
+                    <span className="badge-rose text-[10px]">{row.flaggedCount}</span>
+                  </td>
+                  <td className="py-3.5 px-4 font-mono text-xs">
+                    <span className="badge-emerald text-[10px]">{row.approvedCount}</span>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
-          {byUser.length === 0 && <p className="py-6 text-center text-slate-500">No account activity recorded.</p>}
+          {byUser.length === 0 && <p className="py-8 text-center text-xs text-slate-500">No account activity recorded.</p>}
         </div>
       </section>
 

@@ -139,37 +139,43 @@ function ProfileManagementPage() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-extrabold text-white tracking-tight flex items-center gap-3">
-          <Users className="h-8 w-8 text-cyan-400" />
-          Family Profile & Policy Management
-        </h1>
-        <p className="mt-2 text-slate-400 max-w-2xl">
-          Configure individualized sensitivity thresholds for child, teen, and guardian members. Each profile governs AI censorship aggression and upload permissions.
-        </p>
-      </div>
+      {/* Header */}
+      <section className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2.5">
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight flex items-center gap-2.5">
+              <Users className="h-7 w-7 text-cyan-400" />
+              Family Profiles & Policy Tiers
+            </h1>
+            <span className="badge-slate font-mono text-[10px]">Policy Engine</span>
+          </div>
+          <p className="mt-1 text-slate-400 text-xs sm:text-sm max-w-2xl">
+            Configure individualized sensitivity thresholds for child, teen, and guardian accounts. Profiles dictate local AI blurring and audio suppression aggression.
+          </p>
+        </div>
+      </section>
 
       <AnimatePresence>
         {saveSuccess && (
           <motion.div
-            initial={{ opacity: 0, y: -10 }}
+            initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="flex items-center gap-3 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-sm font-medium text-emerald-300 backdrop-blur-md"
+            exit={{ opacity: 0, y: -8 }}
+            className="flex items-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-xs font-medium text-emerald-300 backdrop-blur-md"
           >
-            <CheckCircle2 className="h-5 w-5 text-emerald-400 flex-shrink-0" />
+            <CheckCircle2 className="h-4 w-4 text-emerald-400 flex-shrink-0" />
             <span>{saveSuccess}</span>
           </motion.div>
         )}
       </AnimatePresence>
 
-      <div className="grid gap-8 lg:grid-cols-12 items-start">
+      <div className="grid gap-6 lg:grid-cols-12 items-start">
         {/* Profile Creator Form */}
-        <section className="lg:col-span-6 rounded-3xl border border-slate-800 bg-slate-900/70 p-6 sm:p-8 backdrop-blur-xl shadow-xl space-y-6">
-          <div className="flex items-center justify-between pb-4 border-b border-slate-800">
+        <section className="lg:col-span-6 glass-card rounded-2xl p-6 sm:p-7 space-y-5">
+          <div className="flex items-center justify-between pb-3.5 border-b border-white/[0.06]">
             <div>
-              <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                <Plus className="h-5 w-5 text-cyan-400" />
+              <h2 className="text-base font-bold text-white flex items-center gap-2">
+                <Plus className="h-4 w-4 text-cyan-400" />
                 Create New Profile
               </h2>
               <p className="text-xs text-slate-400 mt-0.5">Author policy thresholds and maturity tiers</p>
@@ -178,17 +184,17 @@ function ProfileManagementPage() {
 
           {/* Quick Presets */}
           <div>
-            <label className="text-xs font-semibold uppercase tracking-wider text-slate-400 block mb-2">
-              Select Preset Template
+            <label className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-2">
+              Preset Templates
             </label>
             <div className="grid grid-cols-3 gap-2">
               <button
                 type="button"
                 onClick={() => applyPreset('child')}
-                className={`py-2 px-3 rounded-xl text-xs font-bold border transition ${
+                className={`py-2 px-3 rounded-xl text-xs font-semibold border transition-all ${
                   form.type === 'child'
-                    ? 'border-rose-500/60 bg-rose-500/20 text-rose-300'
-                    : 'border-slate-800 bg-slate-950/60 text-slate-400 hover:text-white'
+                    ? 'border-rose-500/50 bg-rose-500/20 text-rose-300 shadow-[0_0_10px_rgba(244,63,94,0.15)]'
+                    : 'border-white/[0.08] bg-slate-950/60 text-slate-400 hover:text-white'
                 }`}
               >
                 Child (Strict)
@@ -196,21 +202,21 @@ function ProfileManagementPage() {
               <button
                 type="button"
                 onClick={() => applyPreset('teen')}
-                className={`py-2 px-3 rounded-xl text-xs font-bold border transition ${
+                className={`py-2 px-3 rounded-xl text-xs font-semibold border transition-all ${
                   form.type === 'teen'
-                    ? 'border-amber-500/60 bg-amber-500/20 text-amber-300'
-                    : 'border-slate-800 bg-slate-950/60 text-slate-400 hover:text-white'
+                    ? 'border-amber-500/50 bg-amber-500/20 text-amber-300 shadow-[0_0_10px_rgba(245,158,11,0.15)]'
+                    : 'border-white/[0.08] bg-slate-950/60 text-slate-400 hover:text-white'
                 }`}
               >
-                Teen (Moderate)
+                Teen (Balanced)
               </button>
               <button
                 type="button"
                 onClick={() => applyPreset('guardian')}
-                className={`py-2 px-3 rounded-xl text-xs font-bold border transition ${
+                className={`py-2 px-3 rounded-xl text-xs font-semibold border transition-all ${
                   form.type === 'guardian'
-                    ? 'border-cyan-500/60 bg-cyan-500/20 text-cyan-300'
-                    : 'border-slate-800 bg-slate-950/60 text-slate-400 hover:text-white'
+                    ? 'border-cyan-500/50 bg-cyan-500/20 text-cyan-300 shadow-[0_0_10px_rgba(6,182,212,0.15)]'
+                    : 'border-white/[0.08] bg-slate-950/60 text-slate-400 hover:text-white'
                 }`}
               >
                 Guardian (Open)
@@ -218,13 +224,13 @@ function ProfileManagementPage() {
             </div>
           </div>
 
-          <form className="space-y-5" onSubmit={submit}>
+          <form className="space-y-4" onSubmit={submit}>
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">
+              <label className="block text-xs font-semibold text-slate-300 mb-1.5">
                 Profile Name
               </label>
               <input
-                className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-sm text-white placeholder-slate-500 focus:border-cyan-500 focus:outline-none"
+                className="input-field text-xs sm:text-sm"
                 placeholder="e.g. Alex, Sarah (Child), Junior"
                 required
                 value={form.name}
@@ -233,30 +239,30 @@ function ProfileManagementPage() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">
+              <label className="block text-xs font-semibold text-slate-300 mb-1.5">
                 Maturity Tier
               </label>
               <select
-                className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-sm text-white focus:border-cyan-500 focus:outline-none"
+                className="input-field text-xs sm:text-sm cursor-pointer"
                 value={form.type}
                 onChange={(e) => setForm((prev) => ({ ...prev, type: e.target.value }))}
               >
-                <option value="child">Child (Restricted uploads + PIN protection)</option>
+                <option value="child">Child (Strict filtering + optional PIN lock)</option>
                 <option value="teen">Teen (Balanced filtering)</option>
                 <option value="guardian">Guardian Full Access (Unrestricted)</option>
               </select>
             </div>
 
             {form.type === 'child' && (
-              <div className="rounded-2xl border border-rose-500/30 bg-rose-500/10 p-4 space-y-2">
+              <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-3.5 space-y-2">
                 <div className="flex items-center gap-2 text-rose-300 text-xs font-bold">
-                  <Lock className="h-4 w-4" />
+                  <Lock className="h-3.5 w-3.5" />
                   <span>Guardian Security PIN (Optional for Child Mode)</span>
                 </div>
                 <input
                   type="password"
                   maxLength={6}
-                  className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:border-cyan-500 focus:outline-none"
+                  className="input-field text-xs font-mono"
                   placeholder="Enter 4-6 digit numeric PIN"
                   value={form.pin}
                   onChange={(e) => setForm((prev) => ({ ...prev, pin: e.target.value }))}
@@ -268,15 +274,15 @@ function ProfileManagementPage() {
             )}
 
             {/* Threshold Sliders */}
-            <div className="space-y-4 pt-2">
-              <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 block">
-                Policy Threshold Calibration
+            <div className="space-y-3 pt-1">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block">
+                Sensitivity Calibration
               </span>
 
               {/* Nudity Slider */}
-              <div className="rounded-2xl border border-slate-800 bg-slate-950/70 p-4">
+              <div className="rounded-xl border border-white/[0.06] bg-slate-950/50 p-3.5">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+                  <span className="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
                     <EyeOff className="h-3.5 w-3.5 text-rose-400" />
                     NSFW & Nudity Tolerance
                   </span>
@@ -291,7 +297,7 @@ function ProfileManagementPage() {
                   step="0.05"
                   value={form.nudity}
                   onChange={(e) => setForm((prev) => ({ ...prev, nudity: Number(e.target.value) }))}
-                  className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-rose-500"
+                  className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-rose-400"
                 />
                 <div className="flex justify-between text-[10px] text-slate-500 font-mono mt-1">
                   <span>Strict Censor (5%)</span>
@@ -300,9 +306,9 @@ function ProfileManagementPage() {
               </div>
 
               {/* Violence Slider */}
-              <div className="rounded-2xl border border-slate-800 bg-slate-950/70 p-4">
+              <div className="rounded-xl border border-white/[0.06] bg-slate-950/50 p-3.5">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+                  <span className="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
                     <Flame className="h-3.5 w-3.5 text-amber-400" />
                     Graphic Violence Tolerance
                   </span>
@@ -317,7 +323,7 @@ function ProfileManagementPage() {
                   step="0.05"
                   value={form.violence}
                   onChange={(e) => setForm((prev) => ({ ...prev, violence: Number(e.target.value) }))}
-                  className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-amber-500"
+                  className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-amber-400"
                 />
                 <div className="flex justify-between text-[10px] text-slate-500 font-mono mt-1">
                   <span>Strict (5%)</span>
@@ -326,9 +332,9 @@ function ProfileManagementPage() {
               </div>
 
               {/* Profanity Slider */}
-              <div className="rounded-2xl border border-slate-800 bg-slate-950/70 p-4">
+              <div className="rounded-xl border border-white/[0.06] bg-slate-950/50 p-3.5">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+                  <span className="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
                     <VolumeX className="h-3.5 w-3.5 text-cyan-400" />
                     Audio Profanity Tolerance
                   </span>
@@ -343,7 +349,7 @@ function ProfileManagementPage() {
                   step="0.05"
                   value={form.profanity}
                   onChange={(e) => setForm((prev) => ({ ...prev, profanity: Number(e.target.value) }))}
-                  className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-cyan-500"
+                  className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-cyan-400"
                 />
                 <div className="flex justify-between text-[10px] text-slate-500 font-mono mt-1">
                   <span>Strict Mute (5%)</span>
@@ -354,7 +360,7 @@ function ProfileManagementPage() {
 
             <button
               type="submit"
-              className="w-full rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 py-3.5 font-bold text-white shadow-lg shadow-cyan-500/20 hover:brightness-110 active:scale-95 transition"
+              className="btn-primary w-full py-3 text-xs sm:text-sm"
             >
               Save Family Profile
             </button>
@@ -362,55 +368,53 @@ function ProfileManagementPage() {
         </section>
 
         {/* Managed Profiles List */}
-        <section className="lg:col-span-6 rounded-3xl border border-slate-800 bg-slate-900/70 p-6 sm:p-8 backdrop-blur-xl shadow-xl space-y-6">
-          <div className="flex items-center justify-between pb-4 border-b border-slate-800">
+        <section className="lg:col-span-6 glass-card rounded-2xl p-6 sm:p-7 space-y-5">
+          <div className="flex items-center justify-between pb-3.5 border-b border-white/[0.06]">
             <div>
-              <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                <Shield className="h-5 w-5 text-cyan-400" />
+              <h2 className="text-base font-bold text-white flex items-center gap-2">
+                <Shield className="h-4 w-4 text-cyan-400" />
                 Managed Profiles ({profiles.length})
               </h2>
               <p className="text-xs text-slate-400 mt-0.5">Switch active viewing mode or remove profiles</p>
             </div>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-3">
             {profiles.length === 0 ? (
-              <div className="text-center py-12 border border-dashed border-slate-800 rounded-2xl">
+              <div className="text-center py-12 border border-dashed border-white/[0.08] rounded-xl bg-slate-950/30">
                 <Users className="h-10 w-10 text-slate-600 mx-auto mb-2" />
-                <p className="text-sm font-semibold text-slate-300">No custom profiles yet</p>
-                <p className="text-xs text-slate-500 mt-1">Use the authoring form to create your child and teen profiles.</p>
+                <p className="text-xs font-semibold text-slate-300">No custom profiles yet</p>
+                <p className="text-[11px] text-slate-500 mt-1">Use the authoring form to create your child and teen profiles.</p>
               </div>
             ) : (
               profiles.map((profile) => {
                 const isActive = profile.id === activeProfileId
-                const typeColors = {
-                  child: 'bg-rose-500/15 text-rose-300 border-rose-500/30',
-                  teen: 'bg-amber-500/15 text-amber-300 border-amber-500/30',
-                  guardian: 'bg-cyan-500/15 text-cyan-300 border-cyan-500/30',
-                }
-
                 return (
                   <article
                     key={profile.id}
-                    className={`rounded-2xl border p-5 transition-all ${
+                    className={`rounded-xl border p-4 transition-all ${
                       isActive
-                        ? 'border-cyan-500/50 bg-cyan-950/20 shadow-[0_0_20px_rgba(6,182,212,0.1)]'
-                        : 'border-slate-800 bg-slate-950/60 hover:border-slate-700'
+                        ? 'border-cyan-500/40 bg-cyan-950/20 shadow-[0_0_16px_rgba(6,182,212,0.1)]'
+                        : 'border-white/[0.06] bg-slate-950/40 hover:border-white/[0.12]'
                     }`}
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex items-center gap-3">
-                        <div className={`h-11 w-11 rounded-xl flex items-center justify-center font-bold text-base ${
-                          profile.type === 'child' ? 'bg-rose-500/20 text-rose-400' :
-                          profile.type === 'teen' ? 'bg-amber-500/20 text-amber-400' :
-                          'bg-cyan-500/20 text-cyan-400'
+                        <div className={`h-10 w-10 rounded-xl flex items-center justify-center font-bold text-sm ${
+                          profile.type === 'child' ? 'bg-rose-500/15 text-rose-400 border border-rose-500/25' :
+                          profile.type === 'teen' ? 'bg-amber-500/15 text-amber-400 border border-amber-500/25' :
+                          'bg-cyan-500/15 text-cyan-400 border border-cyan-500/25'
                         }`}>
                           {profile.name.charAt(0).toUpperCase()}
                         </div>
                         <div>
                           <div className="flex items-center gap-2">
-                            <span className="font-bold text-white text-base">{profile.name}</span>
-                            <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded-full border ${typeColors[profile.type] || typeColors.child}`}>
+                            <span className="font-bold text-white text-sm">{profile.name}</span>
+                            <span className={
+                              profile.type === 'child' ? 'badge-rose text-[10px]' :
+                              profile.type === 'teen' ? 'badge-amber text-[10px]' :
+                              'badge-cyan text-[10px]'
+                            }>
                               {profile.type}
                             </span>
                             {profile.pin && (
@@ -420,19 +424,19 @@ function ProfileManagementPage() {
                             )}
                           </div>
                           {isActive && (
-                            <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-cyan-400 mt-1">
-                              <CheckCircle2 className="h-3.5 w-3.5" /> Currently Active Enforcement
+                            <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-cyan-300 mt-0.5">
+                              <CheckCircle2 className="h-3.5 w-3.5 text-cyan-400" /> Active Enforcement
                             </span>
                           )}
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1.5">
                         {!isActive ? (
                           <button
                             type="button"
                             onClick={() => handleSwitch(profile)}
-                            className="rounded-lg bg-slate-800 hover:bg-slate-700 px-3 py-1.5 text-xs font-semibold text-slate-200 transition"
+                            className="btn-secondary text-xs py-1 px-2.5"
                           >
                             Set Active
                           </button>

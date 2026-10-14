@@ -1,16 +1,18 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import StatCard from '../components/StatCard.jsx'
 import { useAuth } from '../context/AuthContext.jsx'
 import { onUserVideosSnapshot } from '../lib/adminStorage.js'
-import { Shield, Users, Video, Play, Upload, Clock, CheckCircle2, AlertTriangle } from 'lucide-react'
+import { Shield, Users, Video, Play, Upload, Clock, CheckCircle2, AlertTriangle, Filter, Sparkles, UserCheck } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import VideoModal from '../components/VideoModal.jsx'
+import { motion } from 'framer-motion'
 
 function GuardianDashboardPage() {
   const { profiles, activeProfile, role, user } = useAuth()
   const [userVideos, setUserVideos] = useState([])
   const [loadingVideos, setLoadingVideos] = useState(true)
   const [activeVideo, setActiveVideo] = useState(null)
+  const [statusFilter, setStatusFilter] = useState('All')
 
   useEffect(() => {
     if (!user?.uid) return
@@ -20,6 +22,11 @@ function GuardianDashboardPage() {
     })
     return () => unsub()
   }, [user?.uid])
+
+  const filteredVideos = useMemo(() => {
+    if (statusFilter === 'All') return userVideos
+    return userVideos.filter((v) => (v.status || 'Pending').toLowerCase() === statusFilter.toLowerCase())
+  }, [userVideos, statusFilter])
 
   if (role === 'admin') {
     return (
@@ -45,130 +52,197 @@ function GuardianDashboardPage() {
 
   return (
     <div className="space-y-8">
-      <section className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      {/* Hero Welcome Header */}
+      <section className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-slate-800/60">
         <div>
-          <h1 className="text-3xl font-extrabold text-white tracking-tight flex items-center gap-3">
-            <Shield className="h-8 w-8 text-cyan-400" />
+          <div className="flex items-center gap-2.5">
+            <span className="badge-cyan text-[11px]">Parental Protection Active</span>
+            <span className="text-xs text-slate-500">•</span>
+            <span className="text-xs text-slate-400 font-mono">ID: {user?.uid?.slice(0, 8)}...</span>
+          </div>
+          <h1 className="text-3xl font-extrabold text-white tracking-tight mt-1.5 flex items-center gap-3">
             Guardian Dashboard
           </h1>
-          <p className="mt-1 text-slate-400">
-            Welcome, <span className="text-cyan-300">{user?.displayName || user?.email}</span>. Manage family profiles, content policies, and inspect video moderation states.
+          <p className="mt-1 text-sm text-slate-400">
+            Welcome back, <span className="text-slate-200 font-medium">{user?.displayName || user?.email}</span>. Monitor child safety policies, active guardrails, and media moderation.
           </p>
         </div>
-        <Link
-          to="/upload"
-          className="inline-flex items-center gap-2 self-start rounded-xl bg-cyan-500 px-4 py-2.5 font-semibold text-slate-950 transition hover:bg-cyan-400"
-        >
-          <Upload className="h-4 w-4" />
-          <span>Upload Media</span>
-        </Link>
-      </section>
-
-      {/* Stats Overview */}
-      <section className="grid gap-4 sm:grid-cols-3">
-        <StatCard label="Total Family Profiles" value={profiles.length} icon={Users} subtitle="Active guardian group" />
-        <StatCard label="Child Profiles" value={profiles.filter((p) => p.type === 'child').length} tone="rose" icon={Shield} subtitle="Enforcing strict policies" />
-        <StatCard label="My Uploaded Videos" value={userVideos.length} tone="cyan" icon={Video} subtitle="Firestore media catalog" />
-      </section>
-
-      {/* Active Profile Card */}
-      <section className="rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-xl">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold text-white flex items-center gap-2">
-            <Users className="h-5 w-5 text-cyan-400" />
-            Active Profile Enforcement
-          </h2>
-          <Link to="/profiles" className="text-xs text-cyan-400 hover:underline">
-            Manage Profiles →
+        <div className="flex items-center gap-2.5">
+          <Link
+            to="/upload"
+            className="btn-primary text-sm py-2 px-4.5"
+          >
+            <Upload className="h-4 w-4" />
+            <span>Upload Media</span>
           </Link>
         </div>
+      </section>
+
+      {/* Modern Stats Overview */}
+      <section className="grid gap-4 sm:grid-cols-3">
+        <StatCard 
+          label="Family Profiles" 
+          value={profiles.length} 
+          icon={Users} 
+          subtitle="Managed child & teen accounts" 
+        />
+        <StatCard 
+          label="Child Profiles" 
+          value={profiles.filter((p) => p.type === 'child').length} 
+          tone="rose" 
+          icon={Shield} 
+          subtitle="Protected by strict AI filters" 
+        />
+        <StatCard 
+          label="Media In Vault" 
+          value={userVideos.length} 
+          tone="cyan" 
+          icon={Video} 
+          subtitle="Scanned through AI pipeline" 
+        />
+      </section>
+
+      {/* Active Profile Enforcement Card */}
+      <section className="glass-card rounded-2xl p-6">
+        <div className="flex items-center justify-between mb-5">
+          <div>
+            <h2 className="text-lg font-bold text-white flex items-center gap-2">
+              <UserCheck className="h-5 w-5 text-cyan-400" />
+              Active Viewing Session
+            </h2>
+            <p className="text-xs text-slate-400 mt-0.5">Current profile rules actively applied on this device.</p>
+          </div>
+          <Link to="/profiles" className="text-xs font-semibold text-cyan-400 hover:text-cyan-300 transition flex items-center gap-1">
+            <span>Manage Profiles</span>
+            <span>→</span>
+          </Link>
+        </div>
+
         {activeProfile ? (
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
-            <div className="rounded-xl bg-slate-950/60 border border-slate-800 p-4">
-              <span className="text-xs text-slate-500 uppercase tracking-wider">Profile Name</span>
-              <p className="text-lg font-bold text-white mt-1">{activeProfile.name}</p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="rounded-xl bg-slate-950/50 border border-white/[0.06] p-4 flex items-center gap-3.5">
+              <div className="h-10 w-10 rounded-xl bg-cyan-500/15 border border-cyan-500/30 flex items-center justify-center font-bold text-cyan-400">
+                {activeProfile.name.charAt(0).toUpperCase()}
+              </div>
+              <div>
+                <span className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Active Profile</span>
+                <p className="text-base font-bold text-white">{activeProfile.name}</p>
+              </div>
             </div>
-            <div className="rounded-xl bg-slate-950/60 border border-slate-800 p-4">
-              <span className="text-xs text-slate-500 uppercase tracking-wider">Maturity Level</span>
-              <p className="text-lg font-bold capitalize text-cyan-400 mt-1">{activeProfile.type}</p>
+
+            <div className="rounded-xl bg-slate-950/50 border border-white/[0.06] p-4 flex items-center gap-3.5">
+              <div className="h-10 w-10 rounded-xl bg-violet-500/15 border border-violet-500/30 flex items-center justify-center font-bold text-violet-400">
+                <Shield className="h-5 w-5" />
+              </div>
+              <div>
+                <span className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Maturity Mode</span>
+                <p className="text-base font-bold capitalize text-violet-300">{activeProfile.type} Mode</p>
+              </div>
             </div>
-            <div className="rounded-xl bg-slate-950/60 border border-slate-800 p-4">
-              <span className="text-xs text-slate-500 uppercase tracking-wider">Upload Gate</span>
-              <p className="text-lg font-bold mt-1 text-emerald-400">
-                {activeProfile.type === 'child' ? (
-                  <span className="text-rose-400">Restricted (Child Mode)</span>
-                ) : (
-                  <span>Allowed</span>
-                )}
-              </p>
+
+            <div className="rounded-xl bg-slate-950/50 border border-white/[0.06] p-4 flex items-center gap-3.5">
+              <div className="h-10 w-10 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center font-bold text-emerald-400">
+                <CheckCircle2 className="h-5 w-5" />
+              </div>
+              <div>
+                <span className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">AI Content Guard</span>
+                <p className="text-base font-bold text-emerald-400">
+                  {activeProfile.type === 'child' ? 'Strict Censorship' : 'Standard Filter'}
+                </p>
+              </div>
             </div>
           </div>
         ) : (
-          <p className="text-slate-400 text-sm py-2">
-            No profile currently active. Visit <Link to="/profiles" className="text-cyan-400 underline">Profiles</Link> to create or switch.
-          </p>
+          <div className="rounded-xl bg-slate-950/40 border border-dashed border-slate-800 p-6 text-center">
+            <p className="text-sm text-slate-400">
+              No profile selected for this device. <Link to="/profiles" className="text-cyan-400 font-semibold hover:underline">Select a profile</Link> to enforce child safety rules.
+            </p>
+          </div>
         )}
       </section>
 
-      {/* User Video Upload History (SDS Module 2 / FR2.4) */}
-      <section className="rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-xl">
-        <div className="flex items-center justify-between mb-4">
+      {/* Family Media Vault */}
+      <section className="glass-card rounded-2xl p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
           <div>
-            <h2 className="text-xl font-bold text-white flex items-center gap-2">
-              <Video className="h-5 w-5 text-cyan-400" />
-              My Uploaded Media (Real-time Firestore)
-            </h2>
-            <p className="text-xs text-slate-400 mt-0.5">Live status of videos submitted under your account.</p>
+            <div className="flex items-center gap-2">
+              <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                <Video className="h-5 w-5 text-cyan-400" />
+                Family Media Vault
+              </h2>
+              <span className="badge-slate text-[10px] font-mono">Live Sync</span>
+            </div>
+            <p className="text-xs text-slate-400 mt-0.5">Real-time status of family videos scanned by PurePlay AI.</p>
+          </div>
+
+          {/* Clean Status Filter Tabs */}
+          <div className="flex items-center gap-1 bg-slate-950/60 border border-slate-800/80 p-1 rounded-xl self-start">
+            {['All', 'Approved', 'Flagged', 'Pending'].map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setStatusFilter(tab)}
+                className={`rounded-lg px-3 py-1 text-xs font-semibold transition-all ${
+                  statusFilter === tab
+                    ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                {tab}
+              </button>
+            ))}
           </div>
         </div>
 
         {loadingVideos ? (
-          <div className="py-8 text-center text-slate-500 text-sm">Loading media records...</div>
-        ) : userVideos.length === 0 ? (
-          <div className="py-10 text-center text-slate-500 text-sm border border-dashed border-slate-800 rounded-xl">
-            <Video className="h-10 w-10 mx-auto text-slate-600 mb-2" />
-            <p className="font-semibold text-slate-300">No videos uploaded yet</p>
-            <p className="text-xs mt-1">Upload a video to see real-time AI processing status and compliance logs.</p>
+          <div className="py-12 text-center text-slate-500 text-sm flex items-center justify-center gap-2">
+            <div className="h-4 w-4 animate-spin rounded-full border-2 border-cyan-500 border-t-transparent" />
+            <span>Synchronizing media vault...</span>
+          </div>
+        ) : filteredVideos.length === 0 ? (
+          <div className="py-12 text-center text-slate-500 text-sm border border-dashed border-slate-800 rounded-xl bg-slate-950/30">
+            <Video className="h-10 w-10 mx-auto text-slate-600 mb-2.5" />
+            <p className="font-semibold text-slate-300">No media found in this view</p>
+            <p className="text-xs mt-1 text-slate-500">
+              {statusFilter === 'All' 
+                ? 'Upload family videos to automatically scan them for adult content and profanity.' 
+                : `No videos currently matching status '${statusFilter}'.`}
+            </p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="min-w-full text-left text-sm">
-              <thead className="border-b border-slate-800 bg-slate-950/40 text-xs uppercase tracking-wider text-slate-400">
+              <thead className="border-b border-white/[0.06] bg-slate-950/50 text-[11px] uppercase tracking-wider text-slate-400">
                 <tr>
-                  <th className="py-3 px-4 font-medium">Video Title</th>
-                  <th className="py-3 px-4 font-medium">Uploaded Date</th>
-                  <th className="py-3 px-4 font-medium">AI Status</th>
-                  <th className="py-3 px-4 text-right font-medium">Action</th>
+                  <th className="py-3 px-4 font-semibold">Video Details</th>
+                  <th className="py-3 px-4 font-semibold">Date Added</th>
+                  <th className="py-3 px-4 font-semibold">AI Safety Status</th>
+                  <th className="py-3 px-4 text-right font-semibold">Action</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800">
-                {userVideos.map((item) => {
+              <tbody className="divide-y divide-white/[0.04]">
+                {filteredVideos.map((item) => {
                   const status = item.status || 'Pending'
                   return (
-                    <tr key={item.id} className="text-slate-200 hover:bg-slate-800/40 transition">
-                      <td className="py-3 px-4 max-w-xs">
+                    <tr key={item.id} className="text-slate-200 hover:bg-slate-800/30 transition-colors">
+                      <td className="py-3.5 px-4 max-w-xs">
                         <div className="font-semibold text-white truncate">{item.title || item.file_name}</div>
                         {item.description && (
-                          <div className="text-xs text-slate-400 truncate line-clamp-1">{item.description}</div>
+                          <div className="text-xs text-slate-400 truncate line-clamp-1 mt-0.5">{item.description}</div>
                         )}
                       </td>
-                      <td className="py-3 px-4 text-xs text-slate-400">
-                        {item.uploaded_at ? new Date(item.uploaded_at).toLocaleString() : '—'}
+                      <td className="py-3.5 px-4 text-xs text-slate-400 font-mono">
+                        {item.uploaded_at ? new Date(item.uploaded_at).toLocaleDateString() : '—'}
                       </td>
-                      <td className="py-3 px-4">
-                        <span
-                          className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-bold ${
-                            status === 'Approved'
-                              ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                              : status === 'Flagged'
-                              ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
-                              : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
-                          }`}
-                        >
-                          ● {status}
-                        </span>
+                      <td className="py-3.5 px-4">
+                        {status === 'Approved' ? (
+                          <span className="badge-emerald">● Approved Safe</span>
+                        ) : status === 'Flagged' ? (
+                          <span className="badge-rose">● Content Flagged</span>
+                        ) : (
+                          <span className="badge-amber">● AI Analyzing</span>
+                        )}
                       </td>
-                      <td className="py-3 px-4 text-right">
+                      <td className="py-3.5 px-4 text-right">
                         {item.download_url && (
                           <button
                             onClick={() =>
@@ -177,7 +251,7 @@ function GuardianDashboardPage() {
                                 title: item.title || item.file_name,
                               })
                             }
-                            className="inline-flex items-center gap-1 rounded-lg bg-cyan-500/10 px-2.5 py-1 text-xs font-semibold text-cyan-400 hover:bg-cyan-500/20 transition"
+                            className="inline-flex items-center gap-1.5 rounded-lg border border-cyan-500/30 bg-cyan-500/10 px-3 py-1.5 text-xs font-semibold text-cyan-300 hover:bg-cyan-500/20 hover:border-cyan-500/50 transition-all"
                           >
                             <Play className="h-3.5 w-3.5" />
                             <span>Preview</span>

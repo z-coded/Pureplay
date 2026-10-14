@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import { onVideosSnapshot } from '../lib/adminStorage.js'
-import { Play, Search, Film, CheckCircle, Shield, Sparkles } from 'lucide-react'
+import { Play, Search, Film, CheckCircle, ShieldCheck, Sparkles } from 'lucide-react'
 import VideoModal from '../components/VideoModal.jsx'
 import { motion } from 'framer-motion'
 
@@ -19,14 +19,26 @@ function GalleryPage() {
   const [activeVideo, setActiveVideo] = useState(null)
 
   useEffect(() => {
-    const unsub = onVideosSnapshot((items) => {
-      setVideos(items)
+    let unsub = () => {}
+    try {
+      unsub = onVideosSnapshot((items) => {
+        setVideos(items || [])
+        setLoading(false)
+      })
+    } catch (err) {
+      console.error('Error attaching gallery listener:', err)
       setLoading(false)
-    })
-    return () => unsub()
+    }
+
+    const timer = setTimeout(() => setLoading(false), 1200)
+
+    return () => {
+      unsub()
+      clearTimeout(timer)
+    }
   }, [])
 
-  // Module 6: Only videos with status === "Approved" are displayed
+  // Only videos with status === "Approved" are displayed
   const approvedVideos = useMemo(() => {
     return videos.filter((v) => v.status === 'Approved')
   }, [videos])
@@ -44,45 +56,54 @@ function GalleryPage() {
 
   if (loading) {
     return (
-      <div className="flex h-64 items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-cyan-500 border-t-transparent" />
+      <div className="flex h-72 items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-cyan-500 border-t-transparent" />
+          <span className="text-xs text-slate-400 font-medium">Loading safe media library...</span>
+        </div>
       </div>
     )
   }
 
   return (
     <div className="space-y-8">
+      {/* Header & Search */}
       <section className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-extrabold text-white tracking-tight flex items-center gap-3">
-            <Film className="h-8 w-8 text-cyan-400" />
-            Approved Content Gallery (Module 6)
-          </h1>
-          <p className="mt-1 text-slate-400">
-            Verified safe and approved media catalog. Free from profanity and adult violations.
+          <div className="flex items-center gap-2.5">
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight flex items-center gap-2.5">
+              <Film className="h-7 w-7 text-cyan-400" />
+              Safe Media Gallery
+            </h1>
+            <span className="badge-emerald text-[11px] font-mono">Curated Vault</span>
+          </div>
+          <p className="mt-1 text-sm text-slate-400">
+            Verified child-safe video catalog thoroughly inspected by PurePlay AI engines.
           </p>
         </div>
 
-        {/* Search */}
-        <div className="relative w-full sm:w-72">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
+        {/* Clean Search Input */}
+        <div className="relative w-full sm:w-80">
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
           <input
             type="search"
-            placeholder="Search approved videos..."
+            placeholder="Search approved titles..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="w-full rounded-xl border border-slate-700 bg-slate-900 pl-9 pr-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-cyan-500 focus:outline-none"
+            className="input-field pl-10 pr-4 text-xs sm:text-sm"
           />
         </div>
       </section>
 
       {/* Grid of Approved Videos */}
       {filtered.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 rounded-3xl border border-dashed border-slate-800 bg-slate-900/30 text-center">
-          <Film className="h-12 w-12 text-slate-600 mb-3" />
-          <h3 className="text-lg font-bold text-white">No Approved Videos Yet</h3>
-          <p className="mt-1 max-w-sm text-xs text-slate-400">
-            Videos uploaded to PurePlay that pass AI screening or receive Administrator Approval will appear in this catalog.
+        <div className="glass-card flex flex-col items-center justify-center py-20 rounded-2xl border border-dashed border-white/[0.08] text-center px-4">
+          <div className="h-14 w-14 rounded-2xl bg-slate-800/60 border border-white/[0.06] flex items-center justify-center mb-4 text-slate-500">
+            <Film className="h-7 w-7" />
+          </div>
+          <h3 className="text-base font-bold text-white">No Approved Media in Library</h3>
+          <p className="mt-1.5 max-w-md text-xs text-slate-400">
+            Videos uploaded through PurePlay that pass AI screening or receive Administrator Approval will appear automatically in this safe catalog.
           </p>
         </div>
       ) : (
@@ -90,37 +111,60 @@ function GalleryPage() {
           {filtered.map((video) => (
             <motion.div
               key={video.id}
-              whileHover={{ y: -4 }}
-              className="glass-card rounded-2xl overflow-hidden border border-slate-800 bg-slate-900/80 flex flex-col justify-between group shadow-lg"
+              whileHover={{ y: -3 }}
+              transition={{ duration: 0.2 }}
+              className="glass-card rounded-2xl overflow-hidden flex flex-col justify-between group"
             >
-              {/* Video Thumbnail / Mock Player View */}
+              {/* Video Thumbnail / Clean Player Trigger */}
               <div
-                className="relative aspect-video w-full bg-slate-950 flex items-center justify-center cursor-pointer group-hover:brightness-110 transition"
+                className="relative aspect-video w-full bg-slate-950 flex items-center justify-center cursor-pointer overflow-hidden"
                 onClick={() => setActiveVideo(video)}
               >
-                <div className="h-14 w-14 rounded-full bg-cyan-500/20 flex items-center justify-center text-cyan-400 group-hover:scale-110 group-hover:bg-cyan-500/30 transition shadow-lg">
-                  <Play className="h-7 w-7 fill-cyan-400" />
+                {/* Subtle dark backdrop pattern */}
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent z-10" />
+                
+                {/* Play Button */}
+                <div className="relative z-20 h-13 w-13 rounded-full bg-cyan-500/20 border border-cyan-400/30 flex items-center justify-center text-cyan-300 group-hover:scale-110 group-hover:bg-cyan-500/30 group-hover:border-cyan-400/60 transition-all duration-300 shadow-xl backdrop-blur-sm">
+                  <Play className="h-6 w-6 fill-cyan-400 ml-0.5" />
                 </div>
-                <div className="absolute top-3 left-3 flex items-center gap-1.5 rounded-full bg-emerald-500/20 border border-emerald-500/30 px-2.5 py-0.5 text-[11px] font-bold text-emerald-400 backdrop-blur-md">
-                  <CheckCircle className="h-3 w-3" />
-                  <span>Approved Safe</span>
+
+                {/* Safe Status Badge */}
+                <div className="absolute top-3 left-3 z-20">
+                  <span className="badge-emerald text-[11px] backdrop-blur-md">
+                    <CheckCircle className="h-3 w-3" />
+                    <span>Safe for All Ages</span>
+                  </span>
                 </div>
+
+                {/* File size pill */}
+                {video.file_size && (
+                  <div className="absolute bottom-3 right-3 z-20">
+                    <span className="badge-slate text-[10px] font-mono backdrop-blur-md">
+                      {formatBytes(video.file_size)}
+                    </span>
+                  </div>
+                )}
               </div>
 
               {/* Video Meta Info */}
               <div className="p-5 flex-1 flex flex-col justify-between">
                 <div>
-                  <h3 className="font-bold text-white text-base truncate" title={video.title || video.file_name}>
+                  <h3 className="font-bold text-white text-base truncate group-hover:text-cyan-300 transition-colors" title={video.title || video.file_name}>
                     {video.title || video.file_name}
                   </h3>
-                  <p className="text-xs text-slate-400 mt-1 line-clamp-2">
-                    {video.description || 'No description provided.'}
+                  <p className="text-xs text-slate-400 mt-1 line-clamp-2 leading-relaxed">
+                    {video.description || 'Verified family content cleared by PurePlay multi-layer detection filters.'}
                   </p>
                 </div>
 
-                <div className="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-500">
-                  <span className="font-mono">{formatBytes(video.file_size)}</span>
-                  <span>{video.uploaded_at ? new Date(video.uploaded_at).toLocaleDateString() : ''}</span>
+                <div className="mt-4 pt-3.5 border-t border-white/[0.05] flex items-center justify-between text-[11px] text-slate-500">
+                  <span className="flex items-center gap-1.5 text-slate-400">
+                    <ShieldCheck className="h-3.5 w-3.5 text-cyan-400" />
+                    <span>NudeNet Checked</span>
+                  </span>
+                  <span className="font-mono text-slate-400">
+                    {video.uploaded_at ? new Date(video.uploaded_at).toLocaleDateString() : 'Active'}
+                  </span>
                 </div>
               </div>
             </motion.div>

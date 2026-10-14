@@ -37,11 +37,11 @@ export default function ProfileSwitcher() {
     <div className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 rounded-xl bg-slate-800/50 border border-slate-700 px-4 py-2 text-sm text-slate-200 hover:bg-slate-800 transition-colors"
+        className="flex items-center gap-2 rounded-xl bg-slate-900/80 border border-white/[0.08] px-3.5 py-1.5 text-xs text-slate-200 hover:bg-slate-800/80 hover:border-white/[0.15] transition-all"
       >
-        <div className={`h-2 w-2 rounded-full ${activeProfile?.type === 'child' ? 'bg-rose-500' : 'bg-emerald-500'}`} />
-        <span>{activeProfile?.name || 'Select Profile'}</span>
-        <ChevronDown className={`h-4 w-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+        <div className={`h-2 w-2 rounded-full ${activeProfile?.type === 'child' ? 'bg-rose-400 shadow-[0_0_6px_#f43f5e]' : 'bg-cyan-400 shadow-[0_0_6px_#22d3ee]'}`} />
+        <span className="font-medium">{activeProfile?.name || 'Select Profile'}</span>
+        <ChevronDown className={`h-3.5 w-3.5 text-slate-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
       <AnimatePresence>
@@ -49,14 +49,14 @@ export default function ProfileSwitcher() {
           <>
             <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
             <motion.div
-              initial={{ opacity: 0, y: 10, scale: 0.95 }}
+              initial={{ opacity: 0, y: 6, scale: 0.98 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 10, scale: 0.95 }}
-              className="absolute right-0 mt-2 z-50 w-64 rounded-2xl bg-slate-900 border border-slate-800 shadow-2xl p-2"
+              exit={{ opacity: 0, y: 6, scale: 0.98 }}
+              className="absolute right-0 mt-2 z-50 w-64 rounded-2xl bg-slate-900/95 border border-white/[0.1] shadow-2xl backdrop-blur-2xl p-2"
             >
               {!pendingProfile ? (
                 <div className="space-y-1">
-                  <p className="px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-slate-500">Switch Profile</p>
+                  <p className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-500 font-mono">Switch Profile</p>
                   {profiles.map((profile) => (
                     <button
                       key={profile.id}

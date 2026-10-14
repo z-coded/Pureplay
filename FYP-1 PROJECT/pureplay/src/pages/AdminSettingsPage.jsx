@@ -55,25 +55,28 @@ function AdminSettingsPage() {
 
   return (
     <motion.div 
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
       className="space-y-8 max-w-4xl"
     >
       <section className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-extrabold text-white tracking-tight flex items-center gap-3">
-            <Settings className="text-cyan-400 h-8 w-8" />
-            Global Moderation Policy
-          </h1>
-          <p className="mt-2 text-slate-400 text-base">
-            Configure baseline AI confidence thresholds. These global parameters dictate how aggressively the shared pipeline flags content before individual profile restrictions apply.
+          <div className="flex items-center gap-2.5">
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight flex items-center gap-2.5">
+              <Settings className="text-cyan-400 h-7 w-7" />
+              Global Moderation Policy
+            </h1>
+            <span className="badge-slate font-mono text-[10px]">Baseline Tuning</span>
+          </div>
+          <p className="mt-1 text-slate-400 text-xs sm:text-sm">
+            Calibrate baseline AI confidence thresholds. These parameters govern automated visual blurring and audio suppression across all accounts.
           </p>
         </div>
 
         <button
           type="button"
           onClick={handleReset}
-          className="self-start inline-flex items-center gap-2 rounded-xl border border-slate-800 bg-slate-900/80 px-4 py-2 text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800 transition"
+          className="self-start btn-secondary text-xs"
         >
           <RotateCcw className="h-3.5 w-3.5" />
           <span>Reset Defaults</span>
@@ -83,10 +86,10 @@ function AdminSettingsPage() {
       <AnimatePresence>
         {savedToast && (
           <motion.div
-            initial={{ opacity: 0, y: -10 }}
+            initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="flex items-center gap-2 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-3.5 text-xs font-medium text-emerald-300 backdrop-blur-md"
+            exit={{ opacity: 0, y: -8 }}
+            className="flex items-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-xs font-medium text-emerald-300 backdrop-blur-md"
           >
             <CheckCircle2 className="h-4 w-4 text-emerald-400 flex-shrink-0" />
             <span>{savedToast}</span>
@@ -95,15 +98,15 @@ function AdminSettingsPage() {
       </AnimatePresence>
 
       {/* Preset Buttons */}
-      <section className="rounded-2xl border border-slate-800 bg-slate-900/50 p-5 backdrop-blur-md">
-        <span className="text-xs font-bold uppercase tracking-wider text-slate-400 block mb-3">
-          Global Sensitivity Presets
+      <section className="glass-card rounded-2xl p-5">
+        <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-3">
+          Sensitivity Presets
         </span>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <button
             type="button"
             onClick={() => applyPreset('strict')}
-            className="p-3.5 rounded-xl border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 text-left transition"
+            className="p-3.5 rounded-xl border border-rose-500/25 bg-rose-500/10 hover:bg-rose-500/15 text-left transition"
           >
             <p className="text-xs font-bold text-rose-300">Strict Defense</p>
             <p className="text-[11px] text-slate-400 mt-1">Aggressive visual censorship and sensitive speech muting</p>
@@ -111,49 +114,46 @@ function AdminSettingsPage() {
           <button
             type="button"
             onClick={() => applyPreset('balanced')}
-            className="p-3.5 rounded-xl border border-cyan-500/30 bg-cyan-500/10 hover:bg-cyan-500/20 text-left transition"
+            className="p-3.5 rounded-xl border border-cyan-500/25 bg-cyan-500/10 hover:bg-cyan-500/15 text-left transition"
           >
             <p className="text-xs font-bold text-cyan-300">Balanced Standard</p>
-            <p className="text-[11px] text-slate-400 mt-1">Production recommended: 72% visual, 58% profanity</p>
+            <p className="text-[11px] text-slate-400 mt-1">Recommended: 72% visual threshold, 58% profanity</p>
           </button>
           <button
             type="button"
             onClick={() => applyPreset('permissive')}
-            className="p-3.5 rounded-xl border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 text-left transition"
+            className="p-3.5 rounded-xl border border-amber-500/25 bg-amber-500/10 hover:bg-amber-500/15 text-left transition"
           >
             <p className="text-xs font-bold text-amber-300">Permissive Review</p>
-            <p className="text-[11px] text-slate-400 mt-1">Flags only high-confidence explicit visual sequences</p>
+            <p className="text-[11px] text-slate-400 mt-1">Flags only high-confidence explicit sequences</p>
           </button>
         </div>
       </section>
 
-      <section className="glass-card rounded-3xl p-6 sm:p-8 relative overflow-hidden">
-        {/* Glow effect */}
-        <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/5 rounded-full blur-3xl pointer-events-none" />
-
+      <section className="glass-card rounded-2xl p-6 sm:p-7 relative overflow-hidden">
         <div className="relative z-10">
-          <div className="flex items-center gap-3 mb-8 pb-6 border-b border-white/10">
-            <SlidersHorizontal className="h-6 w-6 text-indigo-400" />
+          <div className="flex items-center gap-3 mb-6 pb-5 border-b border-white/[0.06]">
+            <SlidersHorizontal className="h-5 w-5 text-indigo-400" />
             <div>
-              <h2 className="text-xl font-bold text-white">Threshold Calibration</h2>
-              <p className="text-xs text-slate-400 mt-1">Higher values require stronger model confidence to trigger censorship.</p>
+              <h2 className="text-base font-bold text-white">Threshold Calibration</h2>
+              <p className="text-xs text-slate-400 mt-0.5">Higher values require stronger model confidence to trigger censorship.</p>
             </div>
           </div>
 
-          <div className="space-y-8">
-            <div className="bg-slate-900/50 rounded-2xl p-6 border border-white/5">
+          <div className="space-y-6">
+            <div className="bg-slate-950/50 rounded-xl p-5 border border-white/[0.05]">
               <label className="block">
-                <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center justify-between mb-3.5">
                   <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-rose-500/20">
-                      <EyeOff className="h-5 w-5 text-rose-400" />
+                    <div className="p-2 rounded-lg bg-rose-500/15 text-rose-400">
+                      <EyeOff className="h-4 w-4" />
                     </div>
                     <div>
-                      <span className="text-sm font-semibold text-slate-200 block">NSFW (Visual Content)</span>
-                      <span className="text-xs text-slate-500">NudeNet 18-class boundary box and classification threshold</span>
+                      <span className="text-xs font-semibold text-slate-200 block">NSFW (Visual Content)</span>
+                      <span className="text-[11px] text-slate-400">NudeNet 18-class boundary box and classification threshold</span>
                     </div>
                   </div>
-                  <span className="text-base font-bold tabular-nums text-cyan-400 bg-slate-950 px-4 py-1.5 rounded-xl border border-slate-800">
+                  <span className="text-sm font-bold tabular-nums text-cyan-300 bg-slate-900 px-3 py-1 rounded-lg border border-white/[0.08] font-mono">
                     {Math.round(settings.nsfwThreshold * 100)}%
                   </span>
                 </div>
@@ -165,28 +165,28 @@ function AdminSettingsPage() {
                   step="0.01"
                   value={settings.nsfwThreshold}
                   onChange={(e) => update({ nsfwThreshold: Number(e.target.value) })}
-                  className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-cyan-500"
+                  className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-cyan-400"
                 />
-                <div className="flex justify-between text-xs text-slate-500 font-mono mt-2">
+                <div className="flex justify-between text-[10px] text-slate-500 font-mono mt-2">
                   <span>Strict Censor (10%)</span>
                   <span>Permissive (99%)</span>
                 </div>
               </label>
             </div>
 
-            <div className="bg-slate-900/50 rounded-2xl p-6 border border-white/5">
+            <div className="bg-slate-950/50 rounded-xl p-5 border border-white/[0.05]">
               <label className="block">
-                <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center justify-between mb-3.5">
                   <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-amber-500/20">
-                      <VolumeX className="h-5 w-5 text-amber-400" />
+                    <div className="p-2 rounded-lg bg-amber-500/15 text-amber-400">
+                      <VolumeX className="h-4 w-4" />
                     </div>
                     <div>
-                      <span className="text-sm font-semibold text-slate-200 block">Profanity (Audio Track)</span>
-                      <span className="text-xs text-slate-500">Audio stream bleeping and suppression sensitivity</span>
+                      <span className="text-xs font-semibold text-slate-200 block">Profanity (Audio Stream)</span>
+                      <span className="text-[11px] text-slate-400">Audio stream bleeping and suppression sensitivity</span>
                     </div>
                   </div>
-                  <span className="text-base font-bold tabular-nums text-cyan-400 bg-slate-950 px-4 py-1.5 rounded-xl border border-slate-800">
+                  <span className="text-sm font-bold tabular-nums text-cyan-300 bg-slate-900 px-3 py-1 rounded-lg border border-white/[0.08] font-mono">
                     {Math.round(settings.profanityThreshold * 100)}%
                   </span>
                 </div>
@@ -198,9 +198,9 @@ function AdminSettingsPage() {
                   step="0.01"
                   value={settings.profanityThreshold}
                   onChange={(e) => update({ profanityThreshold: Number(e.target.value) })}
-                  className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-cyan-500"
+                  className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-cyan-400"
                 />
-                <div className="flex justify-between text-xs text-slate-500 font-mono mt-2">
+                <div className="flex justify-between text-[10px] text-slate-500 font-mono mt-2">
                   <span>Strict Mute (10%)</span>
                   <span>Permissive (99%)</span>
                 </div>
