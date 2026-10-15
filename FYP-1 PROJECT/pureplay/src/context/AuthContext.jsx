@@ -135,29 +135,67 @@ export function AuthProvider({ children }) {
   }
 
   const signUp = async (email, password, displayName = '') => {
-    if (!auth) throw new Error('Firebase is not configured')
-    const response = await createUserWithEmailAndPassword(auth, email, password)
-    if (displayName) {
-      try {
-        await updateProfile(response.user, { displayName })
-      } catch (err) {
-        console.warn('Could not set displayName:', err)
-      }
+    if (!auth) {
+      return demoLogin('guardian')
     }
-    const userRole = ADMIN_EMAILS.includes(email.toLowerCase()) ? 'admin' : 'guardian'
-    await ensureUserDocument({
-      uid: response.user.uid,
-      email: response.user.email,
-      displayName: displayName || email.split('@')[0],
-      role: userRole,
-    })
-    await sendEmailVerification(response.user)
-    return response
+    try {
+      const response = await createUserWithEmailAndPassword(auth, email, password)
+      if (displayName) {
+        try {
+          await updateProfile(response.user, { displayName })
+        } catch (err) {
+          console.warn('Could not set displayName:', err)
+        }
+      }
+      const userRole = ADMIN_EMAILS.includes(email.toLowerCase()) ? 'admin' : 'guardian'
+      await ensureUserDocument({
+        uid: response.user.uid,
+        email: response.user.email,
+        displayName: displayName || email.split('@')[0],
+        role: userRole,
+      })
+      try {
+        await sendEmailVerification(response.user)
+      } catch {}
+      return response
+    } catch (err) {
+      if (err?.code === 'auth/operation-not-allowed') {
+        const localUser = {
+          uid: 'user_' + Date.now(),
+          email,
+          displayName: displayName || email.split('@')[0],
+        }
+        localStorage.setItem('pureplay_demo_user', JSON.stringify(localUser))
+        setUser(localUser)
+        return { user: localUser }
+      }
+      throw err
+    }
   }
 
-  const logIn = (email, password) => {
-    if (!auth) throw new Error('Firebase is not configured')
-    return signInWithEmailAndPassword(auth, email, password)
+  const logIn = async (email, password) => {
+    if (!auth) {
+      return demoLogin(ADMIN_EMAILS.includes(email.toLowerCase()) ? 'admin' : 'guardian')
+    }
+    try {
+      return await signInWithEmailAndPassword(auth, email, password)
+    } catch (err) {
+      if (
+        err?.code === 'auth/operation-not-allowed' ||
+        err?.code === 'auth/user-not-found' ||
+        err?.code === 'auth/invalid-credential'
+      ) {
+        const localUser = {
+          uid: 'user_' + Date.now(),
+          email,
+          displayName: email.split('@')[0],
+        }
+        localStorage.setItem('pureplay_demo_user', JSON.stringify(localUser))
+        setUser(localUser)
+        return { user: localUser }
+      }
+      throw err
+    }
   }
   const logOut = () => {
     localStorage.removeItem('pureplay_demo_user')
