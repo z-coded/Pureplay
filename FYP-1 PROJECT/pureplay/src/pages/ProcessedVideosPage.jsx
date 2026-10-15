@@ -250,10 +250,8 @@ function ProcessedVideosPage() {
               <Play className="h-3.5 w-3.5 fill-white" /> Preview Filtered Output
             </button>
             <a
-              href="https://www.w3schools.com/html/mov_bbb.mp4"
-              download="moderated_output.mp4"
-              target="_blank"
-              rel="noreferrer"
+              href="/demo_censored_child_safe.mp4"
+              download="demo_censored_child_safe.mp4"
               className="btn-secondary text-xs flex items-center gap-1.5"
             >
               <Download className="h-3.5 w-3.5" /> Download
@@ -265,8 +263,8 @@ function ProcessedVideosPage() {
       <VideoModal
         isOpen={isVideoOpen}
         onClose={() => setIsVideoOpen(false)}
-        videoUrl="https://www.w3schools.com/html/mov_bbb.mp4"
-        title="Moderated Output Demo"
+        videoUrl="/demo_censored_child_safe.mp4"
+        title="PurePlay AI — Real-Time Moderated Output (Voice Muted + 51×51 Gaussian Blur)"
       />
     </div>
   )
