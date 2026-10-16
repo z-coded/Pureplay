@@ -208,6 +208,115 @@ class PurePlayMediaProcessor:
             "fps": fps
         }
 
+    def censor_multi_modal_video(
+        self,
+        input_video_path: str,
+        output_video_path: str,
+        detections_by_timestamp: dict = None,
+        bleep_intervals: list = None,
+        blur_ksize: int = 51
+    ):
+        """
+        Unified multi-modal censoring pipeline:
+        1. Reads input video, applies 51x51 Gaussian blur to detected bounding boxes.
+        2. Extracts audio, mutes/bleeps detected profanity intervals with 1000 Hz tone.
+        3. Muxes video & audio with FFmpeg (H.264 / AAC) into child-safe output MP4.
+        """
+        import imageio_ffmpeg
+        import subprocess
+        ffmpeg_exe = imageio_ffmpeg.get_ffmpeg_exe()
+
+        temp_dir = os.path.dirname(output_video_path)
+        timestamp_id = int(time.time() * 1000)
+        temp_video_avi = os.path.join(temp_dir, f"_temp_vid_{timestamp_id}.avi")
+        temp_audio_in = os.path.join(temp_dir, f"_temp_aud_{timestamp_id}.wav")
+        temp_audio_out = os.path.join(temp_dir, f"_temp_aud_censored_{timestamp_id}.wav")
+
+        try:
+            # 1. Process Video Frames (Visual Gaussian Blur)
+            vid_res = self.process_and_redact_video(
+                input_video_path,
+                temp_video_avi,
+                detections_by_timestamp=detections_by_timestamp
+            )
+
+            # 2. Extract & Censor Audio
+            bleep_intervals = bleep_intervals or []
+            has_audio = False
+            try:
+                cmd_ext = [
+                    ffmpeg_exe, "-y",
+                    "-i", input_video_path,
+                    "-vn", "-ar", "44100", "-ac", "1",
+                    temp_audio_in
+                ]
+                res_ext = subprocess.run(cmd_ext, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                if res_ext.returncode == 0 and os.path.exists(temp_audio_in) and os.path.getsize(temp_audio_in) > 1000:
+                    has_audio = True
+            except Exception as e:
+                print(f"[WARN] Audio extraction failed: {e}")
+
+            if has_audio:
+                with wave.open(temp_audio_in, 'rb') as w_in:
+                    rate = w_in.getframerate()
+                    n_frames = w_in.getnframes()
+                    audio_data = np.frombuffer(w_in.readframes(n_frames), dtype=np.int16).copy()
+
+                for interval in bleep_intervals:
+                    s_idx = max(0, int(float(interval.get("start", 0)) * rate))
+                    e_idx = min(len(audio_data), int(float(interval.get("end", 0)) * rate))
+                    if e_idx > s_idx:
+                        # Mute original voice
+                        audio_data[s_idx:e_idx] = 0
+                        # Insert 1000 Hz FCC censor bleep tone
+                        t_bleep = np.arange(e_idx - s_idx) / rate
+                        bleep = (np.sin(2 * np.pi * 1000.0 * t_bleep) * 12000).astype(np.int16)
+                        audio_data[s_idx:e_idx] = bleep
+
+                with wave.open(temp_audio_out, 'wb') as w_out:
+                    w_out.setnchannels(1)
+                    w_out.setsampwidth(2)
+                    w_out.setframerate(rate)
+                    w_out.writeframes(audio_data.tobytes())
+
+                # 3. Mux Video + Censored Audio
+                cmd_mux = [
+                    ffmpeg_exe, "-y",
+                    "-i", temp_video_avi,
+                    "-i", temp_audio_out,
+                    "-c:v", "libx264", "-preset", "fast", "-crf", "23",
+                    "-pix_fmt", "yuv420p",
+                    "-c:a", "aac", "-b:a", "192k",
+                    "-shortest",
+                    output_video_path
+                ]
+                subprocess.run(cmd_mux, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
+            else:
+                # Video-only fallback
+                cmd_mux = [
+                    ffmpeg_exe, "-y",
+                    "-i", temp_video_avi,
+                    "-c:v", "libx264", "-preset", "fast", "-crf", "23",
+                    "-pix_fmt", "yuv420p",
+                    output_video_path
+                ]
+                subprocess.run(cmd_mux, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
+
+            return {
+                "success": True,
+                "output_video": output_video_path,
+                "redacted_frames": vid_res.get("redacted_frames", 0),
+                "bleep_intervals_applied": len(bleep_intervals)
+            }
+        finally:
+            for f in [temp_video_avi, temp_audio_in, temp_audio_out]:
+                if os.path.exists(f):
+                    try:
+                        os.remove(f)
+                    except Exception:
+                        pass
+
+
 
 # Singleton instance
 media_processor_instance = None

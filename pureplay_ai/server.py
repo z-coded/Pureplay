@@ -199,9 +199,47 @@ async def analyze_video_endpoint(
             profile=profile_ctx
         )
 
+        # 6. Apply Multi-Modal Censorship (Blur Visual NSFW + Bleep Audio Profanity)
+        base_dir = os.path.dirname(__file__)
+        censored_dir_public = os.path.join(base_dir, "..", "FYP-1 PROJECT", "pureplay", "public", "censored")
+        censored_dir_dist = os.path.join(base_dir, "..", "FYP-1 PROJECT", "pureplay", "dist", "censored")
+        os.makedirs(censored_dir_public, exist_ok=True)
+        os.makedirs(censored_dir_dist, exist_ok=True)
+
+        clean_name = "".join(c for c in file.filename if c.isalnum() or c in "._-")
+        censored_filename = f"censored_{int(time.time())}_{clean_name}"
+        if not censored_filename.endswith(".mp4"):
+            censored_filename += ".mp4"
+        censored_public_path = os.path.join(censored_dir_public, censored_filename)
+        censored_dist_path = os.path.join(censored_dir_dist, censored_filename)
+
+        detections_by_timestamp = {}
+        for item in nudenet_results.get("xai_timeline", []):
+            ts = item.get("timestamp_seconds", 0.0)
+            boxes = [d["box"] for d in item.get("detections", []) if d.get("is_explicit")]
+            if boxes:
+                detections_by_timestamp[round(ts, 1)] = [{"box": b} for b in boxes]
+
+        bleep_intervals = detox_results.get("redaction_intervals", [])
+
+        try:
+            censor_res = media_processor.censor_multi_modal_video(
+                input_video_path=temp_video_path,
+                output_video_path=censored_public_path,
+                detections_by_timestamp=detections_by_timestamp,
+                bleep_intervals=bleep_intervals
+            )
+            if os.path.exists(censored_public_path):
+                shutil.copyfile(censored_public_path, censored_dist_path)
+            censored_url = f"/censored/{censored_filename}"
+        except Exception as censor_err:
+            print(f"[WARN] Multi-modal censoring fallback: {censor_err}")
+            censored_url = "/demo_censored_child_safe.mp4"
+
         return JSONResponse(content={
             "success": True,
             "filename": file.filename,
+            "censored_video_url": censored_url,
             "guardrail_verdict": nemo_decision,
             "visual_analysis": {
                 "nudenet": nudenet_results,

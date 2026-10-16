@@ -120,7 +120,10 @@ function UploadPage() {
           })
           if (aiRes.ok) {
             const aiData = await aiRes.json()
-            aiAnalysis = aiData.analysis
+            aiAnalysis = aiData.guardrail_verdict || aiData.analysis || aiData
+            if (aiData.censored_video_url) {
+              downloadURL = aiData.censored_video_url
+            }
           }
         } catch (aiErr) {
           console.warn('Local AI service error, using heuristics:', aiErr)
