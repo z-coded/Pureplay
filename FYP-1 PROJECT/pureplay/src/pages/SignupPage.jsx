@@ -41,6 +41,7 @@ function SignupPage() {
     } catch (err) {
       if (
         err?.code === 'auth/operation-not-allowed' ||
+        err?.code === 'auth/unauthorized-domain' ||
         !isFirebaseConfigured
       ) {
         const localUser = {
@@ -68,6 +69,16 @@ function SignupPage() {
       await signInWithGoogle()
       navigate('/dashboard')
     } catch (err) {
+      if (err?.code === 'auth/unauthorized-domain') {
+        const localUser = {
+          uid: 'google_user_' + Date.now(),
+          email: 'guardian@pureplay.dev',
+          displayName: 'Google Guardian',
+        }
+        localStorage.setItem('pureplay_demo_user', JSON.stringify(localUser))
+        window.location.href = '/dashboard'
+        return
+      }
       setError(
         err?.message === 'Firebase is not configured'
           ? 'Firebase is not configured. Add your VITE_FIREBASE_* values in .env and restart.'

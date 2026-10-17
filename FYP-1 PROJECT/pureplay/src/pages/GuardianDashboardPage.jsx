@@ -1,18 +1,40 @@
 import { useState, useEffect, useMemo } from 'react'
 import StatCard from '../components/StatCard.jsx'
 import { useAuth } from '../context/AuthContext.jsx'
-import { onUserVideosSnapshot } from '../lib/adminStorage.js'
-import { Shield, Users, Video, Play, Upload, Clock, CheckCircle2, AlertTriangle, Filter, Sparkles, UserCheck } from 'lucide-react'
+import { onUserVideosSnapshot, deleteVideo } from '../lib/adminStorage.js'
+import { Shield, Users, Video, Play, Upload, Clock, CheckCircle2, AlertTriangle, Filter, Sparkles, UserCheck, ShieldAlert, Trash2 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import VideoModal from '../components/VideoModal.jsx'
 import { motion } from 'framer-motion'
 
 function GuardianDashboardPage() {
-  const { profiles, activeProfile, role, user } = useAuth()
+  const { profiles, activeProfile, role, user, switchProfile } = useAuth()
   const [userVideos, setUserVideos] = useState([])
   const [loadingVideos, setLoadingVideos] = useState(true)
   const [activeVideo, setActiveVideo] = useState(null)
   const [statusFilter, setStatusFilter] = useState('All')
+  const [deletingId, setDeletingId] = useState(null)
+
+  const handleDeleteVideo = async (videoId, videoTitle) => {
+    if (!videoId) return
+    const title = videoTitle || 'this video'
+    if (!window.confirm(`Are you sure you want to permanently delete "${title}"? This will remove it from your vault and storage.`)) {
+      return
+    }
+
+    try {
+      setDeletingId(videoId)
+      await deleteVideo(videoId)
+      if (activeVideo?.id === videoId) {
+        setActiveVideo(null)
+      }
+    } catch (err) {
+      console.error('Failed to delete video:', err)
+      alert('Could not delete video: ' + (err?.message || 'Unknown error'))
+    } finally {
+      setDeletingId(null)
+    }
+  }
 
   useEffect(() => {
     if (!user?.uid) return
@@ -78,6 +100,42 @@ function GuardianDashboardPage() {
         </div>
       </section>
 
+      {/* Child Profile Warning & Quick-Switch Banner */}
+      {activeProfile?.type === 'child' && (
+        <motion.div
+          initial={{ opacity: 0, y: -6 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="rounded-2xl border border-amber-300 bg-amber-50/90 p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 text-amber-950 shadow-xs"
+        >
+          <div className="flex items-center gap-3.5">
+            <div className="h-11 w-11 rounded-2xl bg-amber-100 border border-amber-200 flex items-center justify-center text-amber-700 flex-shrink-0">
+              <ShieldAlert className="h-6 w-6" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="font-extrabold text-sm sm:text-base text-amber-950">
+                  Child Profile Active: &quot;{activeProfile.name}&quot;
+                </span>
+                <span className="badge-amber text-[10px]">Restricted Mode</span>
+              </div>
+              <p className="text-xs text-amber-800 mt-0.5">
+                Uploads and administrative policy changes are restricted in Child mode. Switch to your Guardian profile for full platform access.
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              const guardian = profiles.find((p) => p.type === 'guardian')
+              if (guardian) switchProfile(guardian.id)
+            }}
+            className="btn-primary text-xs py-2 px-4 self-start sm:self-center whitespace-nowrap shadow-xs"
+          >
+            Switch to Guardian Profile
+          </button>
+        </motion.div>
+      )}
+
       {/* Modern Stats Overview */}
       <section className="grid gap-4 sm:grid-cols-3">
         <StatCard 
@@ -130,14 +188,29 @@ function GuardianDashboardPage() {
               </div>
             </div>
 
-            <div className="rounded-xl bg-slate-50 border border-slate-200 p-4 flex items-center gap-3.5 shadow-2xs">
-              <div className="h-10 w-10 rounded-xl bg-purple-50 border border-purple-200 flex items-center justify-center font-bold text-purple-600">
-                <Shield className="h-5 w-5" />
+            <div className="rounded-xl bg-slate-50 border border-slate-200 p-4 flex items-center justify-between gap-3 shadow-2xs">
+              <div className="flex items-center gap-3.5">
+                <div className="h-10 w-10 rounded-xl bg-purple-50 border border-purple-200 flex items-center justify-center font-bold text-purple-600 flex-shrink-0">
+                  <Shield className="h-5 w-5" />
+                </div>
+                <div>
+                  <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Maturity Mode</span>
+                  <p className="text-base font-bold capitalize text-purple-700">{activeProfile.type} Mode</p>
+                </div>
               </div>
-              <div>
-                <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Maturity Mode</span>
-                <p className="text-base font-bold capitalize text-purple-700">{activeProfile.type} Mode</p>
-              </div>
+              {activeProfile.type === 'child' && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    const guardian = profiles.find((p) => p.type === 'guardian')
+                    if (guardian) switchProfile(guardian.id)
+                  }}
+                  className="btn-secondary text-[11px] py-1 px-2.5 whitespace-nowrap"
+                  title="Switch to Guardian mode"
+                >
+                  Exit Child Mode
+                </button>
+              )}
             </div>
 
             <div className="rounded-xl bg-slate-50 border border-slate-200 p-4 flex items-center gap-3.5 shadow-2xs">
@@ -243,20 +316,33 @@ function GuardianDashboardPage() {
                         )}
                       </td>
                       <td className="py-3.5 px-4 text-right">
-                        {item.download_url && (
+                        <div className="flex items-center justify-end gap-2">
+                          {item.download_url && (
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setActiveVideo({
+                                  id: item.id,
+                                  url: item.download_url,
+                                  title: item.title || item.file_name,
+                                })
+                              }
+                              className="btn-secondary text-xs py-1.5 px-3"
+                            >
+                              <Play className="h-3.5 w-3.5 text-indigo-600" />
+                              <span>Preview</span>
+                            </button>
+                          )}
                           <button
-                            onClick={() =>
-                              setActiveVideo({
-                                url: item.download_url,
-                                title: item.title || item.file_name,
-                              })
-                            }
-                            className="btn-secondary text-xs py-1.5 px-3"
+                            type="button"
+                            onClick={() => handleDeleteVideo(item.id, item.title || item.file_name)}
+                            disabled={deletingId === item.id}
+                            className="rounded-lg p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition border border-transparent hover:border-rose-200"
+                            title="Delete Video from Vault"
                           >
-                            <Play className="h-3.5 w-3.5 text-indigo-600" />
-                            <span>Preview</span>
+                            <Trash2 className="h-4 w-4" />
                           </button>
-                        )}
+                        </div>
                       </td>
                     </tr>
                   )
@@ -273,6 +359,7 @@ function GuardianDashboardPage() {
         onClose={() => setActiveVideo(null)}
         videoUrl={activeVideo?.url}
         title={activeVideo?.title}
+        onDelete={activeVideo?.id ? () => handleDeleteVideo(activeVideo.id, activeVideo.title) : undefined}
       />
     </div>
   )

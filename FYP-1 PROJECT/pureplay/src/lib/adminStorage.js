@@ -16,6 +16,16 @@ import {
 import { ref, deleteObject } from 'firebase/storage'
 import { db, storage } from '../firebase/config.js'
 
+export const USERS_COLLECTION = 'users'
+export const VIDEOS_COLLECTION = 'videos'
+
+function withTimeout(promise, ms = 2000) {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => setTimeout(() => reject(new Error('Firestore timeout')), ms)),
+  ])
+}
+
 // ─── Seed Data for Instant Evaluation ─────────────────────────────────────────
 const SEED_VIDEOS = [
   {
@@ -180,10 +190,10 @@ export async function ensureUserDocument({ uid, email, displayName, role = 'user
   if (!db) return userData
   try {
     const userRef = doc(db, USERS_COLLECTION, uid)
-    const existing = await getDoc(userRef)
-    if (existing.exists()) return existing.data()
+    const existing = await withTimeout(getDoc(userRef), 2000)
+    if (existing && existing.exists && existing.exists()) return existing.data()
 
-    await setDoc(userRef, userData)
+    await withTimeout(setDoc(userRef, userData), 2000)
     return userData
   } catch (error) {
     console.warn('Firestore ensureUserDocument fallback to local:', error)
@@ -346,7 +356,7 @@ export async function createVideoDocument({
   if (!db) return videoData
 
   try {
-    const docRef = await addDoc(collection(db, VIDEOS_COLLECTION), videoData)
+    const docRef = await withTimeout(addDoc(collection(db, VIDEOS_COLLECTION), videoData), 2000)
     return { ...videoData, id: docRef.id }
   } catch (error) {
     console.warn('Firestore addDoc fallback to local:', error)
@@ -522,29 +532,29 @@ export async function flagVideo(videoId) {
 }
 
 /**
- * Admin: Delete a video — removes BOTH Firestore document AND Storage object.
- * SDS §4.1.2 Admin Override Algorithm steps 5-7.
+ * Delete a video — removes from local store immediately, and deletes Firestore document + Storage object.
+ * Accessible to Guardians and Administrators.
  */
 export async function deleteVideo(videoId) {
   if (!videoId) return
 
-  // Remove from local store immediately
+  // Remove from local store immediately for instant UI feedback
   const localVideos = getLocalStoredVideos().filter((v) => v.id !== videoId)
   saveLocalStoredVideos(localVideos)
 
   if (!db) return
   try {
     const videoRef = doc(db, VIDEOS_COLLECTION, videoId)
-    const videoSnap = await getDoc(videoRef)
-    if (videoSnap.exists()) {
+    const videoSnap = await withTimeout(getDoc(videoRef), 2000)
+    if (videoSnap && videoSnap.exists()) {
       const data = videoSnap.data()
       if (data?.storage_url && storage) {
         try {
           const storageRef = ref(storage, data.storage_url)
-          await deleteObject(storageRef)
+          await withTimeout(deleteObject(storageRef), 2000)
         } catch {}
       }
-      await deleteDoc(videoRef)
+      await withTimeout(deleteDoc(videoRef), 2000)
     }
   } catch (error) {
     console.warn('Firestore deleteDoc fallback, removed locally:', error)

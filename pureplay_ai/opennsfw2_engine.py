@@ -44,7 +44,7 @@ class PurePlayOpenNSFW2Engine:
     Inference engine for OpenNSFW2 visual content moderation.
     Supports ONNX Runtime (CPU/GPU) with PyTorch fallback.
     """
-    def __init__(self, onnx_model_path=None, pt_model_path=None, threshold=0.60):
+    def __init__(self, onnx_model_path=None, pt_model_path=None, threshold=0.20):
         self.threshold = threshold
         self.onnx_path = onnx_model_path or os.path.join(os.path.dirname(__file__), "pureplay_opennsfw2_trained.onnx")
         self.pt_path = pt_model_path or os.path.join(os.path.dirname(__file__), "pureplay_opennsfw2_trained.pt")
@@ -149,6 +149,8 @@ class PurePlayOpenNSFW2Engine:
         fps = cap.get(cv2.CAP_PROP_FPS) or 30.0
         frame_interval = max(1, int(round(fps / sample_fps)))
         total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+        if total_frames > 0 and (total_frames / frame_interval) > 35:
+            frame_interval = max(frame_interval, total_frames // 35)
         duration = total_frames / fps if fps > 0 else 0
 
         timeline = []

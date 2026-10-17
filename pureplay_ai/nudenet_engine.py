@@ -103,6 +103,8 @@ class PurePlayNudeNetEngine:
 
         # Determine frame skip interval
         frame_interval = max(1, int(video_fps / sample_fps))
+        if total_video_frames > 0 and (total_video_frames / frame_interval) > 35:
+            frame_interval = max(frame_interval, total_video_frames // 35)
 
         frame_index = 0
         analyzed_frames = 0
@@ -138,13 +140,13 @@ class PurePlayNudeNetEngine:
                         "frame_index": frame_index,
                         "timestamp_seconds": round(current_sec, 2),
                         "timestamp_percent": round((current_sec / max(duration_seconds, 1.0)) * 100, 1),
-                        "is_flagged": res["is_flagged"],
+                        "is_flagged": res["is_flagged"] or any(d.get("class") in SUGGESTIVE_LABELS for d in res["detections"]),
                         "peak_score": res["peak_nsfw_score"],
                         "detections": res["detections"],
                     }
                     frame_results.append(frame_entry)
 
-                    if res["is_flagged"]:
+                    if frame_entry["is_flagged"]:
                         all_violations.append(frame_entry)
 
                 frame_index += 1
@@ -184,8 +186,10 @@ class PurePlayNudeNetEngine:
                     "timestamp": v["timestamp_seconds"],
                     "timestamp_percent": v["timestamp_percent"],
                     "peak_score": v["peak_score"],
-                    "labels": [d["label"] for d in v["detections"] if d["is_explicit"]],
-                    "boxes": [d["box"] for d in v["detections"] if d["is_explicit"]],
+                    "labels": [d["label"] for d in v["detections"] if d["is_explicit"] or d.get("class") in SUGGESTIVE_LABELS],
+                    "classes": [d.get("class", d["label"]) for d in v["detections"] if d["is_explicit"] or d.get("class") in SUGGESTIVE_LABELS],
+                    "scores": [d["confidence"] for d in v["detections"] if d["is_explicit"] or d.get("class") in SUGGESTIVE_LABELS],
+                    "boxes": [d["box"] for d in v["detections"] if d["is_explicit"] or d.get("class") in SUGGESTIVE_LABELS],
                 }
                 for v in all_violations
             ],

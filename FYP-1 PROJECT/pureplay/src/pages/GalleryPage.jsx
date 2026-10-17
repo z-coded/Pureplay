@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
-import { onVideosSnapshot } from '../lib/adminStorage.js'
-import { Play, Search, Film, CheckCircle, ShieldCheck, Sparkles } from 'lucide-react'
+import { onVideosSnapshot, deleteVideo } from '../lib/adminStorage.js'
+import { useAuth } from '../context/AuthContext.jsx'
+import { Play, Search, Film, CheckCircle, ShieldCheck, Sparkles, Trash2 } from 'lucide-react'
 import VideoModal from '../components/VideoModal.jsx'
 import { motion } from 'framer-motion'
 
@@ -13,10 +14,36 @@ function formatBytes(bytes) {
 }
 
 function GalleryPage() {
+  const { role, activeProfile } = useAuth()
   const [videos, setVideos] = useState([])
   const [loading, setLoading] = useState(true)
   const [query, setQuery] = useState('')
   const [activeVideo, setActiveVideo] = useState(null)
+  const [deletingId, setDeletingId] = useState(null)
+
+  const isGuardianOrAdmin = role === 'admin' || role === 'guardian' || activeProfile?.type !== 'child'
+
+  const handleDeleteVideo = async (e, video) => {
+    if (e) e.stopPropagation()
+    if (!video) return
+    const title = video.title || video.file_name || 'this video'
+    if (!window.confirm(`Are you sure you want to permanently delete "${title}"? This will remove it from the family library.`)) {
+      return
+    }
+
+    try {
+      setDeletingId(video.id)
+      await deleteVideo(video.id)
+      if (activeVideo?.id === video.id) {
+        setActiveVideo(null)
+      }
+    } catch (err) {
+      console.error('Failed to delete video:', err)
+      alert('Could not delete video: ' + (err?.message || 'Unknown error'))
+    } finally {
+      setDeletingId(null)
+    }
+  }
 
   useEffect(() => {
     let unsub = () => {}
@@ -113,7 +140,7 @@ function GalleryPage() {
               key={video.id}
               whileHover={{ y: -3 }}
               transition={{ duration: 0.2 }}
-              className="glass-card rounded-2xl overflow-hidden flex flex-col justify-between group"
+              className="glass-card rounded-2xl overflow-hidden flex flex-col justify-between group relative"
             >
               {/* Video Thumbnail / Clean Player Trigger */}
               <div
@@ -135,6 +162,19 @@ function GalleryPage() {
                     <span>Safe for All Ages</span>
                   </span>
                 </div>
+
+                {/* Guardian/Admin Delete Button on Thumbnail */}
+                {isGuardianOrAdmin && (
+                  <button
+                    type="button"
+                    onClick={(e) => handleDeleteVideo(e, video)}
+                    disabled={deletingId === video.id}
+                    className="absolute top-3 right-3 z-30 rounded-xl bg-slate-900/80 p-2 text-slate-300 hover:text-rose-400 hover:bg-slate-900 transition-all border border-white/10 backdrop-blur-sm shadow-md"
+                    title="Delete Video from Library"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                )}
 
                 {/* File size pill */}
                 {video.file_size && (
@@ -162,9 +202,23 @@ function GalleryPage() {
                     <ShieldCheck className="h-3.5 w-3.5 text-indigo-600" />
                     <span>NudeNet Checked</span>
                   </span>
-                  <span className="font-mono text-slate-500">
-                    {video.uploaded_at ? new Date(video.uploaded_at).toLocaleDateString() : 'Active'}
-                  </span>
+                  <div className="flex items-center gap-3">
+                    <span className="font-mono text-slate-500">
+                      {video.uploaded_at ? new Date(video.uploaded_at).toLocaleDateString() : 'Active'}
+                    </span>
+                    {isGuardianOrAdmin && (
+                      <button
+                        type="button"
+                        onClick={(e) => handleDeleteVideo(e, video)}
+                        disabled={deletingId === video.id}
+                        className="text-slate-400 hover:text-rose-600 p-1 rounded-md hover:bg-rose-50 transition flex items-center gap-1 font-semibold"
+                        title="Delete video from library"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                        <span>Delete</span>
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             </motion.div>
@@ -178,6 +232,7 @@ function GalleryPage() {
         onClose={() => setActiveVideo(null)}
         videoUrl={activeVideo?.download_url || activeVideo?.fileUrl}
         title={activeVideo?.title || activeVideo?.file_name}
+        onDelete={isGuardianOrAdmin ? () => handleDeleteVideo(null, activeVideo) : undefined}
       />
     </div>
   )

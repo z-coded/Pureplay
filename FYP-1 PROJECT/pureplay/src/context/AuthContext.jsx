@@ -81,6 +81,44 @@ export function AuthProvider({ children }) {
     }
   }, [profiles, user])
 
+  // Ensure a default Guardian profile always exists for the account holder
+  useEffect(() => {
+    if (!user) return
+
+    setProfiles((prev) => {
+      const hasGuardian = prev.some((p) => p.type === 'guardian')
+      if (hasGuardian) return prev
+
+      const defaultGuardian = {
+        id: 'guardian_' + (user.uid || 'primary'),
+        name: user.displayName ? `${user.displayName} (Guardian)` : 'Guardian (Parent)',
+        type: 'guardian',
+        pin: '',
+        policy: {
+          nudity: 0.85,
+          violence: 0.85,
+          profanity: 0.90,
+        },
+        createdAt: new Date().toISOString(),
+        isPrimary: true,
+      }
+      return [defaultGuardian, ...prev]
+    })
+  }, [user])
+
+  // Ensure activeProfileId points to a valid profile, defaulting to Guardian if unset
+  useEffect(() => {
+    if (profiles.length > 0) {
+      const activeExists = profiles.some((p) => p.id === activeProfileId)
+      if (!activeExists || !activeProfileId) {
+        const guardian = profiles.find((p) => p.type === 'guardian')
+        const fallbackId = guardian ? guardian.id : profiles[0].id
+        setActiveProfileId(fallbackId)
+        localStorage.setItem(activeProfileStoreKey, fallbackId)
+      }
+    }
+  }, [profiles, activeProfileId])
+
   useEffect(() => {
     if (activeProfileId) {
       localStorage.setItem(activeProfileStoreKey, activeProfileId)
@@ -223,12 +261,17 @@ export function AuthProvider({ children }) {
     return res
   }
 
-  const switchProfile = (profileId, pin = '') => {
+  const switchProfile = (profileId, pin = '', isGuardianOverride = false) => {
     const target = profiles.find((p) => p.id === profileId)
     if (!target) return { success: false, error: 'Profile not found' }
 
+    // If currently in child profile with PIN, validate PIN when switching away unless guardian override
+    if (!isGuardianOverride && activeProfile?.type === 'child' && activeProfile?.pin && activeProfile.pin !== pin) {
+      return { success: false, error: 'Incorrect child lock PIN' }
+    }
+
     // If target is child and has a PIN, validate it
-    if (target.type === 'child' && target.pin && target.pin !== pin) {
+    if (!isGuardianOverride && target.type === 'child' && target.pin && target.pin !== pin) {
       return { success: false, error: 'Incorrect PIN' }
     }
 

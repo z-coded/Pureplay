@@ -73,29 +73,52 @@ class PurePlayMediaProcessor:
 
     def blur_bounding_boxes(self, frame, boxes):
         """
-        Applies heavy 51x51 Gaussian blur to specified bounding boxes [x1, y1, x2, y2].
+        Applies heavy 51x51 Gaussian blur to specified bounding boxes [x1, y1, x2, y2],
+        NudeNet format [x, y, w, h], or full_frame adult scenes.
         """
         redacted = frame.copy()
         h, w = frame.shape[:2]
 
         for box in boxes:
-            x1 = max(0, int(box.get("x1", box.get("box", [0, 0, 0, 0])[0])))
-            y1 = max(0, int(box.get("y1", box.get("box", [0, 0, 0, 0])[1])))
-            x2 = min(w, int(box.get("x2", box.get("box", [0, 0, 0, 0])[2])))
-            y2 = min(h, int(box.get("y2", box.get("box", [0, 0, 0, 0])[3])))
+            if isinstance(box, dict) and box.get("full_frame"):
+                # Heavy Gaussian blur across the entire adult frame
+                ksize = (
+                    self.blur_kernel_size[0] if self.blur_kernel_size[0] % 2 != 0 else self.blur_kernel_size[0] + 1,
+                    self.blur_kernel_size[1] if self.blur_kernel_size[1] % 2 != 0 else self.blur_kernel_size[1] + 1
+                )
+                blurred = cv2.GaussianBlur(redacted, ksize, 30)
+                cv2.rectangle(blurred, (0, 0), (w, h), (255, 100, 50), 4)
+                return blurred
+
+            raw_box = box.get("box", box) if isinstance(box, dict) else box
+            if isinstance(raw_box, (list, tuple)) and len(raw_box) == 4:
+                b0, b1, b2, b3 = [int(v) for v in raw_box]
+                # If b2 > b0 and b3 > b1, it is [x1, y1, x2, y2]
+                if b2 > b0 and b3 > b1 and b2 <= w and b3 <= h:
+                    x1, y1, x2, y2 = max(0, b0), max(0, b1), min(w, b2), min(h, b3)
+                else:
+                    # NudeNet format: [x, y, width, height]
+                    x1 = max(0, b0)
+                    y1 = max(0, b1)
+                    x2 = min(w, b0 + max(20, b2))
+                    y2 = min(h, b1 + max(20, b3))
+            elif isinstance(box, dict) and "x1" in box:
+                x1 = max(0, int(box["x1"]))
+                y1 = max(0, int(box["y1"]))
+                x2 = min(w, int(box["x2"]))
+                y2 = min(h, int(box["y2"]))
+            else:
+                x1, y1, x2, y2 = 0, 0, w, h
 
             if x2 > x1 and y2 > y1:
                 roi = redacted[y1:y2, x1:x2]
                 if roi.size > 0:
-                    # Apply Gaussian Blur
                     ksize = (
                         self.blur_kernel_size[0] if self.blur_kernel_size[0] % 2 != 0 else self.blur_kernel_size[0] + 1,
                         self.blur_kernel_size[1] if self.blur_kernel_size[1] % 2 != 0 else self.blur_kernel_size[1] + 1
                     )
                     blurred_roi = cv2.GaussianBlur(roi, ksize, 30)
-                    
-                    # Add child-safe censor outline
-                    cv2.rectangle(blurred_roi, (0, 0), (x2 - x1, y2 - y1), (255, 100, 50), 2)
+                    cv2.rectangle(blurred_roi, (0, 0), (x2 - x1, y2 - y1), (255, 100, 50), 3)
                     redacted[y1:y2, x1:x2] = blurred_roi
 
         return redacted
@@ -183,9 +206,9 @@ class PurePlayMediaProcessor:
             # Find nearest detection timestamp
             boxes = detections_by_timestamp.get(current_time, [])
             if not boxes:
-                # Check within +- 0.5s window
+                # Check within +- 0.8s window so 1fps samples cover the entire sequence
                 for t, b in detections_by_timestamp.items():
-                    if abs(float(t) - current_time) <= 0.5:
+                    if abs(float(t) - current_time) <= 0.8:
                         boxes = b
                         break
 

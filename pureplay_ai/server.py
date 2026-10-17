@@ -14,9 +14,11 @@ import sys
 import shutil
 import tempfile
 import json
+import time
 from pydantic import BaseModel
 from typing import Optional, List, Dict, Any
-from fastapi import FastAPI, File, UploadFile, Query, HTTPException, Body
+from fastapi import FastAPI, File, UploadFile, Query, HTTPException, Body, Request
+from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, FileResponse
 
@@ -24,6 +26,18 @@ if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 if hasattr(sys.stderr, "reconfigure"):
     sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+
+try:
+    import imageio_ffmpeg
+    ffmpeg_exe = imageio_ffmpeg.get_ffmpeg_exe()
+    ffmpeg_dir = os.path.dirname(ffmpeg_exe)
+    ffmpeg_alias = os.path.join(ffmpeg_dir, "ffmpeg.exe")
+    if not os.path.exists(ffmpeg_alias):
+        shutil.copyfile(ffmpeg_exe, ffmpeg_alias)
+    if ffmpeg_dir not in os.environ.get("PATH", ""):
+        os.environ["PATH"] = ffmpeg_dir + os.pathsep + os.environ.get("PATH", "")
+except Exception:
+    pass
 
 # Engine imports
 from nudenet_engine import PurePlayNudeNetEngine
@@ -47,9 +61,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Mount static censored video streaming directory
+base_dir = os.path.dirname(__file__)
+censored_dir_public = os.path.abspath(os.path.join(base_dir, "..", "FYP-1 PROJECT", "pureplay", "public", "censored"))
+os.makedirs(censored_dir_public, exist_ok=True)
+app.mount("/censored", StaticFiles(directory=censored_dir_public), name="censored")
+
 # Engine initializations
 nudenet_engine = PurePlayNudeNetEngine(default_threshold=0.45)
-opennsfw2_engine = PurePlayOpenNSFW2Engine(threshold=0.60)
+opennsfw2_engine = PurePlayOpenNSFW2Engine(threshold=0.18)
 whisper_engine = get_whisper_engine()
 detoxify_engine = get_detoxify_engine()
 nemo_engine = get_nemo_engine()
@@ -134,6 +154,7 @@ def evaluate_guardrail(req: NeMoEvaluationRequest):
 
 @app.post("/api/analyze-video")
 async def analyze_video_endpoint(
+    request: Request,
     file: UploadFile = File(...),
     threshold: float = Query(0.45, ge=0.0, le=1.0),
     sample_fps: float = Query(2.0, ge=0.5, le=10.0),
@@ -189,8 +210,56 @@ async def analyze_video_endpoint(
         }
 
         all_detections = []
-        for frame in nudenet_results.get("xai_timeline", []):
-            all_detections.extend(frame.get("detections", []))
+        detections_by_timestamp = {}
+
+        # 1. Extract NudeNet anatomical detections
+        for item in nudenet_results.get("violations_detected", []):
+            ts = round(float(item.get("timestamp", 0.0)), 1)
+            boxes = item.get("boxes", [])
+            labels = item.get("labels", [])
+            classes = item.get("classes", [])
+            scores = item.get("scores", [])
+            if boxes:
+                detections_by_timestamp[ts] = [{"box": b, "label": l} for b, l in zip(boxes, labels)]
+                for i, (b, l) in enumerate(zip(boxes, labels)):
+                    cls_name = classes[i] if i < len(classes) else l
+                    sc = scores[i] if i < len(scores) else item.get("peak_score", 0.9)
+                    all_detections.append({
+                        "class": cls_name,
+                        "label": l,
+                        "score": sc,
+                        "box": b,
+                        "is_explicit": True,
+                        "timestamp": ts
+                    })
+
+        # 2. Extract OpenNSFW2 adult content frames (kissing, intimacy, suggestive poses)
+        for item in opennsfw2_results.get("timeline", []):
+            nsfw_score = float(item.get("nsfw_score", 0.0))
+            is_flagged = item.get("status") == "flagged" or nsfw_score >= 0.18
+            if is_flagged:
+                ts = round(float(item.get("timestamp", 0.0)), 1)
+                if ts not in detections_by_timestamp:
+                    detections_by_timestamp[ts] = [{"full_frame": True, "score": nsfw_score}]
+                all_detections.append({
+                    "class": "SUGGESTIVE_VISUAL_CONTENT",
+                    "label": "Suggestive / Adult Scene",
+                    "score": nsfw_score,
+                    "confidence": nsfw_score,
+                    "is_explicit": True,
+                    "timestamp": ts,
+                    "full_frame": True
+                })
+
+        # Calculate violation ratio across all sampled frames
+        total_sampled = max(1, len(opennsfw2_results.get("timeline", [])))
+        flagged_count = max(
+            len(detections_by_timestamp),
+            nudenet_results.get("flagged_frames", 0),
+            sum(1 for t in opennsfw2_results.get("timeline", []) if t.get("status") == "flagged" or t.get("nsfw_score", 0) >= 0.18)
+        )
+        violation_ratio = round(flagged_count / total_sampled, 3)
+        profile_ctx["violation_ratio"] = violation_ratio
 
         nemo_decision = nemo_engine.evaluate_safety_guardrail(
             opennsfw2_score=opennsfw2_results.get("overall_score", 0.0),
@@ -198,6 +267,12 @@ async def analyze_video_endpoint(
             detoxify_scores=detox_results.get("segments", [{}])[0].get("scores", {}) if detox_results.get("segments") else {},
             profile=profile_ctx
         )
+
+        # If more than 50% sensitive content, enforce BLOCKED status
+        if violation_ratio >= 0.45:
+            nemo_decision["decision"] = "BLOCKED_VIOLATION"
+            nemo_decision["safety_status"] = "REJECTED"
+            nemo_decision["policy_reason"] = f"CRITICAL POLICY VIOLATION: {int(violation_ratio*100)}% of video runtime contains sensitive or inappropriate material. Playback is blocked for child protection."
 
         # 6. Apply Multi-Modal Censorship (Blur Visual NSFW + Bleep Audio Profanity)
         base_dir = os.path.dirname(__file__)
@@ -213,13 +288,6 @@ async def analyze_video_endpoint(
         censored_public_path = os.path.join(censored_dir_public, censored_filename)
         censored_dist_path = os.path.join(censored_dir_dist, censored_filename)
 
-        detections_by_timestamp = {}
-        for item in nudenet_results.get("xai_timeline", []):
-            ts = item.get("timestamp_seconds", 0.0)
-            boxes = [d["box"] for d in item.get("detections", []) if d.get("is_explicit")]
-            if boxes:
-                detections_by_timestamp[round(ts, 1)] = [{"box": b} for b in boxes]
-
         bleep_intervals = detox_results.get("redaction_intervals", [])
 
         try:
@@ -231,7 +299,10 @@ async def analyze_video_endpoint(
             )
             if os.path.exists(censored_public_path):
                 shutil.copyfile(censored_public_path, censored_dist_path)
-            censored_url = f"/censored/{censored_filename}"
+            
+            host = request.headers.get("x-forwarded-host") or request.headers.get("host") or "127.0.0.1:8000"
+            proto = request.headers.get("x-forwarded-proto") or ("https" if "loca.lt" in host or "ngrok" in host else "http")
+            censored_url = f"{proto}://{host}/censored/{censored_filename}"
         except Exception as censor_err:
             print(f"[WARN] Multi-modal censoring fallback: {censor_err}")
             censored_url = "/demo_censored_child_safe.mp4"
@@ -250,12 +321,14 @@ async def analyze_video_endpoint(
                 "detoxify": detox_results
             },
             "redaction_plan": {
-                "visual_blur_frames": nudenet_results.get("flagged_frames_count", 0),
+                "visual_blur_frames": nudenet_results.get("flagged_frames", len(detections_by_timestamp)),
                 "audio_bleep_intervals": detox_results.get("redaction_intervals", [])
             }
         })
 
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Multi-modal video processing failed: {str(e)}")
 
     finally:

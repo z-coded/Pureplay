@@ -39,6 +39,8 @@ pip-delete-this-directory.txt
 **/demo_censored_*
 **/test_synthetic.*
 **/.cache/
+**/public/censored/*
+!**/public/censored/.gitkeep
 
 # IDE & OS specific files
 .DS_Store
