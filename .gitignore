@@ -24,6 +24,7 @@ env/
 venv/
 ENV/
 .venv
+.venv-modal/
 pip-log.txt
 pip-delete-this-directory.txt
 

@@ -22,6 +22,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 function MainLayout() {
   const { role, user, logOut, activeProfile } = useAuth()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const isJuniorOrChild = activeProfile?.type === 'teen' || activeProfile?.type === 'child'
 
   const navClass = ({ isActive }) =>
     `flex items-center gap-2 rounded-xl px-3 py-1.5 text-xs font-semibold transition-all duration-200 ${

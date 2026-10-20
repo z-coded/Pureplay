@@ -15,6 +15,7 @@ import shutil
 import tempfile
 import json
 import time
+import uuid
 from pydantic import BaseModel
 from typing import Optional, List, Dict, Any
 from fastapi import FastAPI, File, UploadFile, Query, HTTPException, Body, Request
@@ -63,7 +64,7 @@ app.add_middleware(
 
 # Mount static censored video streaming directory
 base_dir = os.path.dirname(__file__)
-censored_dir_public = os.path.abspath(os.path.join(base_dir, "..", "FYP-1 PROJECT", "pureplay", "public", "censored"))
+censored_dir_public = os.path.abspath(os.environ.get("PUREPLAY_OUTPUT_DIR") or os.path.join(base_dir, "..", "FYP-1 PROJECT", "pureplay", "public", "censored"))
 os.makedirs(censored_dir_public, exist_ok=True)
 app.mount("/censored", StaticFiles(directory=censored_dir_public), name="censored")
 
@@ -174,7 +175,7 @@ async def analyze_video_endpoint(
         raise HTTPException(status_code=400, detail="Unsupported video format")
 
     temp_dir = tempfile.mkdtemp()
-    temp_video_path = os.path.join(temp_dir, file.filename)
+    temp_video_path = os.path.join(temp_dir, "input" + os.path.splitext(file.filename)[1].lower())
 
     try:
         with open(temp_video_path, "wb") as buffer:
@@ -275,18 +276,13 @@ async def analyze_video_endpoint(
             nemo_decision["policy_reason"] = f"CRITICAL POLICY VIOLATION: {int(violation_ratio*100)}% of video runtime contains sensitive or inappropriate material. Playback is blocked for child protection."
 
         # 6. Apply Multi-Modal Censorship (Blur Visual NSFW + Bleep Audio Profanity)
-        base_dir = os.path.dirname(__file__)
-        censored_dir_public = os.path.join(base_dir, "..", "FYP-1 PROJECT", "pureplay", "public", "censored")
-        censored_dir_dist = os.path.join(base_dir, "..", "FYP-1 PROJECT", "pureplay", "dist", "censored")
         os.makedirs(censored_dir_public, exist_ok=True)
-        os.makedirs(censored_dir_dist, exist_ok=True)
 
         clean_name = "".join(c for c in file.filename if c.isalnum() or c in "._-")
-        censored_filename = f"censored_{int(time.time())}_{clean_name}"
+        censored_filename = f"censored_{uuid.uuid4().hex}_{clean_name}"
         if not censored_filename.endswith(".mp4"):
             censored_filename += ".mp4"
         censored_public_path = os.path.join(censored_dir_public, censored_filename)
-        censored_dist_path = os.path.join(censored_dir_dist, censored_filename)
 
         bleep_intervals = detox_results.get("redaction_intervals", [])
 
@@ -297,15 +293,14 @@ async def analyze_video_endpoint(
                 detections_by_timestamp=detections_by_timestamp,
                 bleep_intervals=bleep_intervals
             )
-            if os.path.exists(censored_public_path):
-                shutil.copyfile(censored_public_path, censored_dist_path)
+            if not os.path.isfile(censored_public_path) or os.path.getsize(censored_public_path) == 0:
+                raise RuntimeError("Video renderer produced no output")
             
             host = request.headers.get("x-forwarded-host") or request.headers.get("host") or "127.0.0.1:8000"
             proto = request.headers.get("x-forwarded-proto") or ("https" if "loca.lt" in host or "ngrok" in host else "http")
             censored_url = f"{proto}://{host}/censored/{censored_filename}"
         except Exception as censor_err:
-            print(f"[WARN] Multi-modal censoring fallback: {censor_err}")
-            censored_url = "/demo_censored_child_safe.mp4"
+            raise RuntimeError("Video rendering failed") from censor_err
 
         return JSONResponse(content={
             "success": True,

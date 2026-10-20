@@ -36,6 +36,8 @@ class WhisperEngine:
             self.model = whisper.load_model(self.model_size, device=self.device)
             print("[INFO] OpenAI Whisper loaded successfully.")
         except Exception as e:
+            if os.environ.get("PUREPLAY_STRICT_INFERENCE") == "1":
+                raise RuntimeError("Whisper failed to load; moderation cannot continue") from e
             print(f"[WARN] Failed to load official Whisper weights directly ({e}). Using PurePlay Whisper Audio Parser.")
             self.model = None
 
@@ -84,6 +86,19 @@ class WhisperEngine:
                     "model": f"OpenAI-Whisper-{self.model_size}"
                 }
             except Exception as e:
+                err_str = str(e).lower()
+                # If video has no audio track, return an empty transcript without error
+                if "does not contain any stream" in err_str or "failed to load audio" in err_str:
+                    print("[INFO] Video contains no audio stream (silent video). Returning empty transcript.")
+                    return {
+                        "text": "",
+                        "language": "en",
+                        "duration_sec": round(time.time() - start_time, 2),
+                        "segments": [],
+                        "model": f"OpenAI-Whisper-{self.model_size}"
+                    }
+                if os.environ.get("PUREPLAY_STRICT_INFERENCE") == "1":
+                    raise RuntimeError("Whisper transcription failed; moderation cannot continue") from e
                 print(f"[WARN] Error running Whisper transcribe ({e}), falling back to PurePlay Audio Engine.")
 
         # Robust Fallback / Fast synthetic transcription for demonstration & testing

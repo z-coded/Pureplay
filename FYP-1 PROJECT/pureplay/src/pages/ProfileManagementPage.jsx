@@ -19,7 +19,7 @@ import {
 import { Link } from 'react-router-dom'
 
 function ProfileManagementPage() {
-  const { role, profiles, createProfile, deleteProfile, activeProfileId, switchProfile } = useAuth()
+  const { role, profiles, activeProfile, createProfile, deleteProfile, activeProfileId, switchProfile, updateProfilePin } = useAuth()
   const [form, setForm] = useState({
     name: '',
     type: 'child',
@@ -32,6 +32,10 @@ function ProfileManagementPage() {
   const [activePinPrompt, setActivePinPrompt] = useState(null)
   const [pinInput, setPinInput] = useState('')
   const [pinError, setPinError] = useState('')
+  const [gatePin, setGatePin] = useState('')
+  const [gateError, setGateError] = useState('')
+  const [editingGuardianPin, setEditingGuardianPin] = useState(false)
+  const [newGuardianPin, setNewGuardianPin] = useState('')
 
   if (role !== 'guardian') {
     return (
@@ -47,6 +51,65 @@ function ProfileManagementPage() {
         >
           Return to Dashboard
         </Link>
+      </div>
+    )
+  }
+
+  // If in child or junior mode, require guardian passcode to open Profile Management
+  if (activeProfile?.type === 'child' || activeProfile?.type === 'teen') {
+    const guardianProfile = profiles.find((p) => p.type === 'guardian')
+
+    const handleUnlockGate = (e) => {
+      e.preventDefault()
+      if (!gatePin.trim()) {
+        setGateError('Please enter the guardian passcode.')
+        return
+      }
+      if (guardianProfile) {
+        const res = switchProfile(guardianProfile.id, gatePin)
+        if (!res.success) {
+          setGateError(res.error || 'Incorrect guardian passcode.')
+        } else {
+          setGatePin('')
+          setGateError('')
+        }
+      }
+    }
+
+    return (
+      <div className="rounded-3xl border border-slate-200 bg-white p-8 sm:p-10 text-center max-w-md mx-auto shadow-lg mt-8">
+        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-indigo-50 border border-indigo-200 text-indigo-600">
+          <Lock className="h-8 w-8" />
+        </div>
+        <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">Guardian Passcode Required</h2>
+        <p className="mt-2 text-slate-600 text-xs sm:text-sm">
+          Profile management is locked in Junior mode. Enter the guardian passcode to manage profiles.
+        </p>
+        <form onSubmit={handleUnlockGate} className="mt-6 space-y-4">
+          <input
+            type="password"
+            inputMode="numeric"
+            pattern="[0-9]*"
+            maxLength={6}
+            autoFocus
+            className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-center text-lg tracking-[0.4em] font-mono text-slate-900 focus:border-indigo-500 focus:bg-white focus:outline-none"
+            placeholder="••••••"
+            value={gatePin}
+            onChange={(e) => {
+              setGatePin(e.target.value.replace(/\D/g, '').slice(0, 6))
+              setGateError('')
+            }}
+          />
+          {gateError && <p className="text-xs text-rose-600 font-medium">{gateError}</p>}
+          <div className="flex gap-2">
+            <Link to="/dashboard" className="btn-secondary flex-1 py-2.5 text-xs text-center">
+              Return to Dashboard
+            </Link>
+            <button type="submit" disabled={!gatePin} className="btn-primary flex-1 py-2.5 text-xs disabled:opacity-50">
+              Unlock & Manage
+            </button>
+          </div>
+        </form>
       </div>
     )
   }
@@ -88,7 +151,7 @@ function ProfileManagementPage() {
     createProfile({
       name: form.name.trim(),
       type: form.type,
-      pin: form.type === 'child' ? form.pin : '',
+      pin: form.pin ? form.pin.replace(/\D/g, '').slice(0, 6) : '',
       policy: {
         nudity: Number(form.nudity),
         violence: Number(form.violence),
@@ -109,7 +172,17 @@ function ProfileManagementPage() {
   }
 
   const handleSwitch = (profile) => {
-    if (profile.type === 'child' && profile.pin) {
+    if (profile.id === activeProfileId) return
+
+    const isRestrictedActive = activeProfile?.type === 'child' || activeProfile?.type === 'teen'
+
+    // Switching to Guardian from child/teen ALWAYS requires the passcode!
+    const needsPin =
+      (isRestrictedActive && profile.type === 'guardian') ||
+      (isRestrictedActive && Boolean(activeProfile?.pin)) ||
+      Boolean(profile.pin)
+
+    if (needsPin) {
       setActivePinPrompt(profile)
       setPinInput('')
       setPinError('')
@@ -123,7 +196,7 @@ function ProfileManagementPage() {
     if (!activePinPrompt) return
     const res = switchProfile(activePinPrompt.id, pinInput)
     if (!res.success) {
-      setPinError('Incorrect security PIN. Please try again.')
+      setPinError(res.error || 'Incorrect security PIN. Please try again.')
     } else {
       setActivePinPrompt(null)
       setPinInput('')
@@ -253,25 +326,27 @@ function ProfileManagementPage() {
               </select>
             </div>
 
-            {form.type === 'child' && (
-              <div className="rounded-xl border border-rose-200 bg-rose-50/80 p-3.5 space-y-2">
-                <div className="flex items-center gap-2 text-rose-800 text-xs font-bold">
-                  <Lock className="h-3.5 w-3.5 text-rose-600" />
-                  <span>Guardian Security PIN (Optional for Child Mode)</span>
-                </div>
-                <input
-                  type="password"
-                  maxLength={6}
-                  className="input-field text-xs font-mono"
-                  placeholder="Enter 4-6 digit numeric PIN"
-                  value={form.pin}
-                  onChange={(e) => setForm((prev) => ({ ...prev, pin: e.target.value }))}
-                />
-                <p className="text-[11px] text-slate-500">
-                  Required when switching out of this child profile back to guardian settings.
-                </p>
+            <div className={`rounded-xl border p-3.5 space-y-2 ${form.type === 'guardian' ? 'border-indigo-200 bg-indigo-50/80' : form.type === 'teen' ? 'border-amber-200 bg-amber-50/80' : 'border-rose-200 bg-rose-50/80'}`}>
+              <div className={`flex items-center gap-2 text-xs font-bold ${form.type === 'guardian' ? 'text-indigo-800' : form.type === 'teen' ? 'text-amber-800' : 'text-rose-800'}`}>
+                <Lock className={`h-3.5 w-3.5 ${form.type === 'guardian' ? 'text-indigo-600' : form.type === 'teen' ? 'text-amber-600' : 'text-rose-600'}`} />
+                <span>{form.type === 'guardian' ? 'Guardian Passcode (Optional - lock guardian profile)' : 'Security PIN (Optional - strictly numeric digits)'}</span>
               </div>
-            )}
+              <input
+                type="password"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                maxLength={6}
+                className="input-field text-xs font-mono tracking-widest"
+                placeholder="Enter 4-6 digit numeric PIN (digits only)"
+                value={form.pin}
+                onChange={(e) => setForm((prev) => ({ ...prev, pin: e.target.value.replace(/\D/g, '').slice(0, 6) }))}
+              />
+              <p className="text-[11px] text-slate-500">
+                {form.type === 'guardian'
+                  ? 'This passcode will be required whenever any profile tries to switch to this guardian account.'
+                  : 'Required when switching out of this profile back to guardian settings.'}
+              </p>
+            </div>
 
             {/* Threshold Sliders */}
             <div className="space-y-3 pt-1">
@@ -369,6 +444,78 @@ function ProfileManagementPage() {
 
         {/* Managed Profiles List */}
         <section className="lg:col-span-6 glass-card rounded-2xl p-6 sm:p-7 space-y-5">
+          {/* Guardian Master Passcode Banner */}
+          {(() => {
+            const primaryGuardian = profiles.find((p) => p.type === 'guardian')
+            if (!primaryGuardian) return null
+            return (
+              <div className="rounded-xl border border-indigo-200 bg-indigo-50/70 p-4 space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Lock className="h-4 w-4 text-indigo-600" />
+                    <span className="text-xs font-bold text-slate-900">Guardian Master Passcode</span>
+                  </div>
+                  <span className={`text-[10px] font-mono px-2 py-0.5 rounded font-bold ${primaryGuardian.pin ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`}>
+                    {primaryGuardian.pin ? 'PASSCODE ACTIVE' : 'NO PASSCODE SET'}
+                  </span>
+                </div>
+                <p className="text-[11px] text-slate-600">
+                  {primaryGuardian.pin
+                    ? 'Protected with a 6-digit passcode. Required to exit Junior/Child mode or access Guardian settings.'
+                    : 'Set a 6-digit passcode so children cannot switch back into Guardian mode.'}
+                </p>
+                {editingGuardianPin ? (
+                  <div className="pt-2 flex items-center gap-2">
+                    <input
+                      type="password"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      maxLength={6}
+                      placeholder="New 6-digit PIN"
+                      value={newGuardianPin}
+                      onChange={(e) => setNewGuardianPin(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                      className="input-field text-xs font-mono py-1.5 flex-1 tracking-widest text-center"
+                    />
+                    <button
+                      type="button"
+                      disabled={newGuardianPin.length < 4}
+                      onClick={() => {
+                        updateProfilePin(primaryGuardian.id, newGuardianPin)
+                        setEditingGuardianPin(false)
+                        setNewGuardianPin('')
+                        setSaveSuccess('Guardian passcode updated successfully!')
+                        setTimeout(() => setSaveSuccess(''), 3000)
+                      }}
+                      className="btn-primary text-xs py-1.5 px-3 disabled:opacity-50"
+                    >
+                      Save
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { setEditingGuardianPin(false); setNewGuardianPin(''); }}
+                      className="btn-secondary text-xs py-1.5 px-2.5"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                ) : (
+                  <div className="pt-1 flex items-center justify-between">
+                    <span className="text-xs font-mono text-slate-700 font-semibold">
+                      {primaryGuardian.pin ? '••••••' : 'None'}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => { setEditingGuardianPin(true); setNewGuardianPin(primaryGuardian.pin || ''); }}
+                      className="text-xs font-semibold text-indigo-600 hover:text-indigo-800 transition"
+                    >
+                      {primaryGuardian.pin ? 'Change Passcode' : 'Set Passcode Now'}
+                    </button>
+                  </div>
+                )}
+              </div>
+            )
+          })()}
+
           <div className="flex items-center justify-between pb-3.5 border-b border-slate-200">
             <div>
               <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
@@ -514,17 +661,24 @@ function ProfileManagementPage() {
               <h3 className="text-lg font-bold text-slate-900">Enter Profile PIN</h3>
             </div>
             <p className="text-xs text-slate-500 mb-4">
-              Profile "{activePinPrompt.name}" is protected by a guardian security PIN.
+              {activePinPrompt.type === 'guardian'
+                ? 'Enter the guardian passcode to switch to this profile.'
+                : `Profile "${activePinPrompt.name}" is protected by a guardian security PIN.`}
             </p>
             <form onSubmit={handleConfirmPin} className="space-y-4">
               <input
                 type="password"
+                inputMode="numeric"
+                pattern="[0-9]*"
                 maxLength={6}
                 autoFocus
-                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-center text-lg tracking-widest text-slate-900 focus:border-indigo-500 focus:bg-white focus:outline-none"
-                placeholder="••••"
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-center text-lg tracking-[0.4em] font-mono text-slate-900 focus:border-indigo-500 focus:bg-white focus:outline-none"
+                placeholder="••••••"
                 value={pinInput}
-                onChange={(e) => setPinInput(e.target.value)}
+                onChange={(e) => {
+                  setPinInput(e.target.value.replace(/\D/g, '').slice(0, 6))
+                  setPinError('')
+                }}
               />
               {pinError && <p className="text-xs text-rose-600 font-medium">{pinError}</p>}
               <div className="flex gap-2">

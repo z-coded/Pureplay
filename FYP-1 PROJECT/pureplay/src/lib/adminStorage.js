@@ -15,6 +15,7 @@ import {
 } from 'firebase/firestore'
 import { ref, deleteObject } from 'firebase/storage'
 import { db, storage } from '../firebase/config.js'
+import { moderationStatus } from './moderationVerdict.js'
 
 export const USERS_COLLECTION = 'users'
 export const VIDEOS_COLLECTION = 'videos'
@@ -193,7 +194,7 @@ export async function ensureUserDocument({ uid, email, displayName, role = 'user
     const existing = await withTimeout(getDoc(userRef), 2000)
     if (existing && existing.exists && existing.exists()) return existing.data()
 
-    await withTimeout(setDoc(userRef, userData), 2000)
+    await withTimeout(setDoc(userRef, userData, { merge: true }), 2000)
     return userData
   } catch (error) {
     console.warn('Firestore ensureUserDocument fallback to local:', error)
@@ -310,20 +311,13 @@ export async function createVideoDocument({
   const nsfwScore =
     aiAnalysis?.overall_nsfw_score != null
       ? aiAnalysis.overall_nsfw_score
-      : Math.random() * 0.3
+      : (aiAnalysis?.attribution?.visual_contribution ?? null)
   const profanityScore =
     aiAnalysis?.profanity_score != null
       ? aiAnalysis.profanity_score
-      : 0.05
+      : (aiAnalysis?.attribution?.audio_toxicity_contribution ?? null)
 
-  let status = 'Pending'
-  if (aiAnalysis?.status) {
-    status = aiAnalysis.status
-  } else if (nsfwScore > 0.65 || profanityScore > 0.7) {
-    status = 'Flagged'
-  } else {
-    status = 'Approved'
-  }
+  const status = moderationStatus(aiAnalysis)
 
   const videoData = {
     id: 'vid_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7),
@@ -335,17 +329,16 @@ export async function createVideoDocument({
     storage_url: storageUrl || '',
     download_url: downloadUrl || '/sample_demo.mp4',
     status, // "Pending" | "Flagged" | "Approved"
+    ai_analysis: aiAnalysis,
     file_size: fileSize || 0,
     mime_type: mimeType || 'video/mp4',
     ai_scores: {
-      nsfw: parseFloat(Number(nsfwScore).toFixed(3)),
-      profanity: parseFloat(Number(profanityScore).toFixed(3)),
-      model: aiAnalysis ? 'OpenNSFW2 + NeMo Guardrails' : 'PurePlay AI Inspection',
+      nsfw: nsfwScore == null ? null : parseFloat(Number(nsfwScore).toFixed(3)),
+      profanity: profanityScore == null ? null : parseFloat(Number(profanityScore).toFixed(3)),
+      model: aiAnalysis?.guardrail_engine || 'Unknown',
     },
-    ai_violations: aiAnalysis?.violations_detected || (status === 'Flagged' ? ['Suggestive visual pose detected'] : []),
-    ai_timeline: aiAnalysis?.timeline || [
-      { start: 0, end: 100, type: status === 'Flagged' ? 'nsfw' : 'safe', label: status === 'Flagged' ? 'Moderated Segment' : 'Child-Safe Content', confidence: 0.95 },
-    ],
+    ai_violations: aiAnalysis?.violations_detected || [],
+    ai_timeline: aiAnalysis?.timeline || [],
     uploaded_at: new Date().toISOString(),
   }
 
@@ -357,6 +350,8 @@ export async function createVideoDocument({
 
   try {
     const docRef = await withTimeout(addDoc(collection(db, VIDEOS_COLLECTION), videoData), 2000)
+    saveLocalStoredVideos(getLocalStoredVideos().map((video) =>
+      video.id === videoData.id ? { ...video, id: docRef.id } : video))
     return { ...videoData, id: docRef.id }
   } catch (error) {
     console.warn('Firestore addDoc fallback to local:', error)
@@ -440,7 +435,7 @@ export function onVideosSnapshot(callback) {
 export function onUserVideosSnapshot(userId, callback) {
   const filterLocal = () => {
     const local = getLocalStoredVideos()
-    return local.filter((v) => !userId || v.user_id === userId || v.user_id === 'demo_guardian_123')
+    return local.filter((v) => Boolean(userId) && v.user_id === userId)
   }
 
   const notify = () => {

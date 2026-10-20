@@ -17,11 +17,12 @@ function ProtectedRoute({ children, allowedRoles, uploadGate = false }) {
   if (!user) return <Navigate to="/login" replace />
   if (allowedRoles && !allowedRoles.includes(role)) return <Navigate to="/not-authorized" replace />
 
-  if (uploadGate && activeProfile?.type === 'child') {
+  if (uploadGate && (activeProfile?.type === 'child' || activeProfile?.type === 'teen')) {
     const guardianProfile = profiles.find((p) => p.type === 'guardian')
 
     const handleDirectSwitch = () => {
-      if (activeProfile?.pin && !showPinInput) {
+      // Switching to guardian from child/junior ALWAYS requires entering the passcode
+      if (!showPinInput) {
         setShowPinInput(true)
         return
       }
@@ -47,13 +48,13 @@ function ProtectedRoute({ children, allowedRoles, uploadGate = false }) {
     const handlePinSubmit = (e) => {
       e.preventDefault()
       if (!pinInput.trim()) {
-        setPinError('Please enter your security PIN.')
+        setPinError('Please enter your guardian passcode.')
         return
       }
       if (guardianProfile) {
         const res = switchProfile(guardianProfile.id, pinInput)
         if (!res.success) {
-          setPinError(res.error || 'Incorrect security PIN.')
+          setPinError(res.error || 'Incorrect passcode. Please try again.')
         }
       }
     }
@@ -75,10 +76,12 @@ function ProtectedRoute({ children, allowedRoles, uploadGate = false }) {
           </div>
 
           <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">
-            Upload Restricted in Child Profile
+            Upload Restricted in {activeProfile?.type === 'teen' ? 'Junior' : 'Child'} Profile
           </h2>
           <p className="mt-2 text-sm text-slate-600 leading-relaxed">
-            Child-level accounts can watch safe, filtered content but are restricted from uploading new media to the family vault.
+            {activeProfile?.type === 'teen'
+              ? 'Junior-level accounts can watch safe, filtered content but are not permitted to upload new media to the family vault.'
+              : 'Child-level accounts can watch safe, filtered content but are restricted from uploading new media to the family vault.'}
           </p>
 
           {/* Session Overview Card */}
@@ -87,7 +90,7 @@ function ProtectedRoute({ children, allowedRoles, uploadGate = false }) {
               <span className="font-semibold text-slate-500">Active Profile</span>
               <span className="font-bold text-slate-900 flex items-center gap-1.5">
                 <span className="h-2 w-2 rounded-full bg-amber-500" />
-                {activeProfile.name} (Child Mode)
+                {activeProfile.name} ({activeProfile?.type === 'teen' ? 'Junior' : 'Child'} Mode)
               </span>
             </div>
             <div className="mt-2.5 pt-2.5 border-t border-slate-200/80 flex items-center justify-between text-xs">
@@ -104,19 +107,21 @@ function ProtectedRoute({ children, allowedRoles, uploadGate = false }) {
               <form onSubmit={handlePinSubmit} className="space-y-3">
                 <div className="flex items-center justify-center gap-2 text-xs font-semibold text-slate-700">
                   <Lock className="h-4 w-4 text-indigo-600" />
-                  <span>Enter Profile PIN to switch to Guardian mode</span>
+                  <span>Enter Guardian Passcode to switch profiles</span>
                 </div>
                 <input
                   type="password"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   maxLength={6}
                   autoFocus
                   value={pinInput}
                   onChange={(e) => {
-                    setPinInput(e.target.value)
+                    setPinInput(e.target.value.replace(/\D/g, '').slice(0, 6))
                     setPinError('')
                   }}
-                  placeholder="••••"
-                  className="input-field text-center text-lg tracking-widest font-mono py-2"
+                  placeholder="••••••"
+                  className="input-field text-center text-lg tracking-[0.4em] font-mono py-2"
                 />
                 {pinError && <p className="text-xs text-rose-600 font-medium">{pinError}</p>}
                 <div className="flex gap-2">

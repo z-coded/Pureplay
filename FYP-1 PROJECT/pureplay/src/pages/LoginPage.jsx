@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext.jsx'
 import { getFirebaseAuthMessage } from '../utils/firebaseAuthErrors.js'
 import GoogleSignInButton from '../components/GoogleSignInButton.jsx'
 import { Eye, EyeOff, Lock, Mail, ArrowRight } from 'lucide-react'
-import { motion } from 'framer-motion'
+import { motion as Motion } from 'framer-motion'
 
 function LoginPage() {
   const navigate = useNavigate()
@@ -22,22 +22,6 @@ function LoginPage() {
       await logIn(form.email, form.password)
       navigate('/dashboard')
     } catch (err) {
-      if (
-        err?.code === 'auth/operation-not-allowed' ||
-        err?.code === 'auth/user-not-found' ||
-        err?.code === 'auth/invalid-credential' ||
-        err?.code === 'auth/unauthorized-domain' ||
-        !isFirebaseConfigured
-      ) {
-        const localUser = {
-          uid: 'user_' + Date.now(),
-          email: form.email || 'guardian@pureplay.dev',
-          displayName: form.email ? form.email.split('@')[0] : 'Guardian',
-        }
-        localStorage.setItem('pureplay_demo_user', JSON.stringify(localUser))
-        window.location.href = '/dashboard'
-        return
-      }
       setError(getFirebaseAuthMessage(err))
     } finally {
       setSubmitting(false)
@@ -50,16 +34,6 @@ function LoginPage() {
       await signInWithGoogle()
       navigate('/dashboard')
     } catch (err) {
-      if (err?.code === 'auth/unauthorized-domain') {
-        const localUser = {
-          uid: 'google_user_' + Date.now(),
-          email: 'guardian@pureplay.dev',
-          displayName: 'Google Guardian',
-        }
-        localStorage.setItem('pureplay_demo_user', JSON.stringify(localUser))
-        window.location.href = '/dashboard'
-        return
-      }
       setError(
         err?.message === 'Firebase is not configured'
           ? 'Firebase is not configured. Add your VITE_FIREBASE_* values in .env and restart.'
@@ -70,7 +44,7 @@ function LoginPage() {
 
   return (
     <div className="min-h-[85vh] flex items-center justify-center px-4 py-8">
-      <motion.div
+      <Motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-8 shadow-xl relative overflow-hidden"
@@ -173,7 +147,7 @@ function LoginPage() {
             </Link>
           </p>
         </div>
-      </motion.div>
+      </Motion.div>
     </div>
   )
 }

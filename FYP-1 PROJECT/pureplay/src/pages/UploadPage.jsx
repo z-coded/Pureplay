@@ -1,9 +1,8 @@
-import { useState, useRef } from 'react'
-import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage'
+import { useState, useRef, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext.jsx'
-import { storage } from '../firebase/config.js'
-import { createVideoDocument, ensureUserDocument, deleteVideo } from '../lib/adminStorage.js'
-import { motion, AnimatePresence } from 'framer-motion'
+import { aiBaseUrl, analyzeVideo } from '../lib/aiClient.js'
+import { createVideoDocument, ensureUserDocument, deleteVideo, approveVideo } from '../lib/adminStorage.js'
+import { motion as Motion, AnimatePresence } from 'framer-motion'
 import { UploadCloud, CheckCircle2, AlertCircle, FileVideo, ShieldAlert, X, FileText, Play, Trash2 } from 'lucide-react'
 import VideoModal from '../components/VideoModal.jsx'
 
@@ -33,7 +32,34 @@ function UploadPage() {
   const [uploadState, setUploadState] = useState('idle') // idle, uploading, success, error
   const [uploadedVideoData, setUploadedVideoData] = useState(null)
   const [previewVideo, setPreviewVideo] = useState(null)
+  const [aiServerStatus, setAiServerStatus] = useState({ online: false, checking: true, details: null })
   const fileInputRef = useRef(null)
+
+  const uploadController = useRef(null)
+
+  useEffect(() => () => uploadController.current?.abort(), [])
+
+  useEffect(() => {
+    let isMounted = true
+    const controller = new AbortController()
+    const checkAiHealth = async () => {
+      try {
+        if (!aiBaseUrl) throw new Error('AI URL is not configured')
+        const res = await fetch(`${aiBaseUrl}/api/health`, { signal: controller.signal })
+        if (res.ok) {
+          const data = await res.json()
+          if (isMounted) setAiServerStatus({ online: true, checking: false, details: data })
+          return
+        }
+      } catch { /* Show an offline state; never switch to a different API. */ }
+      if (isMounted) setAiServerStatus({ online: false, checking: false, details: null })
+    }
+    checkAiHealth()
+    return () => {
+      isMounted = false
+      controller.abort()
+    }
+  }, [])
 
   const validateFile = (file) => {
     if (!file) return 'No file selected.'
@@ -89,7 +115,7 @@ function UploadPage() {
 
     // Automatic title generation if left blank
     const autoTitle = title.trim() || selectedFile.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ') || 'Uploaded Video'
-    const autoDescription = description.trim() || 'Scanned & child-safe media stream'
+    const autoDescription = description.trim() || 'Automatically analyzed media'
 
     const effectiveUser = user || {
       uid: 'demo_guardian_123',
@@ -101,15 +127,7 @@ function UploadPage() {
     setProgress(5)
     setStatus('Initializing AI moderation pipeline...')
 
-    let localBlobUrl = '/sample_demo.mp4'
-    try {
-      localBlobUrl = URL.createObjectURL(selectedFile)
-    } catch {}
-
-    let simulatedInterval = null
-
     const finishUploadAndRegister = async (finalDownloadUrl, aiAnalysisVerdict) => {
-      if (simulatedInterval) clearInterval(simulatedInterval)
       setProgress(95)
       setStatus('Registering video metadata & compliance audit...')
 
@@ -120,13 +138,12 @@ function UploadPage() {
           displayName: effectiveUser.displayName,
         })
 
-        const storagePath = `uploads/${effectiveUser.uid}/${Date.now()}_${selectedFile.name}`
         const docResult = await createVideoDocument({
           userId: effectiveUser.uid,
           userEmail: effectiveUser.email,
           title: autoTitle,
           description: autoDescription,
-          storageUrl: storagePath,
+          storageUrl: '', // Video is stored on the AI backend, not Firebase Storage.
           downloadUrl: finalDownloadUrl,
           fileSize: selectedFile.size,
           mimeType: selectedFile.type || 'video/mp4',
@@ -136,13 +153,14 @@ function UploadPage() {
 
         setProgress(100)
         setUploadedVideoData(docResult)
-        setStatus('Complete! Censored video is ready for playback.')
+        setStatus(docResult.status === 'Approved' ? 'Analysis complete. Review the result before sharing.' : 'Analysis complete. This video requires review.')
         setUploadState('success')
 
         // Automatically launch the player with the censored video
         setPreviewVideo({
           url: finalDownloadUrl || '/sample_demo.mp4',
           title: autoTitle,
+          aiAnalysis: aiAnalysisVerdict,
         })
       } catch (err) {
         console.error('Error saving document:', err)
@@ -151,96 +169,23 @@ function UploadPage() {
       }
     }
 
-    // Direct client streaming to FastAPI AI microservice (configurable for Vercel/Cloud deployment)
-    const aiBaseUrl = import.meta.env.VITE_AI_API_URL || 'https://sad-colts-rule.loca.lt'
-    const formData = new FormData()
-    formData.append('file', selectedFile)
-
-    const xhr = new XMLHttpRequest()
-    xhr.open('POST', `${aiBaseUrl}/api/analyze-video?sample_fps=1.0`, true)
-    xhr.setRequestHeader('Bypass-Tunnel-Reminder', 'true')
-
-    // Track upload progress (5% - 50%)
-    xhr.upload.onprogress = (event) => {
-      if (event.lengthComputable) {
-        const uploadPct = Math.round((event.loaded / event.total) * 50)
-        setProgress(Math.max(5, uploadPct))
-        setStatus(`Streaming media frames: ${Math.round((event.loaded / event.total) * 100)}% (${formatBytes(event.loaded)} / ${formatBytes(event.total)})`)
+    uploadController.current = new AbortController()
+    try {
+      const aiData = await analyzeVideo({
+        file: selectedFile, user, signal: uploadController.current.signal,
+        onProgress: (percent) => {
+          setProgress(Math.max(5, Math.round(percent / 2)))
+          setStatus(percent === 100 ? 'Upload complete. Waiting for analysis...' : `Uploading video: ${percent}%`)
+        },
+        onStatus: (message) => { setProgress(55); setStatus(message) },
+      })
+      await finishUploadAndRegister(aiData.censored_video_url, aiData.guardrail_verdict)
+    } catch (error) {
+      if (error.name !== 'AbortError') {
+        setStatus(error.message || 'AI processing failed. Please try again.')
+        setUploadState('error')
       }
     }
-
-    // When file transmission to AI microservice completes:
-    xhr.upload.onload = () => {
-      setProgress(52)
-      setStatus('Running Multi-Modal AI Inspection (OpenNSFW2 + NudeNet + Whisper + Detoxify + NeMo)...')
-
-      const stages = [
-        { pct: 58, text: 'Extracting video keyframes via OpenCV (1.0 fps)...' },
-        { pct: 68, text: 'Running NudeNet anatomy detection & OpenNSFW2 adult scoring...' },
-        { pct: 78, text: 'Transcribing speech via Whisper & screening text with Detoxify...' },
-        { pct: 86, text: 'Evaluating NVIDIA NeMo Guardrails & applying 51×51 Gaussian blur...' },
-        { pct: 92, text: 'Synthesizing child-safe video stream & compiling compliance audit...' },
-      ]
-      let stageIndex = 0
-      simulatedInterval = setInterval(() => {
-        if (stageIndex < stages.length) {
-          setProgress(stages[stageIndex].pct)
-          setStatus(stages[stageIndex].text)
-          stageIndex++
-        } else {
-          // Keep UI lively while deep neural networks finish processing
-          setProgress((prev) => Math.min(prev + 1, 97))
-          setStatus('Finalizing multi-modal redaction & compiling compliance audit...')
-        }
-      }, 1200)
-    }
-
-    xhr.onload = async () => {
-      if (simulatedInterval) clearInterval(simulatedInterval)
-
-      if (xhr.status >= 200 && xhr.status < 300) {
-        try {
-          const aiData = JSON.parse(xhr.responseText)
-          const aiAnalysis = aiData.guardrail_verdict || aiData.analysis || aiData
-          const finalUrl = aiData.censored_video_url || localBlobUrl
-          await finishUploadAndRegister(finalUrl, aiAnalysis)
-          return
-        } catch (e) {
-          console.warn('Could not parse AI response, using fallback:', e)
-        }
-      }
-
-      await finishUploadAndRegister(localBlobUrl, {
-        decision: 'APPROVED',
-        status: 'Approved',
-        confidence: 0.98,
-        reason: 'Client-side verification heuristic (Verified Safe)',
-      })
-    }
-
-    xhr.onerror = async () => {
-      console.warn('Local AI service connection error, falling back to simulated verification...')
-      if (simulatedInterval) clearInterval(simulatedInterval)
-      await finishUploadAndRegister(localBlobUrl, {
-        decision: 'APPROVED',
-        status: 'Approved',
-        confidence: 0.95,
-        reason: 'Client-side verification heuristic',
-      })
-    }
-
-    xhr.timeout = 180000 // 3 minutes timeout
-    xhr.ontimeout = async () => {
-      console.warn('AI processing timed out, saving video...')
-      if (simulatedInterval) clearInterval(simulatedInterval)
-      await finishUploadAndRegister(localBlobUrl, {
-        decision: 'FLAGGED',
-        status: 'Pending',
-        reason: 'Large video deferred for background processing',
-      })
-    }
-
-    xhr.send(formData)
   }
 
   const handleReset = () => {
@@ -272,7 +217,7 @@ function UploadPage() {
   }
 
   return (
-    <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="space-y-8">
+    <Motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="space-y-8">
       <section className="pb-4 border-b border-slate-200">
         <div className="flex items-center gap-2.5">
           <h1 className="flex items-center gap-2.5 text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">
@@ -290,7 +235,7 @@ function UploadPage() {
         <div className="relative z-10 flex flex-col items-center">
           <div className="w-full max-w-2xl">
             {/* Active Profile Info */}
-            <div className="mb-6 flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+            <div className="mb-3 flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
               <div className="flex items-center gap-2.5">
                 <ShieldAlert className="h-4 w-4 text-indigo-600" />
                 <span className="text-xs font-semibold text-slate-600">Active Viewing Profile</span>
@@ -300,9 +245,31 @@ function UploadPage() {
               </span>
             </div>
 
+            {/* AI Microservice Status Badge */}
+            <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-2 rounded-xl border border-slate-200/80 bg-white/80 backdrop-blur-sm px-4 py-3 shadow-xs">
+              <div className="flex items-center gap-2.5">
+                <span className={`h-2.5 w-2.5 rounded-full shrink-0 ${aiServerStatus.online ? 'bg-emerald-500 animate-pulse' : aiServerStatus.checking ? 'bg-amber-400 animate-ping' : 'bg-rose-500'}`} />
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold text-slate-800">
+                      AI Microservice: {aiServerStatus.online ? 'Online & Connected' : aiServerStatus.checking ? 'Connecting...' : 'Not Found / Offline'}
+                    </span>
+                    <span className={`text-[10px] font-mono px-2 py-0.5 rounded-md font-bold ${aiServerStatus.online ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}`}>
+                      {aiServerStatus.online ? 'CONNECTED' : 'OFFLINE'}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-500 mt-0.5">
+                    {aiServerStatus.online
+                      ? 'Processing service is reachable. Models start when a video is submitted.'
+                      : 'Processing service is unavailable. Try again shortly.'}
+                  </p>
+                </div>
+              </div>
+            </div>
+
             <AnimatePresence mode="wait">
               {uploadState === 'idle' && (
-                <motion.form
+                <Motion.form
                   key="idle"
                   initial={{ opacity: 0, scale: 0.98 }}
                   animate={{ opacity: 1, scale: 1 }}
@@ -338,7 +305,7 @@ function UploadPage() {
                       <div className="mt-4 flex items-center gap-2 text-[10px] font-mono">
                         <span className="badge-slate">.MP4</span>
                         <span className="badge-slate">.WEBM</span>
-                        <span className="badge-slate">Max 100MB</span>
+                        <span className="badge-slate">Max 100MB ? 3 minutes ? English speech</span>
                       </div>
                     </div>
                   ) : (
@@ -411,11 +378,11 @@ function UploadPage() {
                     <Play className="h-4 w-4 fill-current" />
                     <span>Scan & Play Censored Video</span>
                   </button>
-                </motion.form>
+                </Motion.form>
               )}
 
               {uploadState === 'uploading' && (
-                <motion.div
+                <Motion.div
                   key="uploading"
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
@@ -425,7 +392,7 @@ function UploadPage() {
                   <div className="relative mb-8 h-32 w-32">
                     <svg className="h-full w-full -rotate-90" viewBox="0 0 100 100">
                       <circle cx="50" cy="50" r="45" className="stroke-slate-200" strokeWidth="8" fill="none" />
-                      <motion.circle
+                      <Motion.circle
                         cx="50"
                         cy="50"
                         r="45"
@@ -444,27 +411,27 @@ function UploadPage() {
                   </div>
                   <h3 className="mb-2 text-xl font-bold text-slate-900 animate-pulse">{status}</h3>
                   <p className="text-sm text-slate-500">PurePlay Multi-Modal AI: NudeNet • OpenNSFW2 • Whisper • Detoxify • NeMo</p>
-                </motion.div>
+                </Motion.div>
               )}
 
               {uploadState === 'success' && (
-                <motion.div
+                <Motion.div
                   key="success"
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   className="flex flex-col items-center py-8 text-center"
                 >
-                  <motion.div
+                  <Motion.div
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
                     transition={{ type: 'spring', bounce: 0.5 }}
                     className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-emerald-100"
                   >
                     <CheckCircle2 className="h-10 w-10 text-emerald-600" />
-                  </motion.div>
+                  </Motion.div>
                   <h3 className="mb-2 text-2xl font-bold text-slate-900">Video Uploaded & Logged!</h3>
                   <p className="mb-6 max-w-md text-sm text-slate-600">
-                    Uploaded successfully to Storage and recorded in Firestore `videos` collection.
+                    Review the edited video before making it available in the child gallery.
                   </p>
 
                   {uploadedVideoData && (
@@ -493,11 +460,30 @@ function UploadPage() {
                   )}
 
                   <div className="flex flex-col sm:flex-row gap-3 w-full justify-center">
+                    {uploadedVideoData?.ai_analysis?.verification_passed &&
+                      uploadedVideoData.status !== 'Approved' && (
+                      <button
+                        type="button"
+                        className="btn-secondary"
+                        onClick={async () => {
+                          if (!window.confirm('Have you watched the entire filtered video and confirmed it is suitable for your child?')) return
+                          try {
+                            await approveVideo(uploadedVideoData.id)
+                            setUploadedVideoData((current) => ({ ...current, status: 'Approved' }))
+                          } catch (error) {
+                            setStatus('Approval failed: ' + error.message)
+                          }
+                        }}
+                      >
+                        I reviewed it — add to child gallery
+                      </button>
+                    )}
                     <button
                       type="button"
                       onClick={() => setPreviewVideo({
                         url: uploadedVideoData?.download_url || '/sample_demo.mp4',
-                        title: uploadedVideoData?.title || 'Moderated Video'
+                        title: uploadedVideoData?.title || 'Moderated Video',
+                        aiAnalysis: uploadedVideoData?.ai_analysis,
                       })}
                       className="btn-primary flex items-center justify-center gap-2"
                     >
@@ -528,11 +514,11 @@ function UploadPage() {
                       </button>
                     )}
                   </div>
-                </motion.div>
+                </Motion.div>
               )}
 
               {uploadState === 'error' && (
-                <motion.div
+                <Motion.div
                   key="error"
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
@@ -543,13 +529,31 @@ function UploadPage() {
                   </div>
                   <h3 className="mb-2 text-2xl font-bold text-slate-900">Upload Failed</h3>
                   <p className="mb-8 max-w-md text-sm text-rose-600 font-medium">{status}</p>
+                  {status.includes('ALLOWED_USER_UIDS') && (
+                    <div className="mb-6 w-full max-w-lg rounded-xl border border-amber-200 bg-amber-50 p-4 text-left text-sm text-slate-700">
+                      <p className="font-semibold">Signed-in account: {user?.email || 'Firebase user'}</p>
+                      <label htmlFor="firebase-upload-uid" className="mt-3 block text-xs font-semibold">
+                        Firebase User UID — copy this exact value
+                      </label>
+                      <input
+                        id="firebase-upload-uid"
+                        readOnly
+                        value={user?.uid || 'Not signed in'}
+                        onFocus={(event) => event.target.select()}
+                        className="mt-1 w-full rounded-lg border border-amber-200 bg-white px-3 py-2 font-mono text-sm"
+                      />
+                      <p className="mt-3 text-xs leading-relaxed">
+                        To allow this account: In Modal dashboard &gt; <b>Secrets</b> &gt; edit <b>pureplay-config</b> &gt; set <code>ALLOWED_USER_UIDS</code> to this UID (or use <code>*</code> to allow all authenticated accounts in your Firebase project), then redeploy Modal.
+                      </p>
+                    </div>
+                  )}
                   <button
                     onClick={handleReset}
                     className="btn-secondary"
                   >
                     Try Again
                   </button>
-                </motion.div>
+                </Motion.div>
               )}
             </AnimatePresence>
           </div>
@@ -561,6 +565,8 @@ function UploadPage() {
         onClose={() => setPreviewVideo(null)}
         videoUrl={previewVideo?.url}
         title={previewVideo?.title}
+        aiAnalysis={previewVideo?.aiAnalysis || uploadedVideoData?.ai_analysis}
+        videoData={uploadedVideoData}
         onDelete={uploadedVideoData?.id ? async () => {
           if (window.confirm('Are you sure you want to delete this video?')) {
             await deleteVideo(uploadedVideoData.id)
@@ -569,7 +575,7 @@ function UploadPage() {
           }
         } : undefined}
       />
-    </motion.div>
+    </Motion.div>
   )
 }
 

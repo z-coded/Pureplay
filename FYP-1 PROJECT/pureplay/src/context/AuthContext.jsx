@@ -14,6 +14,7 @@ import { doc, getDoc, setDoc } from 'firebase/firestore'
 import { auth, db, isFirebaseConfigured } from '../firebase/config.js'
 import { defaultPolicy } from '../data/mockData.js'
 import { ensureUserDocument } from '../lib/adminStorage.js'
+import { activeKey, createSessionLoader, emptySession, normalizeProfiles, profileKey } from '../lib/accountSession.js'
 
 const AuthContext = createContext(null)
 
@@ -25,254 +26,146 @@ const ADMIN_EMAILS = (import.meta.env.VITE_ADMIN_EMAILS ?? '')
 const googleProvider = new GoogleAuthProvider()
 googleProvider.setCustomParameters({ prompt: 'select_account' })
 
-const profileStoreKey = 'pureplay_profiles'
-const activeProfileStoreKey = 'pureplay_active_profile'
-
-const getStoredProfiles = () => {
-  try {
-    const parsed = JSON.parse(localStorage.getItem(profileStoreKey) ?? '[]')
-    return Array.isArray(parsed) ? parsed : []
-  } catch {
-    return []
-  }
-}
-
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [profiles, setProfiles] = useState(getStoredProfiles)
-  const [activeProfileId, setActiveProfileId] = useState(localStorage.getItem(activeProfileStoreKey))
+  const [session, setSession] = useState(() => ({ ...emptySession(), loading: true }))
+  const { user, profiles, activeProfileId, loading } = session
 
-  // Load profiles from Firestore on login
   useEffect(() => {
-    if (!user || !db) return
-
-    const loadProfiles = async () => {
-      try {
-        const userDoc = await getDoc(doc(db, 'users', user.uid))
-        if (userDoc.exists()) {
-          const data = userDoc.data()
-          if (data.profiles) {
-            setProfiles(data.profiles)
-            localStorage.setItem(profileStoreKey, JSON.stringify(data.profiles))
-          }
-        }
-      } catch (error) {
-        console.error('Error loading profiles from Firestore:', error)
-      }
-    }
-
-    loadProfiles()
-  }, [user])
-
-  // Save profiles to Firestore and LocalStorage
-  useEffect(() => {
-    localStorage.setItem(profileStoreKey, JSON.stringify(profiles))
-
-    if (user && db) {
-      const saveProfiles = async () => {
-        try {
-          await setDoc(doc(db, 'users', user.uid), { profiles }, { merge: true })
-        } catch (error) {
-          console.error('Error saving profiles to Firestore:', error)
-        }
-      }
-      saveProfiles()
-    }
-  }, [profiles, user])
-
-  // Ensure a default Guardian profile always exists for the account holder
-  useEffect(() => {
-    if (!user) return
-
-    setProfiles((prev) => {
-      const hasGuardian = prev.some((p) => p.type === 'guardian')
-      if (hasGuardian) return prev
-
-      const defaultGuardian = {
-        id: 'guardian_' + (user.uid || 'primary'),
-        name: user.displayName ? `${user.displayName} (Guardian)` : 'Guardian (Parent)',
-        type: 'guardian',
-        pin: '',
-        policy: {
-          nudity: 0.85,
-          violence: 0.85,
-          profanity: 0.90,
-        },
-        createdAt: new Date().toISOString(),
-        isPrimary: true,
-      }
-      return [defaultGuardian, ...prev]
+    const loader = createSessionLoader({
+      storage: localStorage,
+      publish: setSession,
+      readProfiles: async (uid) => {
+        if (!db) throw new Error('Firebase is not configured')
+        const snapshot = await getDoc(doc(db, 'users', uid))
+        return snapshot.exists() ? snapshot.data().profiles : undefined
+      },
+      onError: (error) => console.error('Could not load account profiles:', error),
     })
-  }, [user])
-
-  // Ensure activeProfileId points to a valid profile, defaulting to Guardian if unset
-  useEffect(() => {
-    if (profiles.length > 0) {
-      const activeExists = profiles.some((p) => p.id === activeProfileId)
-      if (!activeExists || !activeProfileId) {
-        const guardian = profiles.find((p) => p.type === 'guardian')
-        const fallbackId = guardian ? guardian.id : profiles[0].id
-        setActiveProfileId(fallbackId)
-        localStorage.setItem(activeProfileStoreKey, fallbackId)
-      }
-    }
-  }, [profiles, activeProfileId])
-
-  useEffect(() => {
-    if (activeProfileId) {
-      localStorage.setItem(activeProfileStoreKey, activeProfileId)
-    }
-  }, [activeProfileId])
-
-  useEffect(() => {
-    if (!auth) {
-      const savedDemo = localStorage.getItem('pureplay_demo_user')
-      if (savedDemo) {
-        try { setUser(JSON.parse(savedDemo)) } catch {}
-      }
-      setLoading(false)
-      return () => {}
-    }
-    const unsub = onAuthStateChanged(auth, (sessionUser) => {
-      if (sessionUser) {
-        setUser(sessionUser)
-      } else {
-        const savedDemo = localStorage.getItem('pureplay_demo_user')
-        if (savedDemo) {
-          try { setUser(JSON.parse(savedDemo)) } catch {}
-        } else {
-          setUser(null)
-        }
-      }
-      setLoading(false)
-    })
-    return unsub
+    const unsubscribe = auth
+      ? onAuthStateChanged(auth, (firebaseUser) => { void loader.load(firebaseUser) })
+      : (() => { void loader.load(null); return () => {} })()
+    return () => { loader.cancel(); unsubscribe() }
   }, [])
+
+  useEffect(() => {
+    if (loading || !user || !session.dirty || auth?.currentUser?.uid !== user.uid) return
+    localStorage.setItem(profileKey(user.uid), JSON.stringify(profiles))
+    localStorage.setItem(activeKey(user.uid), activeProfileId || '')
+    // Never write cached profiles over an account whose cloud read failed.
+    if (db && session.canSaveRemote) {
+      setDoc(doc(db, 'users', user.uid), { profiles }, { merge: true })
+        .catch((error) => console.error('Could not save account profiles:', error))
+    }
+  }, [session, loading, user, profiles, activeProfileId])
+
+  const setProfiles = (update) => setSession((previous) => {
+    if (!previous.user || previous.loading) return previous
+    const next = typeof update === 'function' ? update(previous.profiles) : update
+    return { ...previous, profiles: next, dirty: true }
+  })
+  const setActiveProfileId = (id) => setSession((previous) => {
+    if (!previous.user || previous.loading || !previous.profiles.some((p) => p.id === id)) return previous
+    return { ...previous, activeProfileId: id, dirty: true }
+  })
 
   const role = useMemo(() => {
     if (!user?.email) return null
     return ADMIN_EMAILS.includes(user.email.toLowerCase()) ? 'admin' : 'guardian'
   }, [user])
-
   const activeProfile = useMemo(
     () => profiles.find((profile) => profile.id === activeProfileId) ?? null,
     [activeProfileId, profiles],
   )
 
-  const demoLogin = (targetRole = 'guardian') => {
-    const demoEmail = targetRole === 'admin' ? (ADMIN_EMAILS[0] || 'maazbinrashidofficial@gmail.com') : 'guardian@pureplay.dev'
-    const demoUser = {
-      uid: 'demo_' + targetRole + '_123',
-      email: demoEmail,
-      displayName: targetRole === 'admin' ? 'System Administrator' : 'Guardian Account',
-    }
-    localStorage.setItem('pureplay_demo_user', JSON.stringify(demoUser))
-    setUser(demoUser)
-    return demoUser
-  }
-
   const signUp = async (email, password, displayName = '') => {
-    if (!auth) {
-      return demoLogin('guardian')
+    if (!auth) throw new Error('Firebase is not configured')
+    const response = await createUserWithEmailAndPassword(auth, email, password)
+    if (displayName) {
+      await updateProfile(response.user, { displayName })
+      setSession((previous) => previous.user?.uid === response.user.uid && !previous.loading
+        ? { ...previous, profiles: normalizeProfiles(response.user, previous.profiles).profiles, dirty: true }
+        : previous)
     }
-    try {
-      const response = await createUserWithEmailAndPassword(auth, email, password)
-      if (displayName) {
-        try {
-          await updateProfile(response.user, { displayName })
-        } catch (err) {
-          console.warn('Could not set displayName:', err)
-        }
-      }
-      const userRole = ADMIN_EMAILS.includes(email.toLowerCase()) ? 'admin' : 'guardian'
-      await ensureUserDocument({
-        uid: response.user.uid,
-        email: response.user.email,
-        displayName: displayName || email.split('@')[0],
-        role: userRole,
-      })
-      try {
-        await sendEmailVerification(response.user)
-      } catch {}
-      return response
-    } catch (err) {
-      if (err?.code === 'auth/operation-not-allowed') {
-        const localUser = {
-          uid: 'user_' + Date.now(),
-          email,
-          displayName: displayName || email.split('@')[0],
-        }
-        localStorage.setItem('pureplay_demo_user', JSON.stringify(localUser))
-        setUser(localUser)
-        return { user: localUser }
-      }
-      throw err
-    }
+    await ensureUserDocument({
+      uid: response.user.uid, email: response.user.email,
+      displayName: displayName || email.split('@')[0],
+      role: ADMIN_EMAILS.includes(email.toLowerCase()) ? 'admin' : 'guardian',
+    })
+    try { await sendEmailVerification(response.user) }
+    catch (error) { console.warn('Verification email could not be sent:', error) }
+    return response
   }
 
   const logIn = async (email, password) => {
-    if (!auth) {
-      return demoLogin(ADMIN_EMAILS.includes(email.toLowerCase()) ? 'admin' : 'guardian')
-    }
-    try {
-      return await signInWithEmailAndPassword(auth, email, password)
-    } catch (err) {
-      if (
-        err?.code === 'auth/operation-not-allowed' ||
-        err?.code === 'auth/user-not-found' ||
-        err?.code === 'auth/invalid-credential'
-      ) {
-        const localUser = {
-          uid: 'user_' + Date.now(),
-          email,
-          displayName: email.split('@')[0],
-        }
-        localStorage.setItem('pureplay_demo_user', JSON.stringify(localUser))
-        setUser(localUser)
-        return { user: localUser }
-      }
-      throw err
-    }
+    if (!auth) throw new Error('Firebase is not configured')
+    // Firebase errors propagate to the form. No synthetic session is created.
+    return signInWithEmailAndPassword(auth, email, password)
   }
-  const logOut = () => {
+  const logOut = async () => {
     localStorage.removeItem('pureplay_demo_user')
-    setUser(null)
-    if (!auth) return Promise.resolve()
-    return signOut(auth)
+    if (auth) await signOut(auth)
   }
   const resetPassword = (email) => {
     if (!auth) throw new Error('Firebase is not configured')
     return sendPasswordResetEmail(auth, email)
   }
-
   const signInWithGoogle = async () => {
     if (!auth) throw new Error('Firebase is not configured')
-    const res = await signInWithPopup(auth, googleProvider)
-    if (res?.user) {
-      const userRole = ADMIN_EMAILS.includes((res.user.email || '').toLowerCase()) ? 'admin' : 'guardian'
-      await ensureUserDocument({
-        uid: res.user.uid,
-        email: res.user.email,
-        displayName: res.user.displayName || res.user.email?.split('@')[0],
-        role: userRole,
-      })
-    }
-    return res
+    const response = await signInWithPopup(auth, googleProvider)
+    await ensureUserDocument({
+      uid: response.user.uid, email: response.user.email,
+      displayName: response.user.displayName || response.user.email?.split('@')[0],
+      role: ADMIN_EMAILS.includes((response.user.email || '').toLowerCase()) ? 'admin' : 'guardian',
+    })
+    return response
+  }
+
+  const updateProfilePin = (profileId, newPin) => {
+    const cleanPin = String(newPin || '').replace(/\D/g, '').slice(0, 6)
+    setProfiles((prev) =>
+      prev.map((p) => (p.id === profileId ? { ...p, pin: cleanPin } : p))
+    )
+    return { success: true }
   }
 
   const switchProfile = (profileId, pin = '', isGuardianOverride = false) => {
     const target = profiles.find((p) => p.id === profileId)
     if (!target) return { success: false, error: 'Profile not found' }
 
-    // If currently in child profile with PIN, validate PIN when switching away unless guardian override
-    if (!isGuardianOverride && activeProfile?.type === 'child' && activeProfile?.pin && activeProfile.pin !== pin) {
-      return { success: false, error: 'Incorrect child lock PIN' }
+    const isRestrictedActive = (activeProfile?.type === 'child' || activeProfile?.type === 'teen')
+    const guardianProfile = profiles.find((p) => p.type === 'guardian')
+    const configuredPins = profiles.map((p) => p.pin).filter(Boolean)
+
+    // Switching to Guardian from a child/junior profile ALWAYS requires the passcode
+    if (!isGuardianOverride && isRestrictedActive && target.type === 'guardian') {
+      const validPins = [guardianProfile?.pin, activeProfile?.pin, ...configuredPins].filter(Boolean)
+      if (validPins.length > 0) {
+        if (!pin || !validPins.includes(pin)) {
+          return { success: false, error: 'Incorrect passcode. Guardian access locked.' }
+        }
+      } else {
+        // No PIN was configured in the household. User must enter a 4-6 digit passcode to unlock Guardian.
+        if (!pin || pin.length < 4) {
+          return { success: false, error: 'Please enter a 4-6 digit passcode to unlock Guardian mode.' }
+        }
+        if (guardianProfile) {
+          setProfiles((prev) =>
+            prev.map((p) => (p.id === guardianProfile.id ? { ...p, pin } : p))
+          )
+        }
+      }
     }
 
-    // If target is child and has a PIN, validate it
-    if (!isGuardianOverride && target.type === 'child' && target.pin && target.pin !== pin) {
-      return { success: false, error: 'Incorrect PIN' }
+    // If leaving a locked child or junior profile to any profile
+    if (!isGuardianOverride && isRestrictedActive && activeProfile?.pin) {
+      if (activeProfile.pin !== pin && guardianProfile?.pin !== pin) {
+        return { success: false, error: 'Incorrect security PIN' }
+      }
+    }
+
+    // If target profile has a PIN
+    if (!isGuardianOverride && target.pin && target.pin !== pin) {
+      return { success: false, error: target.type === 'guardian' ? 'Incorrect guardian passcode' : 'Incorrect PIN' }
     }
 
     setActiveProfileId(profileId)
@@ -280,6 +173,7 @@ export function AuthProvider({ children }) {
   }
 
   const createProfile = ({ name, type, pin, policy }) => {
+    if (!user || loading) throw new Error('Sign in before creating a profile')
     const newProfile = {
       id: crypto.randomUUID(),
       name,
@@ -294,6 +188,7 @@ export function AuthProvider({ children }) {
   }
 
   const deleteProfile = (profileId) => {
+    if (profiles.find((p) => p.id === profileId)?.isPrimary) return
     setProfiles((prev) => prev.filter((p) => p.id !== profileId))
     if (activeProfileId === profileId) {
       const remaining = profiles.filter((p) => p.id !== profileId)
@@ -311,10 +206,10 @@ export function AuthProvider({ children }) {
     activeProfileId,
     setActiveProfileId,
     switchProfile,
+    updateProfilePin,
     signUp,
     logIn,
     logOut,
-    demoLogin,
     resetPassword,
     signInWithGoogle,
     createProfile,
@@ -324,4 +219,6 @@ export function AuthProvider({ children }) {
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
 
+// The provider and its consumer hook intentionally share the same context.
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => useContext(AuthContext)

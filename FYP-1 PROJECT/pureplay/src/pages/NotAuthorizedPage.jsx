@@ -1,20 +1,14 @@
-import { Link, useNavigate } from 'react-router-dom'
-import { ShieldAlert, ArrowLeft, KeyRound, Lock, Home } from 'lucide-react'
-import { motion } from 'framer-motion'
+import { Link } from 'react-router-dom'
+import { ShieldAlert, Lock, Home } from 'lucide-react'
+import { motion as Motion } from 'framer-motion'
 import { useAuth } from '../context/AuthContext.jsx'
 
 function NotAuthorizedPage() {
-  const navigate = useNavigate()
-  const { demoLogin, role } = useAuth()
-
-  const handleAdminSwitch = () => {
-    demoLogin('admin')
-    navigate('/admin')
-  }
+  const { role } = useAuth()
 
   return (
     <div className="min-h-[75vh] flex items-center justify-center px-4">
-      <motion.div
+      <Motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         className="w-full max-w-lg rounded-3xl border border-rose-500/30 bg-slate-900/80 p-8 sm:p-10 text-center shadow-2xl backdrop-blur-xl relative overflow-hidden"
@@ -57,16 +51,10 @@ function NotAuthorizedPage() {
               <Home className="h-4 w-4" />
               <span>Guardian Dashboard</span>
             </Link>
-            <button
-              onClick={handleAdminSwitch}
-              className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 py-3 text-xs font-bold text-white shadow-lg shadow-violet-600/20 hover:brightness-110 transition"
-            >
-              <KeyRound className="h-4 w-4" />
-              <span>Switch to Admin Role</span>
-            </button>
+
           </div>
         </div>
-      </motion.div>
+      </Motion.div>
     </div>
   )
 }

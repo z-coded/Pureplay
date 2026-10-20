@@ -1,9 +1,9 @@
 import { useState, useEffect, useMemo } from 'react'
-import { onVideosSnapshot, deleteVideo } from '../lib/adminStorage.js'
+import { onUserVideosSnapshot, deleteVideo } from '../lib/adminStorage.js'
 import { useAuth } from '../context/AuthContext.jsx'
 import { Play, Search, Film, CheckCircle, ShieldCheck, Sparkles, Trash2 } from 'lucide-react'
 import VideoModal from '../components/VideoModal.jsx'
-import { motion } from 'framer-motion'
+import { motion as Motion } from 'framer-motion'
 
 function formatBytes(bytes) {
   if (!bytes) return ''
@@ -14,7 +14,7 @@ function formatBytes(bytes) {
 }
 
 function GalleryPage() {
-  const { role, activeProfile } = useAuth()
+  const { role, activeProfile, user } = useAuth()
   const [videos, setVideos] = useState([])
   const [loading, setLoading] = useState(true)
   const [query, setQuery] = useState('')
@@ -48,13 +48,12 @@ function GalleryPage() {
   useEffect(() => {
     let unsub = () => {}
     try {
-      unsub = onVideosSnapshot((items) => {
+      unsub = onUserVideosSnapshot(user?.uid, (items) => {
         setVideos(items || [])
         setLoading(false)
       })
     } catch (err) {
       console.error('Error attaching gallery listener:', err)
-      setLoading(false)
     }
 
     const timer = setTimeout(() => setLoading(false), 1200)
@@ -63,11 +62,11 @@ function GalleryPage() {
       unsub()
       clearTimeout(timer)
     }
-  }, [])
+  }, [user?.uid])
 
   // Only videos with status === "Approved" are displayed
   const approvedVideos = useMemo(() => {
-    return videos.filter((v) => v.status === 'Approved')
+    return videos.filter((v) => v.status === 'Approved' && v.ai_analysis?.verification_passed === true)
   }, [videos])
 
   const filtered = useMemo(() => {
@@ -136,7 +135,7 @@ function GalleryPage() {
       ) : (
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((video) => (
-            <motion.div
+            <Motion.div
               key={video.id}
               whileHover={{ y: -3 }}
               transition={{ duration: 0.2 }}
@@ -221,7 +220,7 @@ function GalleryPage() {
                   </div>
                 </div>
               </div>
-            </motion.div>
+            </Motion.div>
           ))}
         </div>
       )}
@@ -232,6 +231,8 @@ function GalleryPage() {
         onClose={() => setActiveVideo(null)}
         videoUrl={activeVideo?.download_url || activeVideo?.fileUrl}
         title={activeVideo?.title || activeVideo?.file_name}
+        videoData={activeVideo}
+        aiAnalysis={activeVideo?.ai_analysis}
         onDelete={isGuardianOrAdmin ? () => handleDeleteVideo(null, activeVideo) : undefined}
       />
     </div>

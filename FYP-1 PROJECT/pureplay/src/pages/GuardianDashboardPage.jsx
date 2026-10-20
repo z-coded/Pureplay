@@ -5,7 +5,7 @@ import { onUserVideosSnapshot, deleteVideo } from '../lib/adminStorage.js'
 import { Shield, Users, Video, Play, Upload, Clock, CheckCircle2, AlertTriangle, Filter, Sparkles, UserCheck, ShieldAlert, Trash2 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import VideoModal from '../components/VideoModal.jsx'
-import { motion } from 'framer-motion'
+import { motion as Motion } from 'framer-motion'
 
 function GuardianDashboardPage() {
   const { profiles, activeProfile, role, user, switchProfile } = useAuth()
@@ -102,7 +102,7 @@ function GuardianDashboardPage() {
 
       {/* Child Profile Warning & Quick-Switch Banner */}
       {activeProfile?.type === 'child' && (
-        <motion.div
+        <Motion.div
           initial={{ opacity: 0, y: -6 }}
           animate={{ opacity: 1, y: 0 }}
           className="rounded-2xl border border-amber-300 bg-amber-50/90 p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 text-amber-950 shadow-xs"
@@ -133,7 +133,7 @@ function GuardianDashboardPage() {
           >
             Switch to Guardian Profile
           </button>
-        </motion.div>
+        </Motion.div>
       )}
 
       {/* Modern Stats Overview */}
@@ -322,6 +322,7 @@ function GuardianDashboardPage() {
                               type="button"
                               onClick={() =>
                                 setActiveVideo({
+                                  ...item,
                                   id: item.id,
                                   url: item.download_url,
                                   title: item.title || item.file_name,
@@ -359,6 +360,8 @@ function GuardianDashboardPage() {
         onClose={() => setActiveVideo(null)}
         videoUrl={activeVideo?.url}
         title={activeVideo?.title}
+        videoData={activeVideo}
+        aiAnalysis={activeVideo?.ai_analysis}
         onDelete={activeVideo?.id ? () => handleDeleteVideo(activeVideo.id, activeVideo.title) : undefined}
       />
     </div>
