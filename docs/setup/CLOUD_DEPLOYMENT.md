@@ -69,10 +69,10 @@ No local PyTorch installation, model downloads, Docker installation or local AI 
 Run from the same repository-root terminal:
 
 ```powershell
-.\.venv-modal\Scripts\python.exe -m modal deploy --env main modal_app.py
+.\.venv-modal\Scripts\python.exe -m modal deploy --env main backend/modal_app.py
 ```
 
-The file `modal_app.py` is already provided; do not paste its code into a Secret. Modal uploads the Python source/checkpoints and builds the Linux images remotely. The first build downloads PyTorch, the Whisper tiny weights and the other runtime dependencies, so allow time for it to finish.
+The file `backend/modal_app.py` is already provided; do not paste its code into a Secret. Modal uploads the Python source/checkpoints and builds the Linux images remotely. The first build downloads PyTorch, the Whisper tiny weights and the other runtime dependencies, so allow time for it to finish.
 
 The deployment defines:
 
@@ -111,7 +111,7 @@ VITE_AI_API_MODE = jobs
 Set these for Production (and Preview only if you also allow that exact preview origin in the Modal secret). Keep the existing `VITE_FIREBASE_*` values. The project build settings are:
 
 ```text
-Root Directory: FYP-1 PROJECT/pureplay
+Root Directory: frontend
 Framework: Vite
 Build Command: npm run build
 Output Directory: dist
@@ -192,11 +192,11 @@ For Modal, replace the current synchronous video endpoint with job submission/st
 
 ## Findings from the actual code
 
-- `FYP-1 PROJECT/pureplay/src/pages/UploadPage.jsx` already reads `VITE_AI_API_URL`, with a localhost fallback. Its health-check failure path also falls back to `/api` on the frontend origin, where the Vercel SPA does not provide the Python service.
-- `pureplay_ai/server.py` loads the engines in one process and performs the video pipeline synchronously inside an async route. A separate worker should own heavy processing so status requests remain responsive.
+- `frontend/src/pages/UploadPage.jsx` already reads `VITE_AI_API_URL`, with a localhost fallback. Its health-check failure path also falls back to `/api` on the frontend origin, where the Vercel SPA does not provide the Python service.
+- `backend/legacy/server.py` loads the engines in one process and performs the video pipeline synchronously inside an async route. A separate worker should own heavy processing so status requests remain responsive.
 - The backend writes censored videos into the frontend's `public/censored` directory on its own filesystem. A remote worker cannot update Vercel's deployed static assets this way. Outputs need durable remote storage and URLs served by that storage or a persistent backend route.
 - The current upload flow records metadata in Firestore; its Firebase Storage imports do not establish that video bytes are uploaded to Firebase Storage.
-- `pureplay_ai/requirements.txt` omits `openai-whisper` and `imageio-ffmpeg`, both used by the runtime. Whisper also needs an executable named `ffmpeg` on PATH. The Windows-oriented `ffmpeg.exe` alias in `server.py` is insufficient for a Linux deployment; install system FFmpeg in the remote image.
+- `backend/legacy/requirements.txt` omits `openai-whisper` and `imageio-ffmpeg`, both used by the runtime. Whisper also needs an executable named `ffmpeg` on PATH. The Windows-oriented `ffmpeg.exe` alias in `server.py` is insufficient for a Linux deployment; install system FFmpeg in the remote image.
 - Whisper catches load/transcription errors and returns a fixed synthetic transcript. Cloud validation must verify real audio transcription, not just a successful HTTP response.
 - The frontend currently marks failed AI requests as approved and plays the original local video. Replace this with an error/pending state before a public demo; failed processing must not be represented as completed moderation.
 - Existing trained files can be shipped to the backend without retraining locally. Include external `.onnx.data` files alongside their `.onnx` files. Actual runtime loading differs from the PRD: NudeNet uses its packaged detector by default, and Whisper loads official `tiny` weights rather than the custom checkpoint.
@@ -222,7 +222,7 @@ Import the Git repository into Vercel and use these settings after the remote ba
 
 | Setting | Value |
 | --- | --- |
-| Root Directory | `FYP-1 PROJECT/pureplay` |
+| Root Directory | `frontend` |
 | Framework | Vite |
 | Build command | `npm run build` |
 | Output directory | `dist` |

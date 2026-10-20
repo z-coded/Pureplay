@@ -271,12 +271,11 @@ def main():
     mux_av(censored_avi, censored_wav, final_censored_mp4)
     print(f"   ✓ Generated CENSORED: {final_censored_mp4} ({os.path.getsize(final_censored_mp4) // 1024} KB)")
     
-    # 4. Deploy to Frontend public and dist, and project root
+    # 4. Deploy to Frontend public and dist
     import shutil
     deploy_dirs = [
-        os.path.join(base_dir, "..", "FYP-1 PROJECT", "pureplay", "public"),
-        os.path.join(base_dir, "..", "FYP-1 PROJECT", "pureplay", "dist"),
-        os.path.join(base_dir, ".."),
+        os.path.join(base_dir, "..", "..", "frontend", "public"),
+        os.path.join(base_dir, "..", "..", "frontend", "dist"),
     ]
     
     for d in deploy_dirs:

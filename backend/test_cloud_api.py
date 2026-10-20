@@ -8,7 +8,7 @@ from unittest.mock import Mock, patch
 
 from fastapi.testclient import TestClient
 
-from pureplay_ai.cloud_api import create_app, firebase_verifier, read_json, write_json
+from backend.cloud_api import create_app, firebase_verifier, read_json, write_json
 
 
 class CloudAPITest(unittest.TestCase):
@@ -84,7 +84,7 @@ class CloudAPITest(unittest.TestCase):
         self.assertEqual(self.submit(content=b"").status_code, 400)
         response = self.client.post("/api/jobs?extension=.exe", content=b"x", headers=self.headers)
         self.assertEqual(response.status_code, 400)
-        with patch("pureplay_ai.cloud_api.MAX_UPLOAD_BYTES", 3):
+        with patch("backend.cloud_api.MAX_UPLOAD_BYTES", 3):
             self.assertEqual(self.submit(content=b"1234").status_code, 413)
             # Exercise streamed limit independently of Content-Length.
             self.assertEqual(self.submit(content=iter([b"12", b"34"])).status_code, 413)

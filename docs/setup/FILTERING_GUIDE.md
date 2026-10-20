@@ -17,7 +17,7 @@ Old results need re-uploading. Source uploads were deleted after processing, so 
 - **NudeNet 3.4.2 / 320n:** checks exposed genitalia, breasts, buttocks and anus at 2 frames/second throughout the video; starting threshold 0.40.
 - **VideoMAE Kinetics-400:** supervised action classifier with label 176, `kissing`. Uses 16 frames over four seconds, windows every two seconds, plus a final tail window. Kissing score >=0.10 or top-ranked kissing flags the whole window. These are provisional operating points, not calibrated safety probabilities.
 - **Whisper base:** transcribes the first audio track with word timestamps. FFprobe confirms audio exists. Decode errors fail the job rather than masquerading as silence.
-- **English vocabulary policy:** whole-word matches across every transcript segment, using word timestamps where available and segment timestamps otherwise. Vocabulary is in `pureplay_ai/speech_policy.py`; this is not a trained general toxicity model.
+- **English vocabulary policy:** whole-word matches across every transcript segment, using word timestamps where available and segment timestamps otherwise. Vocabulary is in `backend/speech_policy.py`; this is not a trained general toxicity model.
 - **Cut planner:** expands detections by 0.35 seconds, merges nearby cuts, and removes tiny retained fragments. Records the source-to-output timeline.
 - **FFmpeg:** accurately seeks and re-encodes retained intervals, concatenates H.264/AAC MP4, validates duration/audio presence, and decodes the output to detect corruption.
 - **Verification:** rescans the output, including new joins. Residual findings fail the job and delete the render. A pass means no residual detections, not proof of safety.
@@ -47,14 +47,14 @@ Weights are pinned to revision `488eb9a0565f257b32866000305c8178965eb9f6` for th
 From the repository root in PowerShell:
 
 ```powershell
-.\.venv-modal\Scripts\python.exe -m unittest pureplay_ai.test_cut_media pureplay_ai.test_cloud_api
-.\.venv-modal\Scripts\python.exe -X utf8 -m modal run --env main modal_filter_check.py
-.\.venv-modal\Scripts\python.exe -X utf8 -m modal deploy modal_app.py --env main
+.\.venv-modal\Scripts\python.exe -m unittest backend.test_cut_media backend.test_cloud_api
+.\.venv-modal\Scripts\python.exe -X utf8 -m modal run --env main backend/modal_filter_check.py
+.\.venv-modal\Scripts\python.exe -X utf8 -m modal deploy backend/modal_app.py --env main
 ```
 
 The cloud smoke test checks decoded frame removal, audio-frequency ordering, silent media, model execution, controlled positive cuts, and rejection of residual detections. Its speech synthesizer is installed only in the test image.
 
-In `FYP-1 PROJECT/pureplay`:
+In `frontend`:
 
 ```powershell
 node --test tests/moderationVerdict.test.mjs

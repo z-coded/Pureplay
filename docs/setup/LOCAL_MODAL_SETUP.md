@@ -5,7 +5,7 @@ For the current scene-cutting behavior and guardian-review steps, see
 
 Your browser and Vite frontend run on this computer at `http://localhost:5173`. The video models and rendering run on Modal. Vercel is not needed yet.
 
-The deployment files and lightweight Modal CLI environment are already prepared. Firebase variables are present in `FYP-1 PROJECT/pureplay/.env`. A new ignored `.env.local` selects cloud job processing and has an empty API URL for you to fill in after deployment. Existing Firebase values remain in `.env`.
+The deployment files and lightweight Modal CLI environment are already prepared. Firebase variables are present in `frontend/.env`. A new ignored `.env.local` selects cloud job processing and has an empty API URL for you to fill in after deployment. Existing Firebase values remain in `.env`.
 
 ## 1. Sign the CLI into Modal
 
@@ -18,11 +18,11 @@ Set-Location 'D:\fyp\FYP-1 PROJECT'
 
 Open the browser authorization link printed by the command if it does not open automatically. Sign into your existing Modal account and approve the CLI connection. Wait for the terminal to report success. Use the same Modal workspace for the following steps.
 
-The SDK is already installed. Do not install the AI requirements or run `pureplay_ai/server.py` on this computer.
+The SDK is already installed. Do not install the AI requirements or run `backend/legacy/server.py` on this computer.
 
 ## 2. Find your Firebase project and login account
 
-Open https://console.firebase.google.com/ and select the project used by PurePlay. You can compare its ID with `VITE_FIREBASE_PROJECT_ID` in `FYP-1 PROJECT/pureplay/.env`.
+Open https://console.firebase.google.com/ and select the project used by PurePlay. You can compare its ID with `VITE_FIREBASE_PROJECT_ID` in `frontend/.env`.
 
 1. Open Project settings (gear icon) > General and copy the **Project ID**.
 2. Open Authentication > Sign-in method. Enable **Email/Password** if it is not already enabled.
@@ -53,7 +53,7 @@ Open Modal Settings > Usage & Billing, check your account's actual credit allowa
 In the same PowerShell terminal at the repository root, run:
 
 ```powershell
-.\.venv-modal\Scripts\python.exe -m modal deploy --env main modal_app.py
+.\.venv-modal\Scripts\python.exe -m modal deploy --env main backend/modal_app.py
 ```
 
 Keep the terminal open until deployment finishes. The first build installs the ML libraries and downloads Whisper on Modal's servers. No model processing runs locally.
@@ -68,7 +68,7 @@ Use the actual generated URL, not the example above and not the dashboard URL. O
 
 ## 5. Put the API URL in the local frontend
 
-Open `FYP-1 PROJECT/pureplay/.env.local` in VS Code. Replace its empty URL value:
+Open `frontend/.env.local` in VS Code. Replace its empty URL value:
 
 ```dotenv
 VITE_AI_API_URL=https://YOUR-ACTUAL-API-HOST.modal.run
@@ -82,7 +82,7 @@ Use no `/api`, `/api/health` or trailing slash. Keep the Firebase variables in `
 In a second PowerShell terminal:
 
 ```powershell
-Set-Location 'D:\fyp\FYP-1 PROJECT\FYP-1 PROJECT\pureplay'
+Set-Location 'D:\fyp\FYP-1 PROJECT\frontend'
 npm run dev -- --host localhost
 ```
 

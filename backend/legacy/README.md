@@ -15,7 +15,7 @@ It implements, trains, and exposes all 5 AI models and the media processing engi
 ## 📁 Repository Structure
 
 ```
-pureplay_ai/
+backend/legacy/
 ├── opennsfw2_engine.py         # OpenNSFW2 ResNet-18 visual frame classifier
 ├── whisper_engine.py           # OpenAI Whisper speech-to-text with timestamp intervals
 ├── detoxify_engine.py          # Detoxify 7-class NLP toxicity & profanity engine
@@ -45,7 +45,7 @@ pureplay_ai/
 
 ### Run Integration Tests (All 6 Engines):
 ```bash
-cd "d:\fyp\FYP-1 PROJECT\pureplay_ai"
+cd "D:\fyp\FYP-1 PROJECT\backend\legacy"
 python test_all_engines.py
 ```
 
@@ -76,7 +76,7 @@ The server runs on **`http://127.0.0.1:8000`** with interactive Swagger document
 
 ## 🛠️ 3. Media Processing Pipeline (OpenCV & FFmpeg)
 
-Implemented in [`media_processor.py`](file:///d:/fyp/FYP-1%20PROJECT/pureplay_ai/media_processor.py):
+Implemented in [`media_processor.py`](media_processor.py):
 - **Keyframe Extraction**: High-throughput video frame sampling at configurable FPS via OpenCV `cv2.VideoCapture`.
 - **Visual Censorship**: Applies a 51×51 Gaussian blur kernel (`cv2.GaussianBlur`) with child-safety boundary highlighting over detected explicit anatomical regions.
 - **Audio Censorship**: Pure-Python 1000 Hz sine wave tone generator (`struct.pack` WAV synthesis) replaces audio tracks at profanity intervals flagged by Detoxify and Whisper.

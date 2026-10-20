@@ -64,7 +64,7 @@ app.add_middleware(
 
 # Mount static censored video streaming directory
 base_dir = os.path.dirname(__file__)
-censored_dir_public = os.path.abspath(os.environ.get("PUREPLAY_OUTPUT_DIR") or os.path.join(base_dir, "..", "FYP-1 PROJECT", "pureplay", "public", "censored"))
+censored_dir_public = os.path.abspath(os.environ.get("PUREPLAY_OUTPUT_DIR") or os.path.join(base_dir, "..", "..", "frontend", "public", "censored"))
 os.makedirs(censored_dir_public, exist_ok=True)
 app.mount("/censored", StaticFiles(directory=censored_dir_public), name="censored")
 

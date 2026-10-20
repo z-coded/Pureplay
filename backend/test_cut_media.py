@@ -1,7 +1,7 @@
 import unittest
 
-from pureplay_ai.cut_media import plan_cuts
-from pureplay_ai.speech_policy import speech_events, contains_profanity
+from backend.cut_media import plan_cuts
+from backend.speech_policy import speech_events, contains_profanity
 
 
 class CutPlanTest(unittest.TestCase):

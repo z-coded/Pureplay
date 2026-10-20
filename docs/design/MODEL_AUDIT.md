@@ -1,7 +1,7 @@
 # Video moderation audit — 2026-10-20
 
 This records the **old pipeline** audit. The subsequent `cuts-v1` implementation
-replaces the deployed Modal model path; see [FILTERING_GUIDE.md](FILTERING_GUIDE.md)
+replaces the deployed Modal model path; see [FILTERING_GUIDE.md](../setup/FILTERING_GUIDE.md)
 for its behavior, verification and remaining limitations.
 
 ## Confirmed from deployed Modal results

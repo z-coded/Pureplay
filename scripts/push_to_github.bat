@@ -1,6 +1,6 @@
 @echo off
 title PurePlay — Push to GitHub
-cd /d "%~dp0"
+cd /d "%~dp0.."
 echo =========================================================
 echo         PurePlay: Pushing Local Commits to GitHub
 echo =========================================================

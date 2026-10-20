@@ -185,7 +185,7 @@ def main():
     print("=" * 60)
     
     base_dir = os.path.dirname(os.path.abspath(__file__))
-    dist_public = os.path.join(base_dir, "..", "FYP-1 PROJECT", "pureplay", "public")
+    dist_public = os.path.join(base_dir, "..", "..", "frontend", "public")
     os.makedirs(dist_public, exist_ok=True)
     
     # 1. Raw Unfiltered Video (with raw audio & detection tags)
@@ -210,12 +210,9 @@ def main():
     mux_video_audio(censored_avi, censored_wav, censored_mp4)
     print(f"   -> Saved: {censored_mp4} ({os.path.getsize(censored_mp4) // 1024} KB)")
     
-    # Copy to root and public sample_demo.mp4 as well so default player plays the censored output
+    # Copy to public sample_demo.mp4 as well so default player plays the censored output
     import shutil
     shutil.copyfile(censored_mp4, os.path.join(dist_public, "sample_demo.mp4"))
-    shutil.copyfile(censored_mp4, os.path.join(base_dir, "..", "sample_demo.mp4"))
-    shutil.copyfile(raw_mp4, os.path.join(base_dir, "..", "demo_raw_unfiltered.mp4"))
-    shutil.copyfile(censored_mp4, os.path.join(base_dir, "..", "demo_censored_child_safe.mp4"))
     
     # Cleanup temp
     for f in [raw_avi, raw_wav, censored_avi, censored_wav]:

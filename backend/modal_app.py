@@ -1,4 +1,4 @@
-"""Deploy from the repository root: python -m modal deploy modal_app.py
+"""Deploy from the repository root: python -m modal deploy backend/modal_app.py
 
 Only the Modal SDK is required on your laptop. ML packages, model loading,
 image builds and video processing execute on Modal.
@@ -9,7 +9,7 @@ from pathlib import Path
 
 import modal
 
-BACKEND = Path(__file__).parent / "pureplay_ai"
+BACKEND = Path(__file__).parent
 app = modal.App("pureplay-ai")
 media_volume = modal.Volume.from_name("pureplay-media", create_if_missing=True)
 settings = modal.Secret.from_name("pureplay-config", required_keys=[
@@ -26,7 +26,8 @@ api_image = (
 
 def excluded_backend_file(path):
     path = Path(path)
-    return ("__pycache__" in path.parts or "data" in path.parts
+    # legacy/ holds the old local server and its checkpoints; the worker never imports it.
+    return ("__pycache__" in path.parts or "legacy" in path.parts
             or path.suffix not in {".py", ".json"})
 
 
